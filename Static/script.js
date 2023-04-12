@@ -75,6 +75,24 @@ function createLocateButton(item) {
   return locateBtn;
 }
 
+const search = document.getElementById("search");
+
+function filterItems(e) {
+  const searchText = e.target.value.toLowerCase();
+  const items = itemList.getElementsByTagName("li");
+
+  Array.from(items).forEach((item) => {
+    const itemName = item.getElementsByTagName("h2")[0].textContent;
+    if (itemName.toLowerCase().indexOf(searchText) !== -1) {
+      item.style.display = "flex";
+    } else {
+      item.style.display = "none";
+    }
+  });
+}
+
+search.addEventListener("input", filterItems);
+
 // Create item element
 function createItemElement(item) {
   const li = document.createElement("li");
@@ -100,7 +118,10 @@ function createItemElement(item) {
   div.appendChild(p);
 
   const span = document.createElement("span");
-  span.innerText = item.position;
+  const positionLabel = document.createElement("strong");
+  positionLabel.innerText = "Position: ";
+  span.appendChild(positionLabel);
+  span.append(item.position);
   div.appendChild(span);
 
   const deleteBtn = document.createElement("button");
