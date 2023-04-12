@@ -1,6 +1,7 @@
 from flask import Flask, render_template, jsonify, request
 import csv
 import os
+import wled_api
 
 app = Flask(__name__)
 app.config['JSON_SORT_KEYS'] = False
@@ -60,6 +61,7 @@ def item(id):
     elif request.method == 'POST':
         if request.form.get('action') == 'locate':
             position = item['position']
+            wled_api.light_on(position)
             print(f"Position of {item['name']}: {position}")
             return jsonify({ 'success': True })
         else:
