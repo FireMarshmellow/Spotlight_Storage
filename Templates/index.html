@@ -10,23 +10,33 @@
 
 <body>
     <h1>Item Manager</h1>
-    <form id="add-form">
-        <label for="name">Name:</label>
-        <input type="text" id="name" name="name" required>
-        <br>
-        <label for="link">Link:</label>
-        <input type="url" id="link" name="link" required>
-        <br>
-        <label for="image">Image:</label>
-        <input type="url" id="image" name="image" required>
-        <br>
-        <label for="position">Position:</label>
-        <input type="number" id="position" name="position" required>
-        <br>
-        <input type="submit" value="Add">
-    </form>
+    <div class="form-container">
+        <form id="add-form">
+            <div class="name">
+                <label for="name">Name:</label>
+                <input type="text" id="name" name="name" required>
+            </div>
+            <div class="link">
+                <label for="link">Link:</label>
+                <input type="url" id="link" name="link" required>
+            </div>
+            <div class="image">
+                <label for="image">Image:</label>
+                <input type="url" id="image" name="image" required>
+            </div>
+            <div class="position">
+                <label for="position">Position:</label>
+                <input type="number" id="position" name="position" required>
+            </div>
+            <input type="submit" value="Add">
+        </form>
+    </div>
+    <div class="search-container">
+        <input type="text" id="search" placeholder="Search items...">
+    </div>
     <ul id="item-list"></ul>
     <script src="{{ url_for('static', filename='script.js') }}"></script>
 </body>
+
 
 </html>

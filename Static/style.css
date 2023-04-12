@@ -1,59 +1,107 @@
+/* style.css */
+
 body {
   font-family: Arial, sans-serif;
+  line-height: 1.6;
+  background-color: #f4f4f4;
   margin: 0;
   padding: 0;
 }
 
 h1 {
+  background-color: #333;
+  color: #fff;
+  padding: 1rem;
   text-align: center;
+}
+
+.form-container {
+  width: 100%;
+  max-width: 700px;
+  margin: 2rem auto;
+  background-color: #fff;
+  padding: 1.5rem;
+  border-radius: 5px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 form {
   display: flex;
-  flex-direction: column;
-  align-items: center;
+  flex-wrap: wrap;
+  justify-content: space-between;
 }
 
-label {
-  margin-top: 10px;
-  margin-bottom: 5px;
+form label {
+  display: block;
+  margin-bottom: 0.5rem;
 }
 
-input {
-  margin-bottom: 10px;
-  padding: 5px;
-  border-radius: 5px;
+form input[type="text"],
+form input[type="url"],
+form input[type="number"] {
+  width: 100%;
+  padding: 0.5rem;
+  margin-bottom: 1rem;
+  border-radius: 4px;
+  border: 1px solid #ccc;
+}
+
+form input[type="submit"] {
+  width: 100%;
+  padding: 0.7rem;
+  background-color: #333;
+  color: #fff;
   border: none;
-}
-
-input[type="submit"] {
-  background-color: #4caf50;
-  color: white;
+  border-radius: 4px;
   cursor: pointer;
 }
 
+form input[type="submit"]:hover {
+  background-color: #555;
+}
+
+/* Add these styles to your existing style.css file */
+
 ul {
-  list-style: none;
   padding: 0;
+  list-style: none;
 }
 
 li {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  border: 1px solid #ddd;
+  background-color: #fff;
+  padding: 1rem;
+  margin: 1rem 0;
   border-radius: 5px;
-  margin-bottom: 10px;
-  padding: 10px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  display: flex;
+  align-items: center;
 }
 
 li img {
-  max-width: 100px;
-  margin-right: 10px;
+  width: 100px;
+  height: 100px;
+  object-fit: cover;
+  border-radius: 5px;
+  margin-right: 1rem;
+}
+
+li div {
+  flex-grow: 1;
+}
+
+li h2 {
+  font-size: 1.2rem;
+  margin: 0;
+  margin-bottom: 0.5rem;
+}
+
+li p {
+  margin: 0;
+  margin-bottom: 0.5rem;
 }
 
 li a {
-  color: #4caf50;
+  color: #0074d9;
   text-decoration: none;
 }
 
@@ -61,45 +109,43 @@ li a:hover {
   text-decoration: underline;
 }
 
-button {
+li span {
+  font-size: 0.9rem;
+  color: #777;
+  display: block;
+  margin-bottom: 0.5rem;
+}
+
+li button {
+  font-size: 0.9rem;
+  padding: 0.3rem 0.6rem;
   border: none;
-  padding: 8px 12px;
-  border-radius: 4px;
-  font-size: 16px;
-  cursor: pointer;
-  background-color: #4285f4;
+  background-color: #333;
   color: #fff;
-  margin-right: 8px;
+  border-radius: 3px;
+  cursor: pointer;
+  margin-right: 0.5rem;
 }
 
-button:hover {
-  background-color: #357ae8;
+li button:last-child {
+  margin-right: 0;
 }
 
-button:active {
-  background-color: #1669c4;
+li button:hover {
+  background-color: #555;
 }
 
-button.delete {
-  background-color: #ea4335;
+/* Add these styles to your existing style.css file */
+
+.search-container {
+  width: 100%;
+  max-width: 700px;
+  margin: 1rem auto;
 }
 
-button.delete:hover {
-  background-color: #cc392c;
-}
-
-button.delete:active {
-  background-color: #a52714;
-}
-
-button.edit {
-  background-color: #fbbc05;
-}
-
-button.edit:hover {
-  background-color: #e8a400;
-}
-
-button.edit:active {
-  background-color: #d79b00;
+#search {
+  width: 100%;
+  padding: 0.5rem;
+  border-radius: 4px;
+  border: 1px solid #ccc;
 }
