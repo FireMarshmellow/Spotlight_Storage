@@ -61,7 +61,7 @@ def item(id):
     elif request.method == 'POST':
         if request.form.get('action') == 'locate':
             position = item['position']
-            wled_api.light_on(position)
+            wled_api.lights(position)
             print(f"Position of {item['name']}: {position}")
             return jsonify({ 'success': True })
         else:
@@ -76,4 +76,4 @@ def delete_item(id):
     return jsonify({ 'success': True })
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(host="0.0.0.0",debug=True)

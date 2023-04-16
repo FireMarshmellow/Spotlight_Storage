@@ -1,30 +1,19 @@
 import requests
+import time
 
-# Replace this with your WLED IP address
-wled_ip = "192.168.0.179"
+url_list = ['http://192.168.0.179/json/state', 'http://192.168.0.42/json/state']
 
-def light_on(position):
-    start_num = int(position) -1
+def send_request(target_url, start_num, stop_num, color):
+    state = {"seg": [{"id": 0, "start": start_num, "stop": stop_num, "col": [color]}]}
+    response = requests.post(target_url, json=state)
+
+def lights(position):
+    position = tuple(map(int, position.split(',')))
+    start_num = int(position[1]) - 1
     print(start_num)
-    params = {
-    "seg": [ # Segment array
-        {
-        "id": 0, # Segment ID
-        "start": start_num, # Start LED index (0-based)
-        "stop": int(position), # Stop LED index (exclusive)
-        "on": True, # Turn on segment
-        "col": [ # Color array
-            [255, 255, 255] # White color for primary color
-        ]
-        }
-    ]
-    }
+    
+    send_request(url_list[position[0] - 1], start_num, int(position[1]), [255, 255, 255])
 
-    # Send the request to WLED JSON API
-    response = requests.post(f"http://{wled_ip}/json/state", json=params)
+    time.sleep(5)
 
-    # Check the response status
-    if response.status_code == 200:
-        print("Success!")
-    else:
-        print("Error:", response.reason)    
+    send_request(url_list[position[0] - 1], 0, 60, [0, 255, 0])
