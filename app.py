@@ -13,7 +13,7 @@ def read_csv():
     if os.path.exists(DATA_FILE):
         with open(DATA_FILE, newline='') as f:
             reader = csv.DictReader(f)
-            items = [row for row in reader]
+            items = list(reader)
     return items
 
 def write_csv(items):
@@ -59,13 +59,12 @@ def item(id):
         write_csv(items)
         return jsonify({ 'success': True })
     elif request.method == 'POST':
-        if request.form.get('action') == 'locate':
-            position = item['position']
-            wled_api.lights(position)
-            print(f"Position of {item['name']}: {position}")
-            return jsonify({ 'success': True })
-        else:
+        if request.form.get('action') != 'locate':
             return jsonify({ 'error': 'Invalid action' }), 400
+        position = item['position']
+        wled_api.lights(position)
+        print(f"Position of {item['name']}: {position}")
+        return jsonify({ 'success': True })
 
 
 @app.route('/api/items/<id>', methods=['DELETE'])
