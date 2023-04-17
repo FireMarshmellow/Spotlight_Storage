@@ -45,7 +45,7 @@ def items():
         # If the request method is POST, read data from the CSV file, add new item, and write back to the CSV file
         item = request.get_json()
         items = read_csv()
-        item['id'] = str(len(items) + 1)
+        item['id'] = str(max(int(i['id']) for i in items) + 1)
         items.append(item)
         write_csv(items)
         return jsonify(item)
@@ -73,7 +73,7 @@ def item(id):
     elif request.method == 'POST':
         # If the request method is POST, check if the request is for locating the item, and send the position to a WLED API
         if request.form.get('action') == 'locate':
-            position = item['position']
+            position = tuple(map(int, item['position'].split(',')))
             wled_api.lights(position)
             print(f"Position of {item['name']}: {position}")
             return jsonify({ 'success': True })
