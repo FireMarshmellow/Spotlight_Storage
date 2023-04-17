@@ -124,7 +124,7 @@ function createItemElement(item) {
   span.append(item.position);
   div.appendChild(span);
 
-  const deleteButton = document.createElement('button');
+  const deleteBtn = document.createElement('button');
   deleteBtn.innerText = "Delete";
   deleteBtn.addEventListener("click", () => deleteItem(item.id));
   div.appendChild(deleteBtn);
