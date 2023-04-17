@@ -6,11 +6,24 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='style.css') }}">
+    <style>
+        .hidden {
+            display: none;
+        }
+    </style>
 </head>
 
 <body>
     <h1>M.I.M.O.S.A V1.3</h1>
-    <div class="form-container">
+    
+    
+    <div class="search-container">
+        <button id="add-item-btn">Add Item Toggle</button>
+        <input type="text" id="search" placeholder="Search items...">
+    </div>
+    <ul id="item-list"></ul>
+
+    <div class="form-container hidden" id="add-form-container">
         <form id="add-form">
             <div class="name">
                 <label for="name">Name:</label>
@@ -31,10 +44,7 @@
             <input type="submit" value="Add">
         </form>
     </div>
-    <div class="search-container">
-        <input type="text" id="search" placeholder="Search items...">
-    </div>
-    <ul id="item-list"></ul>
+    <script src="{{ url_for('static', filename='popup.js') }}"></script>
     <script src="{{ url_for('static', filename='script.js') }}"></script>
 </body>
 

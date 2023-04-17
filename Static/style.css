@@ -1,6 +1,5 @@
-/* style.css */
+/* styles.css */
 
-/* Root variables for easy customization */
 :root {
   --main-color: #333;
   --secondary-color: #555;
@@ -11,24 +10,40 @@
   --primary-font: Arial, sans-serif;
 }
 
-body {
-  font-family: var(--primary-font);
-  line-height: 1.6;
-  background-color: var(--bg-color);
+body, ul {
   margin: 0;
   padding: 0;
 }
 
-h1 {
+body {
+  font-family: var(--primary-font);
+  line-height: 1.6;
+  background-color: var(--bg-color);
+}
+
+h1, form input[type="submit"], #add-item-btn {
   background-color: var(--main-color);
   color: var(--white-color);
   padding: 1rem;
+  border-radius: 4px;
+}
+
+form input[type="submit"]:hover, li button:hover, #add-item-btn:hover {
+  background-color: var(--secondary-color);
+}
+
+h1 {
   text-align: center;
 }
 
-.form-container,
-.search-container {
-  width: 100%;
+#add-item-btn {
+  display: block;
+  margin: 0 auto 2rem;
+  border: none;
+  cursor: pointer;
+}
+
+.form-container, .search-container, li {
   max-width: 700px;
   margin: 2rem auto;
   background-color: var(--white-color);
@@ -37,22 +52,18 @@ h1 {
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-/* form related styles */
-form {
+form, li {
   display: flex;
   flex-wrap: wrap;
   justify-content: space-between;
 }
 
-form label {
+form label, li h2, li p {
   display: block;
   margin-bottom: 0.5rem;
 }
 
-form input[type="text"],
-form input[type="url"],
-form input[type="number"],
-#search {
+form input[type="text"], form input[type="url"], form input[type="number"], #search {
   width: 100%;
   padding: 0.5rem;
   margin-bottom: 1rem;
@@ -62,35 +73,20 @@ form input[type="number"],
 
 form input[type="submit"] {
   width: 100%;
-  padding: 0.7rem;
-  background-color: var(--main-color);
-  color: var(--white-color);
   border: none;
-  border-radius: 4px;
   cursor: pointer;
 }
 
-form input[type="submit"]:hover {
-  background-color: var(--secondary-color);
-}
-
-/* Grid layout for the list */
 #item-list {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
   grid-gap: 1rem;
-  padding: 0;
   list-style: none;
 }
 
-/* List item styles */
 li {
-  background-color: var(--white-color);
-  padding: 1rem;
-  border-radius: 5px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  display: flex;
   flex-direction: column;
+  position: relative;
 }
 
 li img {
@@ -99,17 +95,6 @@ li img {
   object-fit: cover;
   border-radius: 5px;
   margin-bottom: 1rem;
-}
-
-li h2 {
-  font-size: 1.2rem;
-  margin: 0;
-  margin-bottom: 0.5rem;
-}
-
-li p {
-  margin: 0;
-  margin-bottom: 0.5rem;
 }
 
 li a {
@@ -124,7 +109,6 @@ li a:hover {
 li span {
   font-size: 0.9rem;
   color: var(--dark-gray-color);
-  display: block;
   margin-bottom: 0.5rem;
 }
 
@@ -138,27 +122,44 @@ li button {
   cursor: pointer;
   margin-right: 0.5rem;
   margin-top: auto;
-  /* Pushes buttons to the bottom of the container */
 }
 
-li button:last-child {
-  margin-right: 0;
+li button.delete {
+  width: 20px;
+  height: 20px;
+  line-height: 20px;
+  padding: 0;
+  border-radius: 50%;
+  background-color: var(--main-color);
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  font-size: 14px;
+  font-weight: bold;
+  color: var(--white-color);
+  text-align: center;
 }
 
-li button:hover {
+li button.delete:hover {
   background-color: var(--secondary-color);
 }
 
-/* Search input styles */
-.search-container {
-  width: 100%;
-  max-width: 700px;
-  margin: 1rem auto;
-}
 
 #search {
   width: 100%;
   padding: 0.5rem;
   border-radius: 4px;
   border: 1px solid var(--light-gray-color);
+}
+
+#add-form-container {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 100;
+}
+
+.hidden {
+  display: none;
 }
