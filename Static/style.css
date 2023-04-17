@@ -1,30 +1,43 @@
 /* style.css */
 
+/* Root variables for easy customization */
+:root {
+  --main-color: #333;
+  --secondary-color: #555;
+  --bg-color: #f4f4f4;
+  --white-color: #fff;
+  --light-gray-color: #ccc;
+  --dark-gray-color: #777;
+  --primary-font: Arial, sans-serif;
+}
+
 body {
-  font-family: Arial, sans-serif;
+  font-family: var(--primary-font);
   line-height: 1.6;
-  background-color: #f4f4f4;
+  background-color: var(--bg-color);
   margin: 0;
   padding: 0;
 }
 
 h1 {
-  background-color: #333;
-  color: #fff;
+  background-color: var(--main-color);
+  color: var(--white-color);
   padding: 1rem;
   text-align: center;
 }
 
-.form-container {
+.form-container,
+.search-container {
   width: 100%;
   max-width: 700px;
   margin: 2rem auto;
-  background-color: #fff;
+  background-color: var(--white-color);
   padding: 1.5rem;
   border-radius: 5px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
+/* form related styles */
 form {
   display: flex;
   flex-wrap: wrap;
@@ -38,55 +51,54 @@ form label {
 
 form input[type="text"],
 form input[type="url"],
-form input[type="number"] {
+form input[type="number"],
+#search {
   width: 100%;
   padding: 0.5rem;
   margin-bottom: 1rem;
   border-radius: 4px;
-  border: 1px solid #ccc;
+  border: 1px solid var(--light-gray-color);
 }
 
 form input[type="submit"] {
   width: 100%;
   padding: 0.7rem;
-  background-color: #333;
-  color: #fff;
+  background-color: var(--main-color);
+  color: var(--white-color);
   border: none;
   border-radius: 4px;
   cursor: pointer;
 }
 
 form input[type="submit"]:hover {
-  background-color: #555;
+  background-color: var(--secondary-color);
 }
 
-/* Add these styles to your existing style.css file */
-
-ul {
+/* Grid layout for the list */
+#item-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  grid-gap: 1rem;
   padding: 0;
   list-style: none;
 }
 
+/* List item styles */
 li {
-  background-color: #fff;
+  background-color: var(--white-color);
   padding: 1rem;
-  margin: 1rem 0;
   border-radius: 5px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   display: flex;
-  align-items: center;
+  flex-direction: column;
 }
 
 li img {
-  width: 100px;
+  width: 100%;
   height: 100px;
   object-fit: cover;
   border-radius: 5px;
-  margin-right: 1rem;
-}
-
-li div {
-  flex-grow: 1;
+  margin-bottom: 1rem;
 }
 
 li h2 {
@@ -111,7 +123,7 @@ li a:hover {
 
 li span {
   font-size: 0.9rem;
-  color: #777;
+  color: var(--dark-gray-color);
   display: block;
   margin-bottom: 0.5rem;
 }
@@ -120,11 +132,13 @@ li button {
   font-size: 0.9rem;
   padding: 0.3rem 0.6rem;
   border: none;
-  background-color: #333;
-  color: #fff;
+  background-color: var(--main-color);
+  color: var(--white-color);
   border-radius: 3px;
   cursor: pointer;
   margin-right: 0.5rem;
+  margin-top: auto;
+  /* Pushes buttons to the bottom of the container */
 }
 
 li button:last-child {
@@ -132,11 +146,10 @@ li button:last-child {
 }
 
 li button:hover {
-  background-color: #555;
+  background-color: var(--secondary-color);
 }
 
-/* Add these styles to your existing style.css file */
-
+/* Search input styles */
 .search-container {
   width: 100%;
   max-width: 700px;
@@ -147,5 +160,5 @@ li button:hover {
   width: 100%;
   padding: 0.5rem;
   border-radius: 4px;
-  border: 1px solid #ccc;
+  border: 1px solid var(--light-gray-color);
 }
