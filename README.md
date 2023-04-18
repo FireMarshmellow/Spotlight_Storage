@@ -13,13 +13,13 @@ youtu.be/7C4i-2IqSS4
 ## Installation
 
 1. Clone the repo
-2. Edit the ip_list variable in wled_api.py to include the IP addresses of your WLED devices. For example: ip_list = ["192.168.1.100", "192.168.1.101"]
-3. Run app.py
+2. pip install -r requirements.txt
+3. Edit the ip_list variable in wled_api.py to include the IP addresses of your WLED devices. For example: ip_list = ["192.168.1.100", "192.168.1.101"]
+4. Run app.py
 
 ## dependencies:
 
 - python 3.6
-- flask by running `pip install flask`
 
 ## Usage
 
