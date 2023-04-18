@@ -17,7 +17,7 @@ def read_csv():
     if os.path.exists(DATA_FILE):
         with open(DATA_FILE, newline='') as f:
             reader = csv.DictReader(f)
-            items = list(reader)
+            items = [row for row in reader]
     return items
 
 # Function to write data to the CSV file
@@ -45,7 +45,11 @@ def items():
         # If the request method is POST, read data from the CSV file, add new item, and write back to the CSV file
         item = request.get_json()
         items = read_csv()
-        item['id'] = str(max(int(i['id']) for i in items) + 1)
+
+        # Generate a unique ID by finding the highest existing ID and adding 1
+        max_id = max(int(i['id']) for i in items) if items else 0
+        item['id'] = str(max_id + 1)
+
         items.append(item)
         write_csv(items)
         return jsonify(item)
@@ -71,12 +75,14 @@ def item(id):
         write_csv(items)
         return jsonify({ 'success': True })
     elif request.method == 'POST':
-        if request.form.get('action') != 'locate':
+        # If the request method is POST, check if the request is for locating the item, and send the position to a WLED API
+        if request.form.get('action') == 'locate':
+            position = item['position']
+            wled_api.lights(position)
+            print(f"Position of {item['name']}: {position}")
+            return jsonify({ 'success': True })
+        else:
             return jsonify({ 'error': 'Invalid action' }), 400
-        position = tuple(map(int, item['position'].split(',')))
-        wled_api.lights(position)
-        print(f"Position of {item['name']}: {position}")
-        return jsonify({ 'success': True })
 
 # Route to handle DELETE requests for an individual item
 @app.route('/api/items/<id>', methods=['DELETE'])

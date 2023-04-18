@@ -10,7 +10,8 @@
   --primary-font: Arial, sans-serif;
 }
 
-body, ul {
+body,
+ul {
   margin: 0;
   padding: 0;
 }
@@ -21,14 +22,18 @@ body {
   background-color: var(--bg-color);
 }
 
-h1, form input[type="submit"], #add-item-btn {
+h1,
+form input[type="submit"],
+#add-item-btn {
   background-color: var(--main-color);
   color: var(--white-color);
   padding: 1rem;
   border-radius: 4px;
 }
 
-form input[type="submit"]:hover, li button:hover, #add-item-btn:hover {
+form input[type="submit"]:hover,
+li button:hover,
+#add-item-btn:hover {
   background-color: var(--secondary-color);
 }
 
@@ -43,7 +48,9 @@ h1 {
   cursor: pointer;
 }
 
-.form-container, .search-container, li {
+.form-container,
+.search-container,
+li {
   max-width: 700px;
   margin: 2rem auto;
   background-color: var(--white-color);
@@ -52,18 +59,32 @@ h1 {
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-form, li {
+.hidden {
+  display: none;
+}
+
+.form-container.visible {
+  display: flex;
+}
+
+form,
+li {
   display: flex;
   flex-wrap: wrap;
   justify-content: space-between;
 }
 
-form label, li h2, li p {
+form label,
+li h2,
+li p {
   display: block;
   margin-bottom: 0.5rem;
 }
 
-form input[type="text"], form input[type="url"], form input[type="number"], #search {
+form input[type="text"],
+form input[type="url"],
+form input[type="number"],
+#search {
   width: 100%;
   padding: 0.5rem;
   margin-bottom: 1rem;
@@ -79,9 +100,11 @@ form input[type="submit"] {
 
 #item-list {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  grid-template-columns: repeat(5, 1fr);
   grid-gap: 1rem;
   list-style: none;
+  max-width: 1200px; /* set the maximum width to 1200 pixels */
+  margin: 0 auto; /* center the grid horizontally */
 }
 
 li {
@@ -143,7 +166,6 @@ li button.delete {
 li button.delete:hover {
   background-color: var(--secondary-color);
 }
-
 
 #search {
   width: 100%;

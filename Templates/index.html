@@ -14,38 +14,35 @@
 </head>
 
 <body>
-    <h1>M.I.M.O.S.A V1.3</h1>
-    
-    
+    <h1>M.I.M.O.S.A V1.5</h1>
     <div class="search-container">
-        <button id="add-item-btn">Add Item Toggle</button>
+        <button type="button" id="btn-add">Add item</button>
         <input type="text" id="search" placeholder="Search items...">
+        <div class="form-container hidden" id="form-container">
+            <form id="add-form">
+                <div class="name">
+                    <label for="name">Name:</label>
+                    <input type="text" id="name" name="name" required>
+                </div>
+                <div class="link">
+                    <label for="link">Link:</label>
+                    <input type="url" id="link" name="link" required>
+                </div>
+                <div class="image">
+                    <label for="image">Image:</label>
+                    <input type="url" id="image" name="image" required>
+                </div>
+                <div class="position">
+                    <label for="position">Position:</label>
+                    <input type="text" id="position" name="position" required>
+                </div>
+                <input type="submit" value="Add">
+            </form>
+        </div>
     </div>
     <ul id="item-list"></ul>
-
-    <div class="form-container hidden" id="add-form-container">
-        <form id="add-form">
-            <div class="name">
-                <label for="name">Name:</label>
-                <input type="text" id="name" name="name" required>
-            </div>
-            <div class="link">
-                <label for="link">Link:</label>
-                <input type="url" id="link" name="link" required>
-            </div>
-            <div class="image">
-                <label for="image">Image:</label>
-                <input type="url" id="image" name="image" required>
-            </div>
-            <div class="position">
-                <label for="position">Position:</label>
-                <input type="text" id="position" name="position" required>
-            </div>
-            <input type="submit" value="Add">
-        </form>
-    </div>
-    <script src="{{ url_for('static', filename='popup.js') }}"></script>
     <script src="{{ url_for('static', filename='script.js') }}"></script>
+
 </body>
 
 

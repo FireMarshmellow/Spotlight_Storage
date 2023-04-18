@@ -22,6 +22,7 @@ function addItem(event) {
       const li = createItemElement(data);
       itemList.appendChild(li);
       form.reset();
+      toggleAddForm();
     })
     .catch((error) => console.error(error));
 }
@@ -124,7 +125,7 @@ function createItemElement(item) {
   span.append(item.position);
   div.appendChild(span);
 
-  const deleteBtn = document.createElement('button');
+  const deleteBtn = document.createElement("button");
   deleteBtn.innerText = "Delete";
   deleteBtn.addEventListener("click", () => deleteItem(item.id));
   div.appendChild(deleteBtn);
@@ -163,3 +164,18 @@ function deleteItem(id) {
 
 form.addEventListener("submit", addItem);
 loadItems();
+
+function toggleAddForm() {
+  const btn = document.getElementById("btn-add");
+  const container = document.getElementById("form-container");
+
+  if (container.style.display === "block") {
+    container.style.display = "none";
+    btn.innerHTML = "Add item";
+  } else {
+    container.style.display = "block";
+    btn.innerHTML = "Close";
+  }
+}
+
+document.getElementById("btn-add").addEventListener("click", toggleAddForm);
