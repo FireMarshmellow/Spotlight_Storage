@@ -89,11 +89,18 @@ function createAddQuantityButton(item) {
   addQuantityBtn.innerText = "+";
   addQuantityBtn.classList.add("bg-slate-500", "h-8", "w-8", "rounded-md", "text-white", "text-lg", "font-bold", "flex", "justify-center", "items-center", "mx-auto");
   addQuantityBtn.addEventListener("click", () => {
+    updatedItem = { ...item, quantity: item.quantity + 1 };
     fetch(`/api/items/${item.id}`, {
-      method: "POST",
-      headers: { "Content-Type": "application/x-www-form-urlencoded" },
-      body: new URLSearchParams({ action: "addQuantity" }),
-    }).catch((error) => console.error(error));
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(updatedItem),
+    })
+      .then(() => {
+        const li = itemList.querySelector(`li[data-id="${item.id}"]`);
+        const updatedLi = createItemElement(updatedItem);
+        itemList.replaceChild(updatedLi, li);
+      })
+      .catch((error) => console.error(error));
   });
   return addQuantityBtn;
 }
@@ -109,11 +116,18 @@ function createRemoveQuantityButton(item) {
   removeQuantityBtn.innerText = "-";
   removeQuantityBtn.classList.add("bg-slate-500", "h-8", "w-8", "rounded-md", "text-white", "text-lg", "font-bold", "flex", "justify-center", "items-center", "mx-auto");
   removeQuantityBtn.addEventListener("click", () => {
+    updatedItem = { ...item, quantity: item.quantity - 1 };
     fetch(`/api/items/${item.id}`, {
-      method: "POST",
-      headers: { "Content-Type": "application/x-www-form-urlencoded" },
-      body: new URLSearchParams({ action: "removeQuantity" }),
-    }).catch((error) => console.error(error));
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(updatedItem),
+    })
+    .then(() => {
+      const li = itemList.querySelector(`li[data-id="${item.id}"]`);
+      const updatedLi = createItemElement(updatedItem);
+      itemList.replaceChild(updatedLi, li);
+    })
+    .catch((error) => console.error(error));
   });
   return removeQuantityBtn;
 }
