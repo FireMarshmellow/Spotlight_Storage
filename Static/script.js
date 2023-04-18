@@ -9,8 +9,9 @@ function addItem(event) {
   const link = document.getElementById("link").value;
   const image = document.getElementById("image").value;
   const position = document.getElementById("position").value;
+  const quantity = document.getElementById("quantity").value;
 
-  const item = { name, link, image, position };
+  const item = { name, link, image, position, quantity};
 
   fetch("/api/items", {
     method: "POST",
@@ -33,8 +34,9 @@ function editItem(item) {
   const link = prompt("Enter a new link:", item.link);
   const image = prompt("Enter a new image URL:", item.image);
   const position = prompt("Enter a new position:", item.position);
+  const quantity = prompt("Enter a new quantity:", item.quantity);
 
-  const updatedItem = { ...item, name, link, image, position };
+  const updatedItem = { ...item, name, link, image, position, quantity};
 
   fetch(`/api/items/${item.id}`, {
     method: "PUT",
@@ -76,6 +78,52 @@ function createLocateButton(item) {
   return locateBtn;
 }
 
+// add quantity
+function addQuantity(item) {
+  console.log(`Quantity of ${item.name}: ${item.quantity}`);
+}
+
+// Create add quantity button
+function createAddQuantityButton(item) {
+  const addQuantityBtn = document.createElement("button");
+  addQuantityBtn.innerText = "+";
+  addQuantityBtn.classList.add("bg-slate-500", "h-8", "w-8", "rounded-md", "text-white", "text-lg", "font-bold", "flex", "justify-center", "items-center", "mx-auto");
+  addQuantityBtn.addEventListener("click", () => {
+    fetch(`/api/items/${item.id}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: new URLSearchParams({ action: "addQuantity" }),
+    }).catch((error) => console.error(error));
+  });
+  return addQuantityBtn;
+}
+
+// Remove quantity
+function removeQuantity(item) {
+  console.log(`Quantity of ${item.name}: ${item.quantity}`);
+}
+
+// Create remove quantity button
+function createRemoveQuantityButton(item) {
+  const removeQuantityBtn = document.createElement("button");
+  removeQuantityBtn.innerText = "-";
+  removeQuantityBtn.classList.add("bg-slate-500", "h-8", "w-8", "rounded-md", "text-white", "text-lg", "font-bold", "flex", "justify-center", "items-center", "mx-auto");
+  removeQuantityBtn.addEventListener("click", () => {
+    fetch(`/api/items/${item.id}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: new URLSearchParams({ action: "removeQuantity" }),
+    }).catch((error) => console.error(error));
+  });
+  return removeQuantityBtn;
+}
+
+// show quantity
+function showQuantity(item) {
+  console.log(`Quantity of ${item.name}: ${item.quantity}`);
+}
+
+
 const search = document.getElementById("search");
 
 function filterItems(e) {
@@ -98,16 +146,24 @@ search.addEventListener("input", filterItems);
 function createItemElement(item) {
   const li = document.createElement("li");
   li.dataset.id = item.id;
+  li.classList.add("item");
+
+  const wrapper = document.createElement("div");
+  wrapper.classList.add("bg-slate-500", "h-80", "w-11/12", "md:w-full", "mx-auto", "p-2", "rounded-md", "grid", "grid-cols-1", "gap-2", "items-center");
+  li.appendChild(wrapper);
 
   const img = document.createElement("img");
   img.src = item.image;
-  li.appendChild(img);
+  img.classList.add("h-32", "w-32", "rounded-lg", "mx-auto");
+  wrapper.appendChild(img);
 
   const div = document.createElement("div");
-  li.appendChild(div);
+  div.classList.add("text-center", "text-white", "text-sm", "grid", "grid-cols-1", "gap-2");
+  wrapper.appendChild(div);
 
   const h2 = document.createElement("h2");
   h2.innerText = item.name;
+  h2.classList.add("text-lg", "text-white");
   div.appendChild(h2);
 
   const p = document.createElement("p");
@@ -125,16 +181,32 @@ function createItemElement(item) {
   span.append(item.position);
   div.appendChild(span);
 
+  const innerWrapper = document.createElement("div");
+  innerWrapper.classList.add("grid", "grid-cols-3", "gap-2");
+  div.appendChild(innerWrapper);
+
   const deleteBtn = document.createElement("button");
   deleteBtn.innerText = "Delete";
   deleteBtn.addEventListener("click", () => deleteItem(item.id));
-  div.appendChild(deleteBtn);
+  innerWrapper.appendChild(deleteBtn);
 
   const editBtn = createEditButton(item);
-  div.appendChild(editBtn);
+  innerWrapper.appendChild(editBtn);
 
   const locateBtn = createLocateButton(item);
-  div.appendChild(locateBtn);
+  innerWrapper.appendChild(locateBtn);
+
+  const removeQuantityBtn = createRemoveQuantityButton(item);
+  innerWrapper.appendChild(removeQuantityBtn);
+
+  const quantity = document.createElement("span");
+  quantity.innerText = item.quantity;
+  quantity.classList.add("text-center", "text-white", "text-md", "justify-center", "items-center", "mx-auto", "pt-1");
+  innerWrapper.appendChild(quantity);
+
+
+  const addQuantityBtn = createAddQuantityButton(item);
+  innerWrapper.appendChild(addQuantityBtn);
 
   return li;
 }

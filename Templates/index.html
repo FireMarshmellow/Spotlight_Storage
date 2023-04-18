@@ -5,45 +5,46 @@
     <title>MIMOSA Interface</title>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='style.css') }}">
-    <style>
-        .hidden {
-            display: none;
-        }
-    </style>
+    <!-- Include Tailwind CSS styles -->
+    <script src="https://cdn.tailwindcss.com"></script>
 </head>
 
-<body>
-    <h1>M.I.M.O.S.A V1.5</h1>
-    <div class="search-container">
-        <button type="button" id="btn-add">Add item</button>
-        <input type="text" id="search" placeholder="Search items...">
-        <div class="form-container hidden" id="form-container">
-            <form id="add-form">
-                <div class="name">
-                    <label for="name">Name:</label>
-                    <input type="text" id="name" name="name" required>
+<body class="bg-gray-100 font-sans leading-normal tracking-normal">
+    <div class="container mx-auto mt-8">
+        <h1 class="text-4xl text-center font-bold mb-8">M.I.M.O.S.A V1.5</h1>
+        <div class="flex justify-between items-center my-5 mx-5 ">
+            <button type="button" id="btn-add" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">Add item</button>
+            <input type="text" id="search" placeholder="Search items..." class="shadow appearance-none border rounded w-1/2 py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+        </div>
+        <div class="form-container fixed hidden w-fit px-5" id="form-container">
+            <form id="add-form" class="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4">
+                <div class="mb-4">
+                    <label for="name" class="block text-gray-700 font-bold mb-2">Name:</label>
+                    <input type="text" id="name" name="name" required class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
                 </div>
-                <div class="link">
-                    <label for="link">Link:</label>
-                    <input type="url" id="link" name="link" required>
+                <div class="mb-4">
+                    <label for="link" class="block text-gray-700 font-bold mb-2">Link:</label>
+                    <input type="url" id="link" name="link" required class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
                 </div>
-                <div class="image">
-                    <label for="image">Image:</label>
-                    <input type="url" id="image" name="image" required>
+                <div class="mb-4">
+                    <label for="image" class="block text-gray-700 font-bold mb-2">Image:</label>
+                    <input type="url" id="image" name="image" required class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
                 </div>
-                <div class="position">
-                    <label for="position">Position:</label>
-                    <input type="text" id="position" name="position" required>
+                <div class="mb-4">
+                    <label for="position" class="block text-gray-700 font-bold mb-2">Position:</label>
+                    <input type="text" id="position" name="position" required class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
                 </div>
-                <input type="submit" value="Add">
+                <div class="mb-4">
+                    <label for="quantity" class="block text-gray-700 font-bold mb-2">Quantity:</label>
+                    <input type="text" id="quantity" name="quantity" required class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                </div>
+                <input type="submit" value="Add" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">
             </form>
         </div>
+        <ul id="item-list" class="grid sm:grid-cols-1 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 max-w-5xl mx-auto w-11/12 md:5/6 lg:full">
+        </ul>
     </div>
-    <ul id="item-list"></ul>
     <script src="{{ url_for('static', filename='script.js') }}"></script>
-
 </body>
-
 
 </html>

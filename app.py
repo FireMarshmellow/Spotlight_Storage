@@ -23,7 +23,8 @@ def get_db():
             name TEXT NOT NULL,
             link TEXT NOT NULL,
             image TEXT,
-            position TEXT
+            position TEXT,
+            quantity INTEGER
         )
     ''')
     conn.commit()
@@ -41,10 +42,10 @@ def read_items():
 # Function to write data to the database
 def write_item(item):
     conn = get_db()
-    conn.execute('INSERT INTO items (name, link, image, position) VALUES (?, ?, ?, ?)', [item['name'], item['link'], item['image'], item['position']])
+    conn.execute('INSERT INTO items (name, link, image, position, quantity) VALUES (?, ?, ?, ?, ?)', [item['name'], item['link'], item['image'], item['position'], item['quantity']])
     conn.commit()
     conn.close()
-
+    
 # Route to the home page of the web application
 @app.route('/')
 def index():
@@ -78,7 +79,7 @@ def item(id):
         # If the request method is PUT, update the item in the database and return the updated item as JSON
         new_data = request.get_json()
         conn = get_db()
-        conn.execute('UPDATE items SET name = ?, link = ?, image = ?, position = ? WHERE id = ?', [new_data['name'], new_data['link'], new_data['image'], new_data['position'], id])
+        conn.execute('UPDATE items SET name = ?, link = ?, image = ?, position = ?, quantity = ? WHERE id = ?', [new_data['name'], new_data['link'], new_data['image'], new_data['position'], new_data['quantity'], id])
         conn.commit()
         conn.close()
         item = conn.execute('SELECT * FROM items WHERE id = ?', [id]).fetchone()
@@ -97,6 +98,18 @@ def item(id):
             wled_api.lights(position)
             print(f"Position of {item['name']}: {position}")
             return jsonify({ 'success': True })
+        elif request.form.get('action') == 'addQuantity':
+            conn = get_db()
+            conn.execute('UPDATE items SET quantity = ? WHERE id = ?', [item['quantity'] + 1, id])
+            conn.commit()
+            conn.close()
+            return jsonify({ 'success': True })
+        elif request.form.get('action') == 'removeQuantity':
+            conn = get_db()
+            conn.execute('UPDATE items SET quantity = ? WHERE id = ?', [item['quantity'] - 1, id])
+            conn.commit()
+            conn.close()
+            return jsonify({ 'success': True })
         else:
             return jsonify({ 'error': 'Invalid action' }), 400
 
@@ -109,6 +122,7 @@ def delete_item(id):
     conn.commit()
     conn.close()
     return jsonify({ 'success': True })
+
 
 # Running the Flask application
 if __name__ == '__main__':
