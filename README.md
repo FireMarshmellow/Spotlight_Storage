@@ -6,8 +6,6 @@ youtu.be/7C4i-2IqSS4
 
 ## Features
 
-web app:
-
 - inventory management
 - search
 - locate items
