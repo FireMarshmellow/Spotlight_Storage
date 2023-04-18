@@ -28,6 +28,31 @@ function addItem(event) {
     .catch((error) => console.error(error));
 }
 
+// Delete item
+function deleteItem(item) {
+  const response = confirm(`Are you sure you want to delete ${item.name}?`);
+  const id = item.id;
+  if (response) {
+    // Delete item from database
+    fetch(`/api/items/${id}`, { method: "DELETE" })
+    .then(() => {
+      const li = itemList.querySelector(`li[data-id="${id}"]`);
+      li.parentNode.removeChild(li);
+    })
+    .catch((error) => console.error(error));
+  }
+}
+
+// Create delete button
+function createDeleteButton(item) {
+  const deleteBtn = document.createElement("button");
+  deleteBtn.innerText = "Delete";
+  deleteBtn.classList.add("bg-red-500", "hover:bg-red-700", "h-8", "w-full", "rounded-md", "text-white", "text-xs", "justify-center", "items-center", "mx-auto");
+  deleteBtn.addEventListener("click", () => deleteItem(item));
+  return deleteBtn;
+}
+
+
 // Edit item
 function editItem(item) {
   const name = prompt("Enter a new name:", item.name);
@@ -55,6 +80,7 @@ function editItem(item) {
 function createEditButton(item) {
   const editBtn = document.createElement("button");
   editBtn.innerText = "Edit";
+  editBtn.classList.add("bg-blue-500", "hover:bg-blue-700", "h-8", "w-full", "rounded-md", "text-white", "text-xs", "justify-center", "items-center", "mx-auto");
   editBtn.addEventListener("click", () => editItem(item));
   return editBtn;
 }
@@ -68,6 +94,7 @@ function locateItem(item) {
 function createLocateButton(item) {
   const locateBtn = document.createElement("button");
   locateBtn.innerText = "Locate";
+  locateBtn.classList.add("bg-blue-500", "hover:bg-blue-700", "h-8", "w-full", "rounded-md", "text-white", "text-xs", "justify-center", "items-center", "mx-auto");
   locateBtn.addEventListener("click", () => {
     fetch(`/api/items/${item.id}`, {
       method: "POST",
@@ -87,7 +114,7 @@ function addQuantity(item) {
 function createAddQuantityButton(item) {
   const addQuantityBtn = document.createElement("button");
   addQuantityBtn.innerText = "+";
-  addQuantityBtn.classList.add("bg-slate-500", "h-8", "w-8", "rounded-md", "text-white", "text-lg", "font-bold", "flex", "justify-center", "items-center", "mx-auto");
+  addQuantityBtn.classList.add("bg-blue-500", "hover:bg-blue-700", "h-8", "w-8", "rounded-full", "text-white", "text-lg", "font-bold", "flex", "justify-center", "items-center", "mx-auto");
   addQuantityBtn.addEventListener("click", () => {
     updatedItem = { ...item, quantity: item.quantity + 1 };
     fetch(`/api/items/${item.id}`, {
@@ -114,7 +141,7 @@ function removeQuantity(item) {
 function createRemoveQuantityButton(item) {
   const removeQuantityBtn = document.createElement("button");
   removeQuantityBtn.innerText = "-";
-  removeQuantityBtn.classList.add("bg-slate-500", "h-8", "w-8", "rounded-md", "text-white", "text-lg", "font-bold", "flex", "justify-center", "items-center", "mx-auto");
+  removeQuantityBtn.classList.add("bg-blue-500", "hover:bg-blue-700", "h-8", "w-8", "rounded-full", "text-white", "text-lg", "font-bold", "flex", "justify-center", "items-center", "mx-auto");
   removeQuantityBtn.addEventListener("click", () => {
     updatedItem = { ...item, quantity: item.quantity - 1 };
     fetch(`/api/items/${item.id}`, {
@@ -163,7 +190,7 @@ function createItemElement(item) {
   li.classList.add("item");
 
   const wrapper = document.createElement("div");
-  wrapper.classList.add("bg-slate-500", "h-80", "w-11/12", "md:w-full", "mx-auto", "p-2", "rounded-md", "grid", "grid-cols-1", "gap-2", "items-center");
+  wrapper.classList.add("bg-gray-100", "drop-shadow-md", "h-full", "w-11/12", "md:w-full", "mx-auto", "p-2", "rounded-md", "grid", "grid-cols-1", "gap-2", "items-center");
   li.appendChild(wrapper);
 
   const img = document.createElement("img");
@@ -172,19 +199,19 @@ function createItemElement(item) {
   wrapper.appendChild(img);
 
   const div = document.createElement("div");
-  div.classList.add("text-center", "text-white", "text-sm", "grid", "grid-cols-1", "gap-2");
+  div.classList.add("text-center", "text-slate", "text-sm", "grid", "grid-cols-1", "gap-2");
   wrapper.appendChild(div);
 
   const h2 = document.createElement("h2");
   h2.innerText = item.name;
-  h2.classList.add("text-lg", "text-white");
+  h2.classList.add("text-lg", "text-slate");
   div.appendChild(h2);
 
   const p = document.createElement("p");
   const a = document.createElement("a");
   a.href = item.link;
   a.target = "_blank";
-  a.innerText = "Visit Website";
+  a.innerText = "Buy More";
   p.appendChild(a);
   div.appendChild(p);
 
@@ -199,9 +226,7 @@ function createItemElement(item) {
   innerWrapper.classList.add("grid", "grid-cols-3", "gap-2");
   div.appendChild(innerWrapper);
 
-  const deleteBtn = document.createElement("button");
-  deleteBtn.innerText = "Delete";
-  deleteBtn.addEventListener("click", () => deleteItem(item.id));
+  const deleteBtn = createDeleteButton(item);
   innerWrapper.appendChild(deleteBtn);
 
   const editBtn = createEditButton(item);
@@ -215,7 +240,7 @@ function createItemElement(item) {
 
   const quantity = document.createElement("span");
   quantity.innerText = item.quantity;
-  quantity.classList.add("text-center", "text-white", "text-md", "justify-center", "items-center", "mx-auto", "pt-1");
+  quantity.classList.add("text-center", "text-slate", "text-lg", "justify-center", "items-center", "mx-auto", "pt-1");
   innerWrapper.appendChild(quantity);
 
 
@@ -234,16 +259,6 @@ function loadItems() {
         const li = createItemElement(item);
         itemList.appendChild(li);
       });
-    })
-    .catch((error) => console.error(error));
-}
-
-// Delete item from server and list
-function deleteItem(id) {
-  fetch(`/api/items/${id}`, { method: "DELETE" })
-    .then(() => {
-      const li = itemList.querySelector(`li[data-id="${id}"]`);
-      li.parentNode.removeChild(li);
     })
     .catch((error) => console.error(error));
 }
