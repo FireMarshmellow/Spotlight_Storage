@@ -91,14 +91,12 @@ def item(id):
         conn.close()
         return jsonify({ 'success': True })
     elif request.method == 'POST':
-        # If the request method is POST, check if the request is for locating the item, and send the position to a WLED API
-        if request.form.get('action') == 'locate':
-            position = item['position']
-            wled_api.lights(position)
-            print(f"Position of {item['name']}: {position}")
-            return jsonify({ 'success': True })
-        else:
+        if request.form.get('action') != 'locate':
             return jsonify({ 'error': 'Invalid action' }), 400
+        position = item['position']
+        wled_api.lights(position)
+        print(f"Position of {item['name']}: {position}")
+        return jsonify({ 'success': True })
 
 # Route to handle DELETE requests for an individual item
 @app.route('/api/items/<id>', methods=['DELETE'])
