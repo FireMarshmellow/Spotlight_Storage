@@ -13,7 +13,7 @@ def lights(position):
     start_num = int(position[1]) - 1
     print(start_num)
 
-    send_request(ip_list[position[0] - 1], start_num, int(position[1]), [255, 255, 255])
+    send_request(ip_list[position[0] - 1], start_num, int(position[1]), [255, 255, 255]) # Convert color value to [0, 0, 0, 255] to only use white part of LED (RGBW LEDs only).
 
     time.sleep(5) # Change how long the LED stays on for.
 
