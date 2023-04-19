@@ -1,0 +1,37 @@
+<div class="flex flex-col items-center my-5 mx-auto">
+    <button type="button" id="btn-add"
+        class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mb-2">Add item</button>
+    <div id="form-container" class="hidden w-full md:w-2/3 lg:w-1/2">
+        <form id="add-form" class="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4">
+            <div class="mb-4">
+                <label for="name" class="block text-gray-700 font-bold mb-2">Name:</label>
+                <input type="text" id="name" name="name" required
+                    class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+            </div>
+            <div class="mb-4">
+                <label for="link" class="block text-gray-700 font-bold mb-2">Link:</label>
+                <input type="url" id="link" name="link" required
+                    class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+            </div>
+            <div class="mb-4">
+                <label for="image" class="block text-gray-700 font-bold mb-2">Image:</label>
+                <input type="url" id="image" name="image" required
+                    class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+            </div>
+            <div class="mb-4">
+                <label for="position" class="block text-gray-700 font-bold mb-2">Position:</label>
+                <input type="text" id="position" name="position" required
+                    class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+            </div>
+            <div class="mb-4">
+                <label for="quantity" class="block text-gray-700 font-bold mb-2">Quantity:</label>
+                <input type="text" id="quantity" name="quantity" required
+                    class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+            </div>
+            <input type="submit" value="Add"
+                class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">
+        </form>
+    </div>
+    <input type="text" id="search" placeholder="Search items..."
+        class="shadow appearance-none border rounded w-2/3 py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+</div>
