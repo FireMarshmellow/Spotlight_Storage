@@ -10,8 +10,9 @@ function addItem(event) {
   const image = document.getElementById("image").value;
   const position = document.getElementById("position").value;
   const quantity = document.getElementById("quantity").value;
+  const ip = document.getElementById("ip").value;
 
-  const item = { name, link, image, position, quantity};
+  const item = { name, link, image, position, quantity, ip };
 
   fetch("/api/items", {
     method: "POST",
@@ -35,11 +36,11 @@ function deleteItem(item) {
   if (response) {
     // Delete item from database
     fetch(`/api/items/${id}`, { method: "DELETE" })
-    .then(() => {
-      const li = itemList.querySelector(`li[data-id="${id}"]`);
-      li.parentNode.removeChild(li);
-    })
-    .catch((error) => console.error(error));
+      .then(() => {
+        const li = itemList.querySelector(`li[data-id="${id}"]`);
+        li.parentNode.removeChild(li);
+      })
+      .catch((error) => console.error(error));
   }
 }
 
@@ -47,11 +48,21 @@ function deleteItem(item) {
 function createDeleteButton(item) {
   const deleteBtn = document.createElement("button");
   deleteBtn.innerText = "Delete";
-  deleteBtn.classList.add("bg-red-500", "hover:bg-red-700", "h-8", "w-full", "rounded-md", "text-white", "text-xs", "justify-center", "items-center", "mx-auto");
+  deleteBtn.classList.add(
+    "bg-red-500",
+    "hover:bg-red-700",
+    "h-8",
+    "w-full",
+    "rounded-md",
+    "text-white",
+    "text-xs",
+    "justify-center",
+    "items-center",
+    "mx-auto"
+  );
   deleteBtn.addEventListener("click", () => deleteItem(item));
   return deleteBtn;
 }
-
 
 // Edit item
 function editItem(item) {
@@ -60,8 +71,9 @@ function editItem(item) {
   const image = prompt("Enter a new image URL:", item.image);
   const position = prompt("Enter a new position:", item.position);
   const quantity = prompt("Enter a new quantity:", item.quantity);
+  const ip = prompt("Enter a new quantity:", item.ip);
 
-  const updatedItem = { ...item, name, link, image, position, quantity};
+  const updatedItem = { ...item, name, link, image, position, quantity, ip };
 
   fetch(`/api/items/${item.id}`, {
     method: "PUT",
@@ -80,7 +92,18 @@ function editItem(item) {
 function createEditButton(item) {
   const editBtn = document.createElement("button");
   editBtn.innerText = "Edit";
-  editBtn.classList.add("bg-blue-500", "hover:bg-blue-700", "h-8", "w-full", "rounded-md", "text-white", "text-xs", "justify-center", "items-center", "mx-auto");
+  editBtn.classList.add(
+    "bg-blue-500",
+    "hover:bg-blue-700",
+    "h-8",
+    "w-full",
+    "rounded-md",
+    "text-white",
+    "text-xs",
+    "justify-center",
+    "items-center",
+    "mx-auto"
+  );
   editBtn.addEventListener("click", () => editItem(item));
   return editBtn;
 }
@@ -94,7 +117,18 @@ function locateItem(item) {
 function createLocateButton(item) {
   const locateBtn = document.createElement("button");
   locateBtn.innerText = "Locate";
-  locateBtn.classList.add("bg-blue-500", "hover:bg-blue-700", "h-8", "w-full", "rounded-md", "text-white", "text-xs", "justify-center", "items-center", "mx-auto");
+  locateBtn.classList.add(
+    "bg-blue-500",
+    "hover:bg-blue-700",
+    "h-8",
+    "w-full",
+    "rounded-md",
+    "text-white",
+    "text-xs",
+    "justify-center",
+    "items-center",
+    "mx-auto"
+  );
   locateBtn.addEventListener("click", () => {
     fetch(`/api/items/${item.id}`, {
       method: "POST",
@@ -114,7 +148,20 @@ function addQuantity(item) {
 function createAddQuantityButton(item) {
   const addQuantityBtn = document.createElement("button");
   addQuantityBtn.innerText = "+";
-  addQuantityBtn.classList.add("bg-blue-500", "hover:bg-blue-700", "h-8", "w-8", "rounded-full", "text-white", "text-lg", "font-bold", "flex", "justify-center", "items-center", "mx-auto");
+  addQuantityBtn.classList.add(
+    "bg-blue-500",
+    "hover:bg-blue-700",
+    "h-8",
+    "w-8",
+    "rounded-full",
+    "text-white",
+    "text-lg",
+    "font-bold",
+    "flex",
+    "justify-center",
+    "items-center",
+    "mx-auto"
+  );
   addQuantityBtn.addEventListener("click", () => {
     updatedItem = { ...item, quantity: item.quantity + 1 };
     fetch(`/api/items/${item.id}`, {
@@ -141,7 +188,20 @@ function removeQuantity(item) {
 function createRemoveQuantityButton(item) {
   const removeQuantityBtn = document.createElement("button");
   removeQuantityBtn.innerText = "-";
-  removeQuantityBtn.classList.add("bg-blue-500", "hover:bg-blue-700", "h-8", "w-8", "rounded-full", "text-white", "text-lg", "font-bold", "flex", "justify-center", "items-center", "mx-auto");
+  removeQuantityBtn.classList.add(
+    "bg-blue-500",
+    "hover:bg-blue-700",
+    "h-8",
+    "w-8",
+    "rounded-full",
+    "text-white",
+    "text-lg",
+    "font-bold",
+    "flex",
+    "justify-center",
+    "items-center",
+    "mx-auto"
+  );
   removeQuantityBtn.addEventListener("click", () => {
     updatedItem = { ...item, quantity: item.quantity - 1 };
     fetch(`/api/items/${item.id}`, {
@@ -149,12 +209,12 @@ function createRemoveQuantityButton(item) {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(updatedItem),
     })
-    .then(() => {
-      const li = itemList.querySelector(`li[data-id="${item.id}"]`);
-      const updatedLi = createItemElement(updatedItem);
-      itemList.replaceChild(updatedLi, li);
-    })
-    .catch((error) => console.error(error));
+      .then(() => {
+        const li = itemList.querySelector(`li[data-id="${item.id}"]`);
+        const updatedLi = createItemElement(updatedItem);
+        itemList.replaceChild(updatedLi, li);
+      })
+      .catch((error) => console.error(error));
   });
   return removeQuantityBtn;
 }
@@ -163,7 +223,6 @@ function createRemoveQuantityButton(item) {
 function showQuantity(item) {
   console.log(`Quantity of ${item.name}: ${item.quantity}`);
 }
-
 
 const search = document.getElementById("search");
 
@@ -190,7 +249,20 @@ function createItemElement(item) {
   li.classList.add("item");
 
   const wrapper = document.createElement("div");
-  wrapper.classList.add("bg-gray-100", "drop-shadow-md", "h-full", "w-11/12", "md:w-full", "mx-auto", "p-2", "rounded-md", "grid", "grid-cols-1", "gap-2", "items-center");
+  wrapper.classList.add(
+    "bg-gray-100",
+    "drop-shadow-md",
+    "h-full",
+    "w-11/12",
+    "md:w-full",
+    "mx-auto",
+    "p-2",
+    "rounded-md",
+    "grid",
+    "grid-cols-1",
+    "gap-2",
+    "items-center"
+  );
   li.appendChild(wrapper);
 
   const img = document.createElement("img");
@@ -199,7 +271,14 @@ function createItemElement(item) {
   wrapper.appendChild(img);
 
   const div = document.createElement("div");
-  div.classList.add("text-center", "text-slate", "text-sm", "grid", "grid-cols-1", "gap-2");
+  div.classList.add(
+    "text-center",
+    "text-slate",
+    "text-sm",
+    "grid",
+    "grid-cols-1",
+    "gap-2"
+  );
   wrapper.appendChild(div);
 
   const h2 = document.createElement("h2");
@@ -240,9 +319,16 @@ function createItemElement(item) {
 
   const quantity = document.createElement("span");
   quantity.innerText = item.quantity;
-  quantity.classList.add("text-center", "text-slate", "text-lg", "justify-center", "items-center", "mx-auto", "pt-1");
+  quantity.classList.add(
+    "text-center",
+    "text-slate",
+    "text-lg",
+    "justify-center",
+    "items-center",
+    "mx-auto",
+    "pt-1"
+  );
   innerWrapper.appendChild(quantity);
-
 
   const addQuantityBtn = createAddQuantityButton(item);
   innerWrapper.appendChild(addQuantityBtn);

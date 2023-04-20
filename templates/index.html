@@ -12,7 +12,7 @@
 <body class="bg-gray-100 font-sans leading-normal tracking-normal">
     <div class="container mx-auto mt-8">
         <div class="sticky top-0 z-10 w-full bg-slate-100 py-1">
-            <h1 class="text-4xl text-center font-bold mb-8">M.I.M.O.S.A V2.0</h1>
+            <h1 class="text-4xl text-center font-bold mb-8">M.I.M.O.S.A V2.1</h1>
         </div>
         <div class="flex flex-col items-center my-5 mx-auto">
             <button type="button" id="btn-add"
@@ -36,12 +36,17 @@
                     </div>
                     <div class="mb-4">
                         <label for="position" class="block text-gray-700 font-bold mb-2">Position:</label>
-                        <input type="text" id="position" name="position" required
+                        <input type="number" id="position" name="position" required
                             class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
                     </div>
                     <div class="mb-4">
                         <label for="quantity" class="block text-gray-700 font-bold mb-2">Quantity:</label>
                         <input type="text" id="quantity" name="quantity" required
+                            class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                    </div>
+                    <div class="mb-4">
+                        <label for="ip" class="block text-gray-700 font-bold mb-2">Wled IP Address:</label>
+                        <input type="text" id="ip" name="ip" required placeholder="format: 192.168.1.123"
                             class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
                     </div>
                     <input type="submit" value="Add"

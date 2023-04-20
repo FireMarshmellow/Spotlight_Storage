@@ -1,8 +1,8 @@
 # Importing necessary modules and packages
 from flask import Flask, render_template, jsonify, request
-import os
-import wled_api
 import sqlite3
+import requests
+import time
 
 # Creating a Flask application instance
 app = Flask(__name__)
@@ -23,8 +23,9 @@ def get_db():
             name TEXT NOT NULL,
             link TEXT NOT NULL,
             image TEXT,
-            position TEXT,
-            quantity INTEGER
+            position INTEGER,
+            quantity INTEGER,
+            ip TEXT
         )
     ''')
     conn.commit()
@@ -39,10 +40,11 @@ def read_items():
     conn.close()
     return [dict(item) for item in items]
 
+
 # Function to write data to the database
 def write_item(item):
     conn = get_db()
-    conn.execute('INSERT INTO items (name, link, image, position, quantity) VALUES (?, ?, ?, ?, ?)', [item['name'], item['link'], item['image'], item['position'], item['quantity']])
+    conn.execute('INSERT INTO items (name, link, image, position, quantity, ip) VALUES (?, ?, ?, ?, ?, ?)', [item['name'], item['link'], item['image'], item['position'], item['quantity'], item['ip']])
     conn.commit()
     conn.close()
     
@@ -63,6 +65,7 @@ def items():
         item = request.get_json()
         write_item(item)
         return jsonify(item)
+
 
 # Route to handle GET, PUT, DELETE and POST requests for an individual item
 @app.route('/api/items/<id>', methods=['GET', 'PUT', 'DELETE', 'POST'])
@@ -94,9 +97,8 @@ def item(id):
     elif request.method == 'POST':
         # If the request method is POST, check if the request is for locating the item, and send the position to a WLED API
         if request.form.get('action') == 'locate':
-            position = item['position']
-            wled_api.lights(position)
-            print(f"Position of {item['name']}: {position}")
+            lights(item['position'], item['ip'])
+            print(f"Position of {item['name']}: {item['position']}: {item['ip']}")
             return jsonify({ 'success': True })
         elif request.form.get('action') == 'addQuantity':
             conn = get_db()
@@ -123,6 +125,19 @@ def delete_item(id):
     conn.close()
     return jsonify({ 'success': True })
 
+def send_request(target_ip, start_num, stop_num, color):
+    url = f"http://{target_ip}/json/state" # construct URL using the target IP address
+    state = {"seg": [{"id": 0, "start": start_num, "stop": stop_num, "col": [color]}]}
+    response = requests.post(url, json=state)
+
+def lights(position, pi):
+    start_num = int(position) - 1
+
+    send_request(pi, start_num, int(position), [255, 255, 255]) # Convert color value to [0, 0, 0, 255] to only use white part of LED (RGBW LEDs only).
+
+    time.sleep(5) # Change how long the LED stays on for.
+
+    send_request(pi, 0, 60, [0, 255, 0])
 
 # Running the Flask application
 if __name__ == '__main__':
