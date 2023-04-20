@@ -29,7 +29,6 @@ def get_db():
         )
     ''')
     conn.commit()
-    
     return conn
 
 
@@ -132,11 +131,8 @@ def send_request(target_ip, start_num, stop_num, color):
 
 def lights(position, pi):
     start_num = int(position) - 1
-
     send_request(pi, start_num, int(position), [255, 255, 255]) # Convert color value to [0, 0, 0, 255] to only use white part of LED (RGBW LEDs only).
-
     time.sleep(5) # Change how long the LED stays on for.
-
     send_request(pi, 0, 60, [0, 255, 0])
 
 # Running the Flask application
