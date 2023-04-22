@@ -52,6 +52,6 @@ def get_item(id):
 
 def update_item(id, data):
     conn = get_db()
-    conn.execute('UPDATE items SET name = ?, link = ?, image = ?, position = ?, quantity = ? WHERE id = ?', [data['name'], data['link'], data['image'], data['position'], data['quantity'], id])
+    conn.execute('UPDATE items SET name = ?, link = ?, image = ?, position = ?, quantity = ?, ip = ? WHERE id = ?', [data['name'], data['link'], data['image'], data['position'], data['quantity'], data['ip'], id])
     conn.commit()
     conn.close()
