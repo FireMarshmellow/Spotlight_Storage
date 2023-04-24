@@ -17,7 +17,7 @@ Step by step Video:
 
 1. Clone the repo
 2. pip install -r requirements.txt
-4. Run app.py
+4. Run app.py Or .exe
 
 ## dependencies:
 
