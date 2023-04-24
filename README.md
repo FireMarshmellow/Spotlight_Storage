@@ -2,10 +2,10 @@
 
 ## Video
 Main Video:
-youtu.be/7C4i-2IqSS4
+[youtu.be/7C4i-2IqSS4](https://youtu.be/7C4i-2IqSS4)
 
 Step by step Video:
-https://youtu.be/QOd1apc0Lpo
+[https://youtu.be/QOd1apc0Lpo](https://youtu.be/QOd1apc0Lpo)
 
 ## Features
 
