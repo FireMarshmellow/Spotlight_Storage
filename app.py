@@ -23,7 +23,8 @@ def items():
     elif request.method == 'POST':
         # If the request method is POST, add new item to the database and return the item as JSON
         item = request.get_json()
-        db.write_item(item)
+        id = db.write_item(item)
+        item['id'] = id
         return jsonify(item)
 
 # Route to handle GET, PUT, DELETE and POST requests for an individual item
