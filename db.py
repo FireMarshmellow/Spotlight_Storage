@@ -34,9 +34,12 @@ def read_items():
 # Function to write data to the database
 def write_item(item):
     conn = get_db()
-    conn.execute('INSERT INTO items (name, link, image, position, quantity, ip) VALUES (?, ?, ?, ?, ?, ?)', [item['name'], item['link'], item['image'], item['position'], item['quantity'], item['ip']])
+    cursor = conn.cursor()
+    cursor.execute('INSERT INTO items (name, link, image, position, quantity, ip) VALUES (?, ?, ?, ?, ?, ?)', [item['name'], item['link'], item['image'], item['position'], item['quantity'], item['ip']])
+    lastId = cursor.lastrowid
     conn.commit()
     conn.close()
+    return lastId
 
 def delete_item(id):
     conn = get_db()
