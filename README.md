@@ -9,7 +9,9 @@ Step by step Video:
 
 ## Hardware i used
 Affiliate links:
+
 D1 mini: https://amzn.to/440mfet
+
 LEDs : https://amzn.to/3VcoaIY
 
 ## Features
