@@ -66,12 +66,12 @@ function createDeleteButton(item) {
 
 // Edit item
 function editItem(item) {
-  const name = prompt("Enter a new name:", item.name);
-  const link = prompt("Enter a new link:", item.link);
-  const image = prompt("Enter a new image URL:", item.image);
-  const position = prompt("Enter a new position:", item.position);
-  const quantity = prompt("Enter a new quantity:", item.quantity);
-  const ip = prompt("Enter a new quantity:", item.ip);
+  const name = prompt("Enter a new name:", item.name) ?? item.name;
+  const link = prompt("Enter a new link:", item.link) ?? item.link;
+  const image = prompt("Enter a new image URL:", item.image) ?? item.image;
+  const position = prompt("Enter a new position:", item.position) ?? item.position;
+  const quantity = prompt("Enter a new quantity:", item.quantity) ?? item.quantity;
+  const ip = prompt("Enter a new quantity:", item.ip) ?? item.ip;
 
   const updatedItem = { ...item, name, link, image, position, quantity, ip };
 
