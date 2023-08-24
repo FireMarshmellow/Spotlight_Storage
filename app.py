@@ -51,14 +51,21 @@ def item(id):
             lights(item['position'], item['ip'])
             print(f"Position of {item['name']}: {item['position']}: {item['ip']}")
             return jsonify({ 'success': True })
-        elif request.form.get('action') == 'addQuantity':
-            item['quantity'] += 1
+        elif request.form.get('action') == 'addQuantity': #incrementing the quantity by 1 instead of append a digit next to the current quantity
+            item['quantity'] = int(item['quantity']) + 1
             db.update_item(id, item)
             return jsonify({ 'success': True })
         elif request.form.get('action') == 'removeQuantity':
             item['quantity'] -= 1
             db.update_item(id, item)
             return jsonify({ 'success': True })
+        elif request.form.get('action') == 'setQuantity':
+            new_quantity = int(request.form.get('quantity'))
+            if new_quantity >= 1:
+                item['quantity'] = new_quantity
+                db.update_item(id, item)
+                return jsonify({ 'success': True })      
+                  
         else:
             return jsonify({ 'error': 'Invalid action' }), 400
 
