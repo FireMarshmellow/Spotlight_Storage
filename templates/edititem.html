@@ -11,7 +11,8 @@
 <body class="bg-gray-100 font-sans leading-normal tracking-normal">
     <div class="container mx-auto mt-8">
         <div class="sticky top-0 z-10 w-full bg-slate-100 py-1">
-            <h1 class="text-4xl text-center font-bold mb-8">M.I.M.O.S.A V2.1</h1>
+            <h1 class="text-4xl text-center font-bold mb-1">M.I.M.O.S.A V2.1</h1>
+            <h3 id="mode" class="text-2xl text-center font-bold mb-4"></h3>
         </div>
         <div class="flex flex-col items-center my-5 mx-auto">
             <div id="form-container" class="w-full md:w-2/3 lg:w-1/2">
@@ -46,12 +47,44 @@
                         <input type="text" id="ip" name="ip" required placeholder="format: 192.168.1.123"
                             class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
                     </div>
-                    <input type="submit" value="Add"
+                    <input type="submit" value="Save"
                         class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">
                 </form>
             </div>
             <script>
                 const form = document.getElementById("add-form");
+                const mode = document.getElementById("mode");
+                let id = null; // if null: Creating | else: Editing
+
+
+                // Decide if Creating or Editing
+                const urlParams = new URLSearchParams(window.location.search);
+                if (urlParams.has('itemid')) {
+                    id = urlParams.get('itemid')
+                    mode.innerText = "Editing " + id;
+                    fillForm();
+                } else {
+                    mode.innerText = "Creating";
+                }
+
+                // Fill form with Old Data when Editing
+                function fillForm() {
+                    fetch("/api/items/" + id)
+                        .then((response) => response.json())
+                        .then((data) => {
+                            document.getElementById("name").value = data.name;
+                            document.getElementById("link").value = data.link;
+                            document.getElementById("image").value = data.image;
+                            document.getElementById("position").value = data.position;
+                            document.getElementById("quantity").value = data.quantity;
+                            document.getElementById("ip").value = data.ip;
+                        })
+                        .catch((error) => console.error(error));
+                }
+
+
+
+
 
                 // Add item to list
                 function addItem(event) {
@@ -66,16 +99,34 @@
 
                     const item = { name, link, image, position, quantity, ip };
 
-                    fetch("/api/items", {
-                        method: "POST",
-                        headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify(item),
-                    })
-                        .then((response) => response.json())
-                        .then((data) => {
-                            window.location.href = "/";
+                    if (id == null) {
+                        fetch("/api/items", {
+                            method: "POST",
+                            headers: { "Content-Type": "application/json" },
+                            body: JSON.stringify(item),
                         })
-                        .catch((error) => console.error(error));
+                            .then((response) => response.json())
+                            .then((data) => {
+                                window.location.href = "/";
+                            })
+                            .catch((error) => console.error(error));
+                    } else {
+                        const updatedItem = { ...item, name, link, image, position, quantity, ip };
+
+                        fetch("/api/items/" + id, {
+                            method: "PUT",
+                            headers: { "Content-Type": "application/json" },
+                            body: JSON.stringify(updatedItem),
+                        })
+                            .then(() => {
+                                window.location.href = "/";
+                            })
+                            .catch((error) => console.error(error));
+                    }
+
+
+
+
                 }
 
                 form.addEventListener("submit", addItem);

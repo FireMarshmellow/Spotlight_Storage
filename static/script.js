@@ -35,30 +35,6 @@ function createDeleteButton(item) {
   return deleteBtn;
 }
 
-// Edit item
-function editItem(item) {
-  const name = prompt("Enter a new name:", item.name) ?? item.name;
-  const link = prompt("Enter a new link:", item.link) ?? item.link;
-  const image = prompt("Enter a new image URL:", item.image) ?? item.image;
-  const position = prompt("Enter a new position:", item.position) ?? item.position;
-  const quantity = prompt("Enter a new quantity:", item.quantity) ?? item.quantity;
-  const ip = prompt("Enter a new quantity:", item.ip) ?? item.ip;
-
-  const updatedItem = { ...item, name, link, image, position, quantity, ip };
-
-  fetch(`/api/items/${item.id}`, {
-    method: "PUT",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(updatedItem),
-  })
-    .then(() => {
-      const li = itemList.querySelector(`li[data-id="${item.id}"]`);
-      const updatedLi = createItemElement(updatedItem);
-      itemList.replaceChild(updatedLi, li);
-    })
-    .catch((error) => console.error(error));
-}
-
 // Create edit button
 function createEditButton(item) {
   const editBtn = document.createElement("button");
@@ -75,7 +51,7 @@ function createEditButton(item) {
     "items-center",
     "mx-auto"
   );
-  editBtn.addEventListener("click", () => editItem(item));
+  editBtn.addEventListener("click", () => window.location.href = "/edititem?itemid=" + item.id);
   return editBtn;
 }
 
