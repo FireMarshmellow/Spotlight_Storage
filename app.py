@@ -13,6 +13,10 @@ app.config['JSON_SORT_KEYS'] = False
 def index():
     return render_template('index.html')
 
+@app.route('/edititem')
+def edititem():
+    return render_template('edititem.html')
+
 # Route to handle GET and POST requests for items
 @app.route('/api/items', methods=['GET', 'POST'])
 def items():

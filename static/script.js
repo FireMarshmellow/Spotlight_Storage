@@ -1,33 +1,4 @@
-const form = document.getElementById("add-form");
 const itemList = document.getElementById("item-list");
-
-// Add item to list
-function addItem(event) {
-  event.preventDefault();
-
-  const name = document.getElementById("name").value;
-  const link = document.getElementById("link").value;
-  const image = document.getElementById("image").value;
-  const position = document.getElementById("position").value;
-  const quantity = document.getElementById("quantity").value;
-  const ip = document.getElementById("ip").value;
-
-  const item = { name, link, image, position, quantity, ip };
-
-  fetch("/api/items", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(item),
-  })
-    .then((response) => response.json())
-    .then((data) => {
-      const li = createItemElement(data);
-      itemList.appendChild(li);
-      form.reset();
-      toggleAddForm();
-    })
-    .catch((error) => console.error(error));
-}
 
 // Delete item
 function deleteItem(item) {
@@ -349,20 +320,4 @@ function loadItems() {
     .catch((error) => console.error(error));
 }
 
-form.addEventListener("submit", addItem);
 loadItems();
-
-function toggleAddForm() {
-  const btn = document.getElementById("btn-add");
-  const container = document.getElementById("form-container");
-
-  if (container.style.display === "block") {
-    container.style.display = "none";
-    btn.innerHTML = "Add item";
-  } else {
-    container.style.display = "block";
-    btn.innerHTML = "Close";
-  }
-}
-
-document.getElementById("btn-add").addEventListener("click", toggleAddForm);
