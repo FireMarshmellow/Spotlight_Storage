@@ -60,14 +60,16 @@
                 // Decide if Creating or Editing
                 const urlParams = new URLSearchParams(window.location.search);
                 if (urlParams.has('itemid')) {
+                    document.title += " - Editing";
                     id = urlParams.get('itemid')
                     mode.innerText = "Editing " + id;
                     fillForm();
                 } else {
+                    document.title += " - Createing";
                     mode.innerText = "Creating";
                 }
 
-                // Fill form with Old Data when Editing
+                // Fill form with existing data when editing
                 function fillForm() {
                     fetch("/api/items/" + id)
                         .then((response) => response.json())
@@ -81,10 +83,6 @@
                         })
                         .catch((error) => console.error(error));
                 }
-
-
-
-
 
                 // Add item to list
                 function addItem(event) {
@@ -124,28 +122,9 @@
                             .catch((error) => console.error(error));
                     }
 
-
-
-
                 }
 
                 form.addEventListener("submit", addItem);
-
-                function toggleAddForm() {
-                    const btn = document.getElementById("btn-add");
-                    const container = document.getElementById("form-container");
-
-                    if (container.style.display === "block") {
-                        container.style.display = "none";
-                        btn.innerHTML = "Add item";
-                    } else {
-                        container.style.display = "block";
-                        btn.innerHTML = "Close";
-                    }
-                }
-
-                // document.getElementById("btn-add").addEventListener("click", toggleAddForm);
-
             </script>
 </body>
 
