@@ -1,5 +1,5 @@
 # Importing necessary modules and packages
-from flask import Flask, render_template, jsonify, request
+from flask import Flask, render_template, jsonify, request, send_from_directory
 import db
 import requests
 import time
@@ -7,11 +7,21 @@ import time
 # Creating a Flask application instance
 app = Flask(__name__)
 app.config['JSON_SORT_KEYS'] = False
-    
+
+# Route to Favicon
+@app.route('/favicon.ico')
+def favicon():
+    return send_from_directory(app.root_path, 'favicon.ico', mimetype='image/vnd.microsoft.icon')
+
 # Route to the home page of the web application
 @app.route('/')
 def index():
     return render_template('index.html')
+
+# Route to Create/Edit page
+@app.route('/edititem')
+def edititem():
+    return render_template('edititem.html')
 
 # Route to handle GET and POST requests for items
 @app.route('/api/items', methods=['GET', 'POST'])

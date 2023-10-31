@@ -1,33 +1,4 @@
-const form = document.getElementById("add-form");
 const itemList = document.getElementById("item-list");
-
-// Add item to list
-function addItem(event) {
-  event.preventDefault();
-
-  const name = document.getElementById("name").value;
-  const link = document.getElementById("link").value;
-  const image = document.getElementById("image").value;
-  const position = document.getElementById("position").value;
-  const quantity = document.getElementById("quantity").value;
-  const ip = document.getElementById("ip").value;
-
-  const item = { name, link, image, position, quantity, ip };
-
-  fetch("/api/items", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(item),
-  })
-    .then((response) => response.json())
-    .then((data) => {
-      const li = createItemElement(data);
-      itemList.appendChild(li);
-      form.reset();
-      toggleAddForm();
-    })
-    .catch((error) => console.error(error));
-}
 
 // Delete item
 function deleteItem(item) {
@@ -64,30 +35,6 @@ function createDeleteButton(item) {
   return deleteBtn;
 }
 
-// Edit item
-function editItem(item) {
-  const name = prompt("Enter a new name:", item.name) ?? item.name;
-  const link = prompt("Enter a new link:", item.link) ?? item.link;
-  const image = prompt("Enter a new image URL:", item.image) ?? item.image;
-  const position = prompt("Enter a new position:", item.position) ?? item.position;
-  const quantity = prompt("Enter a new quantity:", item.quantity) ?? item.quantity;
-  const ip = prompt("Enter a new quantity:", item.ip) ?? item.ip;
-
-  const updatedItem = { ...item, name, link, image, position, quantity, ip };
-
-  fetch(`/api/items/${item.id}`, {
-    method: "PUT",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(updatedItem),
-  })
-    .then(() => {
-      const li = itemList.querySelector(`li[data-id="${item.id}"]`);
-      const updatedLi = createItemElement(updatedItem);
-      itemList.replaceChild(updatedLi, li);
-    })
-    .catch((error) => console.error(error));
-}
-
 // Create edit button
 function createEditButton(item) {
   const editBtn = document.createElement("button");
@@ -104,7 +51,7 @@ function createEditButton(item) {
     "items-center",
     "mx-auto"
   );
-  editBtn.addEventListener("click", () => editItem(item));
+  editBtn.addEventListener("click", () => window.location.href = "/edititem?itemid=" + item.id);
   return editBtn;
 }
 
@@ -349,20 +296,4 @@ function loadItems() {
     .catch((error) => console.error(error));
 }
 
-form.addEventListener("submit", addItem);
 loadItems();
-
-function toggleAddForm() {
-  const btn = document.getElementById("btn-add");
-  const container = document.getElementById("form-container");
-
-  if (container.style.display === "block") {
-    container.style.display = "none";
-    btn.innerHTML = "Add item";
-  } else {
-    container.style.display = "block";
-    btn.innerHTML = "Close";
-  }
-}
-
-document.getElementById("btn-add").addEventListener("click", toggleAddForm);
