@@ -10,19 +10,25 @@
 
 <body class="bg-gray-100 font-sans leading-normal tracking-normal">
     <div class="container mx-auto mt-8">
-        <div class="sticky top-0 z-10 w-full bg-slate-100 py-1">
-            <h1 class="text-4xl text-center font-bold mb-8">M.I.M.O.S.A V2.1</h1>
-        </div>
-        <div class="flex flex-col items-center my-5 mx-auto">
-            <a href="/edititem" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mb-2">Add Item</a>
+        <header class="sticky top-0 z-10 w-full bg-slate-100 py-1">
+            <h1 class="text-4xl text-center font-bold mb-8">M.I.M.O.S.A</h1>
+        </header>
+        <div class="flex items-center justify-center my-5 mx-auto space-x-4">
             <input type="text" id="search" placeholder="Search items..."
                 class="shadow appearance-none border rounded w-2/3 py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+            <a href="/edititem" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-6 rounded" aria-label="Add new item">Add Item</a>
         </div>
         <ul id="item-list"
             class="relative grid sm:grid-cols-1 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 max-w-5xl mx-auto w-11/12 md:5/6 lg:full">
         </ul>
     </div>
     <script src="{{ url_for('static', filename='script.js') }}"></script>
+    <br>
+    <br>
+    <footer class="sticky top-0 z-10 w-full bg-slate-100 py-1">
+        <h1 class="text-3xl text-center font-bold mb-8">Special thanks to my Github Corporation:</h1>
+        <h3 class="text-xl text-center mb-8">cloudmaking, Heiniusw, nikpcenicni, kassner, ariasairforce, zorarkdouble8, Callsign-Carrot</h3>
+    </footer>
 </body>
 
 </html>
