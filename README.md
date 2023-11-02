@@ -26,7 +26,7 @@ LEDs : https://amzn.to/3VcoaIY
 
 1. Clone the repo
 2. pip install -r requirements.txt
-3. If you already have a database, Move it to the main directory.
+3. If you already have a database, Move it to the main directory. And make sure it's backed up
 4. Run app.py Or .exe
 
 ## dependencies:
