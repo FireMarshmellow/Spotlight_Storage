@@ -84,21 +84,28 @@ def item(id):
             return jsonify({ 'error': 'Invalid action' }), 400
 
 
-def send_request(target_ip, start_num, stop_num, color):
-    url = f"http://{target_ip}/json/state" # construct URL using the target IP address
-    state = {"seg": [{"id": 0, "start": start_num, "stop": stop_num, "col": [color]}]}
+def send_request(target_ip, segments):
+    url = f"http://{target_ip}/json/state"
+    state = {"seg": segments}
     response = requests.post(url, json=state)
 
-def light(position, ip):
-    start_num = int(position) - 1
-    send_request(ip, start_num, int(position), [255, 255, 255]) # Convert color value to [0, 0, 0, 255] to only use white part of LED (RGBW LEDs only).
-    time.sleep(5) # Change how long the LED stays on for.
-    send_request(ip, 0, 60, [0, 255, 0])
+def light(positions, ip):
+    segments = [{"id": 1, "start": 0, "stop": 1000, "col": [0, 0, 0]}]
+    delSegments = [{"id": 1, "start": 0, "stop": 0, "col": [0, 0, 0]}]
+    for i, pos in enumerate(positions):
+        start_num = pos - 1
+        stop_num = pos
+        segments.append({"id": i+2, "start": start_num, "stop": stop_num, "col": [255, 255, 255]})
+        delSegments.append({"id": i+2, "start": start_num, "stop": 0, "col": [0, 0, 0]})
+    
+    send_request(ip, segments)
+    time.sleep(5)
+    send_request(ip, delSegments)
 
 def enumerate_lights(lights_list):
-    for ip, pos in lights_list.items():
-        print("Pos: " + pos + " IP: " + ip)
-        light(pos, ip)
+    for ip, positions in lights_list.items():
+        print("Positions: " + str(positions) + " IP: " + ip)
+        light(positions, ip)
 
 
 # Running the Flask application
