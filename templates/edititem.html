@@ -52,6 +52,31 @@
                 </form>
             </div>
             <script>
+                const highlightLED = () => {
+                    // @TODO show loading
+                    const ip = document.getElementById('ip').value;
+                    const position = document.getElementById('position').value;
+
+                    fetch('/api/locate', {
+                        method: "POST",
+                        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+                        body: new URLSearchParams({ ip, position }),
+                    })
+                        .then((result) => {
+                            // @TODO clear loading
+                            console.log(result);
+                        })
+                        .catch((error) => {
+                            // @TODO clear loading
+                            console.error(error);
+                        })
+                    ;
+                };
+
+                // highlight position after editing the form
+                document.getElementById('position').addEventListener('change', highlightLED);
+                document.getElementById('ip').addEventListener('change', highlightLED);
+
                 const form = document.getElementById("add-form");
                 const mode = document.getElementById("mode");
                 let id = null; // if null: Creating | else: Editing

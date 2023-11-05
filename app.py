@@ -96,6 +96,14 @@ def lights(position, pi):
     time.sleep(5) # Change how long the LED stays on for.
     send_request(pi, 0, 60, [0, 255, 0])
 
+@app.route('/api/locate', methods=['POST'])
+def locate():
+    # TODO: validate inputs
+    ip = request.form.get('ip')
+    position = int(request.form.get('position'))
+    send_request(ip, (position - 1), position, [255, 255, 255])
+    return jsonify({ 'success': True })
+
 # Running the Flask application
 if __name__ == '__main__':
     app.run(host="0.0.0.0", debug=True)
