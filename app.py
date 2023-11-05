@@ -3,6 +3,7 @@ from flask import Flask, render_template, jsonify, request, send_from_directory
 import db
 import requests
 import time
+import json
 
 # Creating a Flask application instance
 app = Flask(__name__)
@@ -58,9 +59,12 @@ def item(id):
     elif request.method == 'POST':
         # If the request method is POST, check if the request is for locating the item, and send the position to a WLED API
         if request.form.get('action') == 'locate':
-            lights(item['position'], item['ip'])
-            print(f"Position of {item['name']}: {item['position']}: {item['ip']}")
-            return jsonify({ 'success': True })
+            try:
+                enumerate_lights(json.loads(item['lights']))
+                print(f"Lights of {item['name']}: {['lights']}")
+                return jsonify({ 'success': True })
+            except:
+                return jsonify({ 'success': False })
         elif request.form.get('action') == 'addQuantity': #incrementing the quantity by 1 instead of append a digit next to the current quantity
             item['quantity'] = int(item['quantity']) + 1
             db.update_item(id, item)
@@ -79,22 +83,23 @@ def item(id):
         else:
             return jsonify({ 'error': 'Invalid action' }), 400
 
-# Route to handle DELETE requests for an individual item
-@app.route('/api/items/<id>', methods=['DELETE'])
-def delete_item(id):
-    db.delete_item(id)
-    return jsonify({ 'success': True })
 
 def send_request(target_ip, start_num, stop_num, color):
     url = f"http://{target_ip}/json/state" # construct URL using the target IP address
     state = {"seg": [{"id": 0, "start": start_num, "stop": stop_num, "col": [color]}]}
     response = requests.post(url, json=state)
 
-def lights(position, pi):
+def light(position, ip):
     start_num = int(position) - 1
-    send_request(pi, start_num, int(position), [255, 255, 255]) # Convert color value to [0, 0, 0, 255] to only use white part of LED (RGBW LEDs only).
+    send_request(ip, start_num, int(position), [255, 255, 255]) # Convert color value to [0, 0, 0, 255] to only use white part of LED (RGBW LEDs only).
     time.sleep(5) # Change how long the LED stays on for.
-    send_request(pi, 0, 60, [0, 255, 0])
+    send_request(ip, 0, 60, [0, 255, 0])
+
+def enumerate_lights(lights_list):
+    for ip, pos in lights_list.items():
+        print("Pos: " + pos + " IP: " + ip)
+        light(pos, ip)
+
 
 # Running the Flask application
 if __name__ == '__main__':

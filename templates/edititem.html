@@ -33,18 +33,13 @@
                             class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
                     </div>
                     <div class="mb-4">
-                        <label for="position" class="block text-gray-700 font-bold mb-2">Position:</label>
-                        <input type="number" id="position" name="position" required
-                            class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
-                    </div>
-                    <div class="mb-4">
                         <label for="quantity" class="block text-gray-700 font-bold mb-2">Quantity:</label>
                         <input type="number" id="quantity" name="quantity" required
                             class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
                     </div>
                     <div class="mb-4">
-                        <label for="ip" class="block text-gray-700 font-bold mb-2">Wled IP Address:</label>
-                        <input type="text" id="ip" name="ip" required placeholder="format: 192.168.1.123"
+                        <label for="lighs" class="block text-gray-700 font-bold mb-2">Wled Lights (format: {"1.1.1.1": "1", "2.2.2.2": "2"}):</label>
+                        <input type="text" id="lights" name="lights" required placeholder='{"1.1.1.1": "1", "2.2.2.2": "2"}'
                             class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
                     </div>
                     <input type="submit" value="Save"
@@ -77,9 +72,8 @@
                             document.getElementById("name").value = data.name;
                             document.getElementById("link").value = data.link;
                             document.getElementById("image").value = data.image;
-                            document.getElementById("position").value = data.position;
                             document.getElementById("quantity").value = data.quantity;
-                            document.getElementById("ip").value = data.ip;
+                            document.getElementById("lights").value = data.lights;
                         })
                         .catch((error) => console.error(error));
                 }
@@ -91,11 +85,10 @@
                     const name = document.getElementById("name").value;
                     const link = document.getElementById("link").value;
                     const image = document.getElementById("image").value;
-                    const position = document.getElementById("position").value;
                     const quantity = document.getElementById("quantity").value;
-                    const ip = document.getElementById("ip").value;
+                    const lights = document.getElementById("lights").value;
 
-                    const item = { name, link, image, position, quantity, ip };
+                    const item = { name, link, image, quantity, lights };
 
                     if (id == null) {
                         fetch("/api/items", {
@@ -109,7 +102,7 @@
                             })
                             .catch((error) => console.error(error));
                     } else {
-                        const updatedItem = { ...item, name, link, image, position, quantity, ip };
+                        const updatedItem = { ...item, name, link, image, quantity, lights };
 
                         fetch("/api/items/" + id, {
                             method: "PUT",

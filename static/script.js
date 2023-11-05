@@ -57,7 +57,7 @@ function createEditButton(item) {
 
 // Locate item
 function locateItem(item) {
-  console.log(`Position of ${item.name}: ${item.position}`);
+  console.log(`Lights: ${item.lights}`);
 }
 
 // Create locate button
@@ -241,12 +241,12 @@ function createItemElement(item) {
   p.appendChild(a);
   div.appendChild(p);
 
-  const span = document.createElement("span");
-  const positionLabel = document.createElement("strong");
-  positionLabel.innerText = "Position: ";
-  span.appendChild(positionLabel);
-  span.append(item.position);
-  div.appendChild(span);
+  // const span = document.createElement("span");
+  // const positionLabel = document.createElement("strong");
+  // positionLabel.innerText = "Position: ";
+  // span.appendChild(positionLabel);
+  // span.append(item.position);
+  // div.appendChild(span);
 
   const innerWrapper = document.createElement("div");
   innerWrapper.classList.add("grid", "grid-cols-3", "gap-2");

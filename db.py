@@ -10,14 +10,13 @@ def get_db():
 
     # Create the items table if it does not exist
     conn.execute('''
-        CREATE TABLE IF NOT EXISTS items (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
+        CREATE TABLE IF NOT EXISTS items (''' + # items2 because i do not want to destroy old databases, will need to create a convert function 
+         '''id INTEGER PRIMARY KEY AUTOINCREMENT,
             name TEXT NOT NULL,
             link TEXT NOT NULL,
             image TEXT,
-            position INTEGER,
             quantity INTEGER,
-            ip TEXT
+            lights TEXT
         )
     ''')
     conn.commit()
@@ -35,7 +34,7 @@ def read_items():
 def write_item(item):
     conn = get_db()
     cursor = conn.cursor()
-    cursor.execute('INSERT INTO items (name, link, image, position, quantity, ip) VALUES (?, ?, ?, ?, ?, ?)', [item['name'], item['link'], item['image'], item['position'], item['quantity'], item['ip']])
+    cursor.execute('INSERT INTO items (name, link, image, quantity, lights) VALUES (?, ?, ?, ?, ?, ?)', [item['name'], item['link'], item['image'], item['quantity'], item['lights']])
     lastId = cursor.lastrowid
     conn.commit()
     conn.close()
@@ -55,6 +54,6 @@ def get_item(id):
 
 def update_item(id, data):
     conn = get_db()
-    conn.execute('UPDATE items SET name = ?, link = ?, image = ?, position = ?, quantity = ?, ip = ? WHERE id = ?', [data['name'], data['link'], data['image'], data['position'], data['quantity'], data['ip'], id])
+    conn.execute('UPDATE items SET name = ?, link = ?, image = ?, quantity = ?, lights = ? WHERE id = ?', [data['name'], data['link'], data['image'], data['quantity'], data['lights'], id])
     conn.commit()
     conn.close()
