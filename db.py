@@ -34,7 +34,7 @@ def read_items():
 def write_item(item):
     conn = get_db()
     cursor = conn.cursor()
-    cursor.execute('INSERT INTO items (name, link, image, quantity, lights) VALUES (?, ?, ?, ?, ?, ?)', [item['name'], item['link'], item['image'], item['quantity'], item['lights']])
+    cursor.execute('INSERT INTO items (name, link, image, quantity, lights) VALUES (?, ?, ?, ?, ?)', [item['name'], item['link'], item['image'], item['quantity'], item['lights']])
     lastId = cursor.lastrowid
     conn.commit()
     conn.close()

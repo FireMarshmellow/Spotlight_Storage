@@ -14,6 +14,11 @@ app.config['JSON_SORT_KEYS'] = False
 def favicon():
     return send_from_directory(app.root_path, 'favicon.ico', mimetype='image/vnd.microsoft.icon')
 
+# Route to Local Images
+@app.route('/images/<path:path>')
+def send_report(path):
+    return send_from_directory('images', path)
+
 # Route to the home page of the web application
 @app.route('/')
 def index():
