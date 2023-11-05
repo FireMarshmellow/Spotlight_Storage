@@ -85,7 +85,6 @@
             <h1 class="menu-title">LED Control</h1>
             <ul>
                 <li>
-
                     <button id="on-button" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-8 rounded focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500", style="margin-bottom: 10px;margin-left: 10px;">
                     On
                     </button>
@@ -106,7 +105,12 @@
                     <div class="w-full" style="margin-left: 10px; padding-right: 10px;">
                         <input type="range" id="brightness" name="brightness" min="0" max="100" step="1" class="w-full">
                     </div>
-                    <output for="brightness" id="brightness-output" class="text-gray-700 text-sm mt-2" style="margin-left: 10px;">50</output>
+                    <output for="brightness" id="brightness-output" class="text-gray-700 text-sm mt-2" style="margin-left: 10px;margin-bottom: 10px;">50</output>
+                </li>
+                <li>
+                    <button id="apply-brightness" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-8 rounded focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500", style="margin-bottom: 10px;margin-left: 10px;">
+                        Apply
+                    </button>
                 </li>
 
 

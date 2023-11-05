@@ -74,7 +74,14 @@ function addItem(event) {
       .catch((error) => console.error(error));
 }
 
-
+function resetAddForm(){
+  document.getElementById("name").value = "";
+  document.getElementById("link").value = "";
+  document.getElementById("image").value = "";
+  document.getElementById("position").value = "";
+  document.getElementById("quantity").value = "";
+  populateEspDropdown();
+}
 
 
 function toggleAddForm() {
@@ -349,7 +356,7 @@ function createItemElement(item) {
   const a = document.createElement("a");
   a.href = item.link;
   a.target = "_blank";
-  a.innerText = "Nachschub besorgen";
+  a.innerText = "Buy more";
   a.classList.add("hover:font-bold", "hover:underline", "hover:text-blue-700"); // Add hover styles
   p.appendChild(a);
   div.appendChild(p);
@@ -414,8 +421,7 @@ loadItems();
 
 document.getElementById("save-item").addEventListener("click", addItem);
 document.getElementById("btn-add").addEventListener("click", toggleAddForm);
-document.getElementById("btn-add").addEventListener("click", populateEspDropdown);
-//Function to Ad ESPs
+document.getElementById("btn-add").addEventListener("click", resetAddForm);
 // Function to add an ESP item
 
 function populateEspDropdown() {

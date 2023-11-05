@@ -169,7 +169,7 @@ def send_request(target_ip, data):
 def lights(position, ip, empty=False):
     set_global_settings(ip)
     set_global_brightness()
-    start_num= round(int((position - 1) * app.segment_size))
+    start_num = round((int(position) - 1) * app.segment_size)
     end_num = round(start_num + app.segment_size)
     if empty:
         # Turn LEDs red
@@ -228,6 +228,16 @@ def turn_led_party():
             set_global_settings(ip)
             party_data = {"on":True,"bri":round(255*app.brightness),"transition":5,"mainseg":0,"seg":[{"id":0,"start":0,"stop":app.led_count,"grp":1,"spc":0,"of":0,"on":True,"frz":False,"bri":255,"cct":127,"set":0,"col":[[255,255,255],[0,0,0],[0,0,0]],"fx":9,"sx":128,"ix":128,"pal":0,"c1":128,"c2":128,"c3":16,"sel":True,"rev":False,"mi":False,"o1":False,"o2":False,"o3":False,"si":0,"m12":0},{"stop":0},{"stop":0},{"stop":0},{"stop":0},{"stop":0},{"stop":0},{"stop":0},{"stop":0},{"stop":0},{"stop":0},{"stop":0},{"stop":0},{"stop":0},{"stop":0},{"stop":0}]}
             send_request(ip, party_data)
+        return jsonify()
+@app.route('/led/brightness', methods=['GET'])
+def apply_brightness():
+    set_global_brightness()
+    if request.method == 'GET':
+        ips = get_unique_ips_from_database()
+        for ip in ips:
+            set_global_settings(ip)
+            brightness_data = {"on":True,"bri":round(255*app.brightness),"transition":5}
+            send_request(ip, brightness_data)
         return jsonify()
 if __name__ == '__main__':
     app.run(host="0.0.0.0", debug=True)

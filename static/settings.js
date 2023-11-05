@@ -1,4 +1,7 @@
-
+const onButton = document.getElementById('on-button');
+const offButton = document.getElementById('off-button');
+const partyButton = document.getElementById('party-button');
+const brightnessButton = document.getElementById('apply-brightness');
 // Function to update brightness output
 function updateBrightnessOutput() {
     const brightnessSlider = document.getElementById("brightness");
@@ -7,6 +10,21 @@ function updateBrightnessOutput() {
     addSettings(event);
 
 }
+function applyBrightness() {
+    // Send a POST request to update the LED brightness
+    fetch("/led/brightness", { })
+        .then((response) => {
+            if (response.ok) {
+                // Successfully updated brightness
+                console.log("Brightness updated successfully");
+            } else {
+                // Handle error cases here
+                console.error("Failed to update brightness");
+            }
+        })
+        .catch((error) => console.error(error));
+}
+
 function addSettings(event) {
     event.preventDefault();
     const brightness = document.getElementById("brightness").value;
@@ -58,35 +76,12 @@ function toggleSideMenu() {
 }
 
 // Add event listeners to the "On" and "Off" buttons
-const onButton = document.getElementById('on-button');
-const offButton = document.getElementById('off-button');
-const partyButton = document.getElementById('party-button');
+
 
 onButton.addEventListener('click', () => {sendLedRequest('on')});
 offButton.addEventListener('click', () => {sendLedRequest('off')});
 partyButton.addEventListener('click', () => {sendLedRequest('party')});
+brightnessButton.addEventListener("click", applyBrightness)
 document.getElementById("brightness").addEventListener("input", function (event) {updateBrightnessOutput();});
 loadSettings();
 
-
-// Function to open the settings modal
-/*function openSettingsModal() {
-    const settingsModal = document.getElementById("settings-modal");
-    settingsModal.classList.remove("hidden");
-}
-
-// Function to close the settings modal
-function closeSettingsModal() {
-    const settingsModal = document.getElementById("settings-modal");
-    settingsModal.classList.add("hidden");
-}
-// Attach event listeners to the settings button and cancel button
-document.getElementById("settings-button").addEventListener("click", openSettingsModal);
-document.getElementById("settings-button").addEventListener("click", loadSettings);
-document.getElementById("settings-button").addEventListener("click", updateBrightnessOutput);
-document.getElementById("close-settings").addEventListener("click", closeSettingsModal);
-// Attach an event listener to the settings form for saving settings
-document.getElementById("settings-form").addEventListener("submit", function (event) {
-    addSettings(event);
-    closeSettingsModal();
-}); */
