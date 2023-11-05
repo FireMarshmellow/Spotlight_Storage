@@ -1,5 +1,8 @@
 # MIMOSA - short for "Mellow_Labs Inventory Management and Organization System Apparatus". Just like a refreshing mimosa, this system will make your life brighter and more organized!
 
+## ❗❗WARNING❗❗ This Update might destroy Existing Databases!!!
+Please update your database using dbupdate.py after making a backup!
+
 ## Videos
 
 Main Video:
