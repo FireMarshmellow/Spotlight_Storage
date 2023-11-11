@@ -2,7 +2,6 @@ import sqlite3
 
 # Defining the path of the SQLite database file
 DATABASE = 'data.db'
-DATABASE_SETTING= 'settings.db'
 DATABASE_ESP= 'esp.db'
 # Function to connect to the database
 def get_db():
@@ -60,39 +59,6 @@ def delete_item(id):
     conn.close()
 
 
-def get_settingsdb():
-    conn = sqlite3.connect(DATABASE_SETTING)
-    conn.row_factory = sqlite3.Row
-    # Create the settings table if it does not exist
-    conn.execute('''
-        CREATE TABLE IF NOT EXISTS settings (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            brightness INTEGER
-        )
-    ''')
-
-    conn.commit()
-    return conn
-
-# Function to read settings from the database
-def read_settings():
-    conn = get_settingsdb()
-    settings = conn.execute('SELECT * FROM settings').fetchone()
-    conn.close()
-    if settings is None:
-        return {}
-    else:
-        return dict(settings)
-
-# Function to update settings in the database
-def update_settings(settings):
-    conn = get_settingsdb()
-    cursor = conn.cursor()
-    cursor.execute('DELETE FROM settings')  # Clear existing settings
-    cursor.execute('INSERT INTO settings (brightness) VALUES (?)', [settings['brightness']])
-    conn.commit()
-    conn.close()
-
 # Function to write data to the database
 
 def get_espdb():
@@ -103,8 +69,7 @@ def get_espdb():
         CREATE TABLE IF NOT EXISTS esp (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             esp_ip TEXT,
-            led_count INTEGER,
-            segment_size INTEGER
+            led_count INTEGER
         )
     ''')
 
@@ -120,8 +85,8 @@ def write_esp_settings(esp_settings):
     conn = get_espdb()
     cursor = conn.cursor()
     try:
-        cursor.execute('INSERT INTO esp (esp_ip, led_count, segment_size) VALUES (?, ?, ?)',
-                       [esp_settings['esp_ip'], esp_settings['led_count'], esp_settings['segment_size']])
+        cursor.execute('INSERT INTO esp (esp_ip, led_count) VALUES (?, ?)',
+                       [esp_settings['esp_ip'], esp_settings['led_count']])
         lastId = cursor.lastrowid
         conn.commit()
     except sqlite3.Error as e:
@@ -131,12 +96,13 @@ def write_esp_settings(esp_settings):
         conn.close()
     return lastId
 
+
 # Function to update ESP settings in the database
 def update_esp_settings(id, esp_settings):
     conn = get_espdb()
     try:
-        conn.execute('UPDATE esp SET esp_ip = ?, led_count = ?, segment_size = ? WHERE id = ?',
-                     [esp_settings['esp_ip'], esp_settings['led_count'], esp_settings['segment_size'], id])
+        conn.execute('UPDATE esp SET esp_ip = ?, led_count = ? WHERE id = ?',
+             [esp_settings['esp_ip'], esp_settings['led_count'], id])
         conn.commit()
     except sqlite3.Error as e:
         conn.rollback()

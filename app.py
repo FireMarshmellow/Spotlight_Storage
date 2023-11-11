@@ -10,9 +10,7 @@ app.config['JSON_SORT_KEYS'] = False
 # Global variable to store the timer start time
 app.timer_start_time = time.time()
 # Define default values for settings
-app.segment_size = 5
-app.led_count = 300
-app.brightness = 0.5
+
 def get_unique_ips_from_database():
     # Get all items from the database
     items = db.read_items()
@@ -27,33 +25,8 @@ def get_unique_ips_from_database():
     unique_ips_list = list(unique_ips)
 
     return unique_ips_list
-def set_global_brightness():
-    brightness = db.read_settings()
-    if brightness:
-        app.brightness = brightness['brightness']/100
-    else: app.brightness = 0.50
-def set_global_settings(target_ip):
-    esp_settings = db.get_esp_settings_by_ip(target_ip)
-    if esp_settings:
-        app.segment_size = esp_settings['segment_size']  # Set segment size from database
-        app.led_count = esp_settings['led_count']  # Set LED count from database
-    else:
-        # Handle the case where ESP settings are not found in the database
-        # You can set default values or raise an error as needed.
-        app.segment_size = 5
-        app.led_count = 300
 
 
-@app.route('/api/settings', methods=['GET', 'POST'])
-def settings():
-    if request.method == 'GET':
-        # If the request method is GET, read data from the database and return as JSON
-        settings = db.read_settings()
-        return jsonify(settings)
-    elif request.method == 'POST':
-        settings = request.get_json()
-        db.update_settings(settings)  # Update settings in the database
-        return jsonify({ 'success': True })
 # Route to the home page of the web application
 @app.route('/api/esp/', methods=['GET', 'POST'])
 def esps():
@@ -74,8 +47,8 @@ def get_esp_by_id(id):
             'id': esp_data[0],
             'esp_ip': esp_data[1],
             'led_count': esp_data[2],
-            'segment_size': esp_data[3]
         })
+    
 @app.route('/api/esp/<id>', methods=['PUT'])
 def update_esp_by_id(id):
     # Parse the JSON data from the request
@@ -163,72 +136,17 @@ def delete_item(id):
     db.delete_item(id)
     return jsonify({ 'success': True })
 
-def send_request(target_ip, data):
-    url = f"http://{target_ip}/json/state"
-    response = requests.post(url, json=data)
-def lights(position, ip, empty=False):
-    set_global_settings(ip)
-    set_global_brightness()
-    start_num= round(int((position - 1) * app.segment_size))
-    end_num = round(start_num + app.segment_size)
-    if empty:
-        # Turn LEDs red
-            pulsate_data = {"on":True,"bri":255,"transition":0,"mainseg":0,"seg":[{"id":0,"start":start_num,"stop":end_num,"grp":1,"spc":0,"of":0,"on":True,
-                    "frz":False,"bri":255,"cct":127,"set":0,"col":[[255*app.brightness,0,0],[0,0,0],[0,0,0]],
-                    "fx":2,"sx":200,"ix":200,"pal":0,"c1":128,"c2":128,"c3":16,"sel":True,
-                    "rev":False,"mi":False,"o1":False,"o2":False,"o3":False,"si":0,"m12":0},
-                    {"stop":0},{"stop":0},{"stop":0},{"stop":0},{"stop":0},{"stop":0},{"stop":0},
-                    {"stop":0},{"stop":0},{"stop":0},{"stop":0},{"stop":0},{"stop":0},{"stop":0},
-                    {"stop":0}]}
+def send_request(target_ip, start_num, stop_num, color):
+    url = f"http://{target_ip}/json/state" # construct URL using the target IP address
+    state = {"seg": [{"id": 0, "start": start_num, "stop": stop_num, "col": [color]}]}
+    response = requests.post(url, json=state)
 
 
-    else:
-        # Use green color
-            pulsate_data = {"on":True,"bri":255,"transition":0,"mainseg":0,"seg":[{"id":0,"start":start_num,"stop":end_num,"grp":1,"spc":0,"of":0,"on":True,
-                  "frz":False,"bri":255,"cct":127,"set":0,"col":[[0,255*app.brightness,0],[0,0,0],[0,0,0]],
-                 "fx":2,"sx":200,"ix":200,"pal":0,"c1":128,"c2":128,"c3":16,"sel":True,
-                 "rev":False,"mi":False,"o1":False,"o2":False,"o3":False,"si":0,"m12":0},
-                {"stop":0},{"stop":0},{"stop":0},{"stop":0},{"stop":0},{"stop":0},{"stop":0},
-                {"stop":0},{"stop":0},{"stop":0},{"stop":0},{"stop":0},{"stop":0},{"stop":0},
-                {"stop":0}]}
-    send_request(ip, pulsate_data)
+def lights(position, pi, empty=False):
+    start_num = int(position) - 1
+    send_request(pi, start_num, int(position), [255, 255, 255]) # Convert color value to [0, 0, 0, 255] to only use white part of LED (RGBW LEDs only).
+    time.sleep(5) # Change how long the LED stays on for.
+    send_request(pi, 0, 60, [0, 255, 0])
 
-
-# Route to turn the LED on
-@app.route('/led/on', methods=['GET'])
-def turn_led_on():
-    set_global_brightness()
-    if request.method == 'GET':
-        ips = get_unique_ips_from_database()
-        for ip in ips:
-            set_global_settings(ip)
-            on_data = {"on":True,"bri":255,"transition":0,"mainseg":0,"seg":[{"id":0,"start":0,"stop":app.led_count,"grp":1,"spc":0,"of":0,"on":True,"frz":False,"bri":255,"cct":127,"set":0,"col":[[255*app.brightness,255*app.brightness,255*app.brightness],[0,0,0],[0,0,0]],"fx":0,"sx":128,"ix":128,"pal":0,"c1":128,"c2":128,"c3":16,"sel":True,"rev":False,"mi":False,"o1":False,"o2":False,"o3":False,"si":0,"m12":0},{"stop":0},{"stop":0},{"stop":0},{"stop":0},{"stop":0},{"stop":0},{"stop":0},{"stop":0},{"stop":0},{"stop":0},{"stop":0},{"stop":0},{"stop":0},{"stop":0},{"stop":0}]}
-            send_request(ip, on_data)
-        return jsonify({ 'success': True})
-
-# Route to turn the LED off
-@app.route('/led/off', methods=['GET'])
-def turn_led_off():
-    set_global_brightness()
-
-    if request.method == 'GET':
-        ips = get_unique_ips_from_database()
-        for ip in ips:
-            set_global_settings(ip)
-            off_data = {"on":False,"bri":128,"transition":0,"mainseg":0,"seg":[{"id":0,"start":0,"stop":app.led_count,"grp":1}]}
-            send_request(ip, off_data)
-        return jsonify()
-# Route to turn the LED to Party
-@app.route('/led/party', methods=['GET'])
-def turn_led_party():
-    set_global_brightness()
-    if request.method == 'GET':
-        ips = get_unique_ips_from_database()
-        for ip in ips:
-            set_global_settings(ip)
-            party_data = {"on":True,"bri":round(255*app.brightness),"transition":5,"mainseg":0,"seg":[{"id":0,"start":0,"stop":app.led_count,"grp":1,"spc":0,"of":0,"on":True,"frz":False,"bri":255,"cct":127,"set":0,"col":[[255,255,255],[0,0,0],[0,0,0]],"fx":9,"sx":128,"ix":128,"pal":0,"c1":128,"c2":128,"c3":16,"sel":True,"rev":False,"mi":False,"o1":False,"o2":False,"o3":False,"si":0,"m12":0},{"stop":0},{"stop":0},{"stop":0},{"stop":0},{"stop":0},{"stop":0},{"stop":0},{"stop":0},{"stop":0},{"stop":0},{"stop":0},{"stop":0},{"stop":0},{"stop":0},{"stop":0}]}
-            send_request(ip, party_data)
-        return jsonify()
 if __name__ == '__main__':
     app.run(host="0.0.0.0", debug=True)
-    set_global_brightness()

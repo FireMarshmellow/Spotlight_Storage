@@ -13,109 +13,10 @@
     <div class="container mx-auto mt-8">
         <head>
             <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css">
-            <style>
-                /* Add your custom CSS for the side menu here */
-                .side-menu {
-                    width: 0;
-                    position: fixed;
-                    top: 0;
-                    left: 0;
-                    height: 100%;
-                    background-color: #cccccc;
-                    overflow-x: hidden;
-                    transition: 0.5s;
-                    padding-top: 60px;
-                    z-index: 1;
-                    box-shadow: 5px 0 10px rgba(0, 0, 0, 0.45); /* Add shadow to the side menu */
-                }
-
-                .side-menu a {
-                    padding: 8px 8px 8px 32px;
-                    text-decoration: none;
-                    font-size: 25px;
-                    color: #cccccc;
-                    display: block;
-                    transition: 0.1s;
-                }
-
-                .menu-button:hover {
-                    background-color: rgb(29 78 216);
-                }
-
-                .menu-button {
-                    position: absolute;
-                    top: 10px;
-                    left: 10px;
-                    z-index: 2;
-                    background-color: #3B82F6FF;
-                    color: white;
-                    padding: 10px 20px; /* Increase padding in the x-direction */
-                    border: none;
-                    cursor: pointer;
-                    border-radius: 10px;
-                    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Add shadow to the button */
-                    transition: background-color 0.1s, transform 0.1s;
-                }
-                .menu-title {
-                    margin-bottom: 10px; /* Add padding to the title */
-                    margin-left: 10px; /* Add padding to the title */
-                    margin-top: 5px;
-                    font-size: 25px;
-                    color: #333; /* Change title color */
-                }
-                @keyframes rainbow {
-                    0% { background-color: red; }
-                    14% { background-color: orange; }
-                    28% { background-color: yellow; }
-                    42% { background-color: green; }
-                    57% { background-color: blue; }
-                    71% { background-color: indigo; }
-                    85% { background-color: violet; }
-                    100% { background-color: red; }
-                }
-
-                #party-button:hover {
-                    animation: rainbow 4s linear infinite;
-                }
-
-            </style>
         </head>
         <body>
-        <div class="side-menu" id="mySideMenu">
-            <h1 class="menu-title">LED Control</h1>
-            <ul>
-                <li>
-
-                    <button id="on-button" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-8 rounded focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500", style="margin-bottom: 10px;margin-left: 10px;">
-                    On
-                    </button>
-                </li>
-                <li>
-                    <button id="off-button" class="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-8 rounded focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500", style="margin-bottom: 10px;margin-left: 10px;">
-                        Off
-                    </button>
-                </li>
-                <li>
-                    <button id="party-button" class="bg-gray-500 hover:bg-rainbow text-white font-bold py-2 px-8 rounded focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500" style="margin-bottom: 10px;margin-left: 10px;">
-                        Party-Mode
-                    </button>
-
-                </li>
-                <li>
-                    <label for="brightness" class="block text-gray-700 font-bold mb-2" style="margin-left: 10px;">Brightness:</label>
-                    <div class="w-full" style="margin-left: 10px; padding-right: 10px;">
-                        <input type="range" id="brightness" name="brightness" min="0" max="100" step="1" class="w-full">
-                    </div>
-                    <output for="brightness" id="brightness-output" class="text-gray-700 text-sm mt-2" style="margin-left: 10px;">50</output>
-                </li>
-
-
-            </ul>
-        </div>
-
-        <button class="menu-button" onclick="toggleSideMenu()">&#9776;</button>
         <div class="absolut top-10 z-10 w-full bg-slate-100 py-1">
-            <h1 class="text-4xl text-center font-bold mb-8">M.I.M.O.S.A V2.1</h1>
+            <h1 class="text-4xl text-center font-bold mb-8">M.I.M.O.S.A V3 WIP</h1>
         </div>
 
     <div class="flex flex-col items-center my-5 mx-auto">
@@ -168,7 +69,6 @@
                     <label for="select_esp" class="block text-gray-700 font-bold mb-2">Select ESP:</label>
                     <select id="select_esp" name="select_esp" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
                         <option value="add" selected>Add ESP</option>
-                        <!-- Add options for previously saved ESPs here -->
                     </select>
                 </div>
                 <div class="mb-4">
@@ -179,11 +79,6 @@
                 <div class="mb-4">
                     <label for="led_count" class="block text-gray-700 font-bold mb-2">LED Count / Controller:</label>
                     <input type="number" id="led_count" name="led_count" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
-                </div>
-                <!-- Add input fields for segment size and brightness here -->
-                <div class="mb-4">
-                    <label for="segment_size" class="block text-gray-700 font-bold mb-2">Segment Size:</label>
-                    <input type="number" id="segment_size" name="segment_size" placeholder="Numbers of LEDs per Row/Number of Compartments per Row" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
                 </div>
                 <div class="flex items-left my-5 mx-auto">
                     <button type="button" id="add-esp"
@@ -203,7 +98,6 @@
 </div>
 <script src="{{ url_for('static', filename='script.js') }}"></script>
 <script src="{{ url_for('static', filename='esp.js') }}"></script>
-<script src="{{ url_for('static', filename='settings.js') }}"></script>
 
 </body>
 

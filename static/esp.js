@@ -15,9 +15,8 @@ function addEsp(event) {
 
     const esp_ip = document.getElementById("esp_ip").value;
     const led_count = document.getElementById("led_count").value;
-    const segment_size = document.getElementById("segment_size").value;
 
-    const espItem = { esp_ip, led_count, segment_size };
+    const espItem = { esp_ip, led_count};
 
     // Check if we are editing an existing ESP or adding a new one
     if (isEditing) {
@@ -69,7 +68,6 @@ function toggleESPForm() {
 }
 
 /*function updateSegmentSizeOutput() {
-    const segmentsizeSlider = document.getElementById("segment_size");
     const segmentsizeOutput = document.getElementById("segment-size-output");
     segmentsizeOutput.innerText = segmentsizeSlider.value + " Leds/Segment";
 }*/
@@ -87,7 +85,6 @@ function resetDropdown () {
             .then((espData) => {
                 document.getElementById("esp_ip").value = espData.esp_ip;
                 document.getElementById("led_count").value = espData.led_count;
-                document.getElementById("segment_size").value = espData.segment_size;
                 //updateSegmentSizeOutput();
             })
             .catch((error) => console.error(error));
@@ -95,7 +92,6 @@ function resetDropdown () {
         // Clear the input fields when "Add ESP" is selected
         document.getElementById("esp_ip").value = "";
         document.getElementById("led_count").value = "";
-        document.getElementById("segment_size").value = "";
        // updateSegmentSizeOutput();
         isEditing = false; // Reset the editing flag
         addEspButton.innerHTML = "Add"; // Change the button text back to "Add ESP"
