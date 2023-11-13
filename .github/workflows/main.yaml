@@ -38,7 +38,7 @@ jobs:
       - uses: actions/upload-artifact@v3
         with:
           name: mimosa.exe
-          path: ./dist/mimosa/mimosa.exe
+          path: ./dist/mimosa.exe
 
       - name: Determine version
         id: version
