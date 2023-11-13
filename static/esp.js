@@ -181,6 +181,22 @@ function deleteESP() {
             .catch((error) => console.error(error));
     }
 }
+document.getElementById("generate_pos").addEventListener("click", function () {
+    // Store form values in localStorage
+    localStorage.setItem("esp_ip", document.getElementById("esp_ip").value);
+    localStorage.setItem("esp_rows", document.getElementById("rows").value);
+    localStorage.setItem("esp_cols", document.getElementById("cols").value);
+    localStorage.setItem("esp_startTop", document.getElementById("start_top").value);
+    localStorage.setItem("esp_startLeft", document.getElementById("start_left").value);
+    localStorage.setItem("serpentine_direction", document.getElementById("serpentine_direction").value);
+
+    // Specify the URL of the grid_gen.html file
+    var url = "grid_gen.html";
+
+    // Open the URL in a new window
+    window.open(url, "_blank");
+});
+
 
 delEspButton.addEventListener("click", deleteESP);
 //document.getElementById("segment_size").addEventListener("input", updateSegmentSizeOutput);

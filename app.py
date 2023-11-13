@@ -13,6 +13,10 @@ app.config['JSON_SORT_KEYS'] = False
 def index():
     return render_template('index.html')
 
+@app.route('/grid_gen.html')
+def grip():
+    return render_template('grid_gen.html')
+
 @app.route('/api/esp/', methods=['GET', 'POST'])
 def esps():
     if request.method == 'GET':
@@ -98,17 +102,49 @@ def item(id):
         return jsonify({'success': True})
 
 # Function to send request to WLED
-def send_request(target_ip, start_num, stop_num, color):
+def send_request(target_ip, segments):
     url = f"http://{target_ip}/json/state"
-    state = {"seg": [{"id": 0, "start": start_num, "stop": stop_num, "col": [color]}]}
-    response = requests.post(url, json=state)
+    state = {"seg": segments}
+    print(segments)
+    requests.post(url, json=state)
     
 # Function to control lights
-def lights(position, pi, empty=False):
-    start_num = int(position) - 1
-    send_request(pi, start_num, int(position), [255, 255, 255]) # Convert color value to [0, 0, 0, 255] to only use white part of LED (RGBW LEDs only).
-    time.sleep(5) # Change how long the LED stays on for.
-    send_request(pi, 0, 60, [0, 255, 0])
+def light(positions, ip):
+    segments = [{"id": 1, "start": 0, "stop": 1000, "col": [0, 0, 0]}]
+    delSegments = [{"id": 1, "start": 0, "stop": 0, "col": [0, 0, 0]}]
+    for i, pos in enumerate(positions):
+        if pos is None:
+            continue  # Skip if pos is None
+        start_num = pos - 1
+        stop_num = pos
+        segments.append({"id": i+2, "start": start_num, "stop": stop_num, "col": [255, 0, 0]})
+        delSegments.append({"id": i+2, "start": start_num, "stop": 0, "col": [0, 0, 0]})
+
+    # Send the initial segments
+    send_request(ip, segments)
+
+    # Wait for a response or confirmation from the device (you may need to adjust the sleep duration)
+    time.sleep(2)
+
+    # Send the delSegments after receiving confirmation
+    send_request(ip, delSegments)
+
+
+
+@app.route('/test_lights', methods=['POST'])
+def control_lights():
+    lights_list = request.get_json()
+    print("Received lights list:", lights_list)  # Debugging print statement
+
+    for ip, positions in lights_list.items():
+        # Validate positions list
+        if not positions or not all(isinstance(pos, int) for pos in positions):
+            return {'error': 'Invalid positions list'}, 400
+
+        light(positions, ip)
+    return {'status': 'Lights controlled'}
+
+
 
 if __name__ == '__main__':
     app.run(host="0.0.0.0", debug=True)
