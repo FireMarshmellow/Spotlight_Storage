@@ -30,10 +30,6 @@ jobs:
           pip install pyinstaller
           pip install -r requirements.txt
 
-      - name: Determine version
-        id: version
-        run: echo "::set-output name=version::$(if [ -n "$GITHUB_REF" ]; then echo $GITHUB_REF | awk -F/ '{print $3}'; else echo "1.0.$(git rev-list --count HEAD)-$(echo ${{ github.sha }} | head -c7)"; fi)"
-
       - name: Build executable
         run: |
           pyinstaller --onefile app.py --name mimosa
@@ -42,9 +38,13 @@ jobs:
           name: mimosa
           path: dist/mimosa.exe
 
+      - name: Determine version
+        id: version
+        run: echo "version=$(if [ -n \"$GITHUB_REF\" ]; then echo $GITHUB_REF | awk -F/ '{print $3}'; else echo \"1.0.$(git rev-list --count HEAD)-$(echo ${{ github.sha }} | head -c7)\"; fi)" >> $GITHUB_OUTPUT
+
       - name: Upload URL generation
         id: upload_url
-        run: echo "upload_url=$(echo ${{ github.event.repository.releases.url }} | sed 's/{\/id}//')" >> $GITHUB_ENV
+        run: echo "upload_url=$(echo ${{ github.event.repository.releases.url }} | sed 's/{\/id}//')" >> $GITHUB_OUTPUT
 
   docker:
     runs-on: ubuntu-latest
