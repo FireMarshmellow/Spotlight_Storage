@@ -33,10 +33,12 @@ jobs:
       - name: Build executable
         run: |
           pyinstaller --onefile app.py --name mimosa
-      - uses: actions/upload-artifact@v2
+      - name: test_ouput
+        run: ls -la ./dist
+      - uses: actions/upload-artifact@v3
         with:
-          name: mimosa
-          path: dist/mimosa.exe
+          name: mimosa.exe
+          path: ./dist/mimosa/mimosa.exe
 
       - name: Determine version
         id: version
