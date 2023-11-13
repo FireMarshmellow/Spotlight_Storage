@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - Main
+      - feature/github-actions
   create:
     tags:
       - "v*" # Trigger on new tags
