@@ -40,7 +40,7 @@ jobs:
       - uses: actions/upload-artifact@v2
         with:
           name: mimosa
-          path: dist/mimosa/mimosa.exe
+          path: dist/mimosa.exe
 
       - name: Upload URL generation
         id: upload_url
@@ -95,7 +95,7 @@ jobs:
         uses: actions/upload-release-asset@v1
         with:
           upload_url: ${{ needs.build.outputs.upload_url }}
-          asset_path: ./dist/mimosa
+          asset_path: ./dist
           asset_name: mimosa.exe
           asset_content_type: application/octet-stream
         env:
