@@ -32,9 +32,9 @@ jobs:
 
       - name: Build executable
         run: |
-          # Replace "your_script.py" with the name of your main Python script
+          # Replace "app.py" with the name of your main Python script
           # Replace "output_file_name" with the desired name of the .exe file
-          pyinstaller --onefile your_script.py --name output_file_name
+          pyinstaller --onefile app.py --name output_file_name
 
       - name: Set outputs
         id: outputs
