@@ -105,7 +105,7 @@ jobs:
         uses: actions/upload-release-asset@v1
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./dist
+          asset_path: ./dist/mimosa.exe
           asset_name: mimosa.exe
           asset_content_type: application/octet-stream
         env:
