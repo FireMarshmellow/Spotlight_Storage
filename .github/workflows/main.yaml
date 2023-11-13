@@ -32,7 +32,7 @@ jobs:
 
       - name: Build executable
         run: |
-          pyinstaller --onefile app.py --name mimosa
+          pyinstaller --onefile app.py --name mimosa.exe
       - name: test_ouput
         run: ls -la ./dist
       - uses: actions/upload-artifact@v3
