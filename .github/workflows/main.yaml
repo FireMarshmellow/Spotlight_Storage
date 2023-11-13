@@ -14,10 +14,12 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       upload_url: ${{ steps.upload_url.outputs.upload_url }}
-      version: ${{ steps.version.outputs.version }}
+      version: v${{ steps.version.outputs.major }}-${{ steps.version.outputs.minor }}-${{ steps.version.outputs.patch }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Set up Python
         uses: actions/setup-python@v4
@@ -33,17 +35,21 @@ jobs:
       - name: Build executable
         run: |
           pyinstaller --onefile app.py --name mimosa.exe
-      - name: test_ouput
-        run: ls -la ./dist
+
       - uses: actions/upload-artifact@v3
         with:
           name: mimosa.exe
           path: ./dist/mimosa.exe
 
       - name: Determine version
+        uses: PaulHatch/semantic-version@v5.3.0
         id: version
-        run: echo "version=$(if [ -n \"$GITHUB_REF\" ]; then echo $GITHUB_REF | awk -F/ '{print $3}'; else echo \"1.0.$(git rev-list --count HEAD)-$(echo ${{ github.sha }} | head -c7)\"; fi)" >> $GITHUB_OUTPUT
-
+        with:
+          tag_prefix: "v"
+          major_pattern: "BREAKING CHANGE"
+          minor_pattern: "feat:"
+          format: "${major}.${minor}.${patch}"
+          bump_each_commit: false
       - name: Upload URL generation
         id: upload_url
         run: echo "upload_url=$(echo ${{ github.event.repository.releases.url }} | sed 's/{\/id}//')" >> $GITHUB_OUTPUT
