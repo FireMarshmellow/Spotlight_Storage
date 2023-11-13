@@ -64,15 +64,19 @@ def delete_item(id):
 def get_espdb():
     conn = sqlite3.connect(DATABASE_ESP)
     conn.row_factory = sqlite3.Row
-    # Create the settings table if it does not exist
+    # Modify the ESP table to include new columns
     conn.execute('''
         CREATE TABLE IF NOT EXISTS esp (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
+            name TEXT,
             esp_ip TEXT,
-            led_count INTEGER
+            rows INTEGER,
+            cols INTEGER,
+            start_top TEXT,
+            start_left TEXT,
+            serpentine_direction TEXT
         )
     ''')
-
     conn.commit()
     return conn
 
@@ -80,41 +84,77 @@ def get_espdb():
 
 
 
+
 # Function to write ESP settings to the database
 def write_esp_settings(esp_settings):
+    required_fields = ['esp_name', 'esp_ip', 'rows', 'cols', 'startTop', 'startLeft', 'serpentineDirection']
+    if not all(field in esp_settings for field in required_fields):
+        print("Missing required fields in esp_settings")
+        return None
+
     conn = get_espdb()
-    cursor = conn.cursor()
     try:
-        cursor.execute('INSERT INTO esp (esp_ip, led_count) VALUES (?, ?)',
-                       [esp_settings['esp_ip'], esp_settings['led_count']])
+        cursor = conn.cursor()
+        cursor.execute('''
+            INSERT INTO esp (name, esp_ip, rows, cols, start_top, start_left, serpentine_direction)
+            VALUES (?, ?, ?, ?, ?, ?, ?)
+        ''', [
+            esp_settings['esp_name'],  # Changed to 'esp_name'
+            esp_settings['esp_ip'],
+            esp_settings['rows'],
+            esp_settings['cols'],
+            esp_settings['startTop'],  # Changed to 'startTop'
+            esp_settings['startLeft'],  # Changed to 'startLeft'
+            esp_settings['serpentineDirection']  # Changed to 'serpentineDirection'
+        ])
         lastId = cursor.lastrowid
         conn.commit()
-    except sqlite3.Error as e:
+    except Exception as e:
+        print(f"Database error: {e}")
         conn.rollback()
         lastId = None
     finally:
         conn.close()
+
     return lastId
+
+
+
+
+
+
+
 
 
 # Function to update ESP settings in the database
 def update_esp_settings(id, esp_settings):
     conn = get_espdb()
     try:
-        conn.execute('UPDATE esp SET esp_ip = ?, led_count = ? WHERE id = ?',
-             [esp_settings['esp_ip'], esp_settings['led_count'], id])
+        conn.execute('UPDATE esp SET name = ?, esp_ip = ?, rows = ?, cols = ?, start_top = ?, start_left = ?, serpentine_direction = ? WHERE id = ?',
+             [esp_settings['esp_name'], esp_settings['esp_ip'], esp_settings['rows'], esp_settings['cols'], esp_settings['startTop'], esp_settings['startLeft'], esp_settings['serpentineDirection'], id])
         conn.commit()
     except sqlite3.Error as e:
         conn.rollback()
     finally:
         conn.close()
 
+
 # Function to get ESP settings from the database by ID
 def get_esp_settings(id):
     conn = get_espdb()
     esp_settings = conn.execute('SELECT * FROM esp WHERE id = ?', [id]).fetchone()
     conn.close()
-    return esp_settings
+    if esp_settings:
+        return dict(esp_settings)
+    else:
+        return None  # Return None if no matching settings are found
+
+def read_esp():
+    conn = get_espdb()
+    esps = conn.execute('SELECT * FROM esp').fetchall()
+    conn.close()
+    return [dict(esp) for esp in esps]
+
 
 # Function to delete ESP settings from the database by ID
 def delete_esp_settings(id):
@@ -132,13 +172,27 @@ def read_esp():
     conn.close()
     return [dict(esp) for esp in esps]
 
-def get_esp_settings_by_ip(esp_ip):
-    conn = get_espdb()
-    esp_settings = conn.execute('SELECT * FROM esp WHERE esp_ip = ?', [esp_ip]).fetchone()
-    conn.close()
+def get_esp_settings_by_ip(id):
+    print('the esp_id is', id)
+    conn = get_espdb()  # Get a database connection
+    try:
+        cursor = conn.cursor()
+        cursor.execute('SELECT * FROM esp WHERE id = ?', (id,))
+        row = cursor.fetchone()
+        
+        if row is None:
+            return None  # No record found for the given IP
 
-    if esp_settings:
-        return dict(esp_settings)
-    else:
-        return None  # Return None if no matching settings are found
+        # Convert the row to a dictionary
+        esp_settings = {col[0]: row[idx] for idx, col in enumerate(cursor.description)}
+        print(esp_settings)
+        return esp_settings
+
+    except Exception as e:
+        print(f"Database error: {e}")
+        return None
+
+    finally:
+        conn.close()
+
 
