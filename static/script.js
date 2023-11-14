@@ -10,12 +10,12 @@ function addItem(event) {
   const name = document.getElementById("name").value;
   const link = document.getElementById("link").value;
   const image = document.getElementById("image").value;
-  const position = document.getElementById("position").value;
+  const position = localStorage.getItem('led_positions');
   const quantity = document.getElementById("quantity").value;
   const selectedEspDropdown = document.getElementById("ip"); // Get the selected ESP dropdown
 
   const selectedEspValue = selectedEspDropdown.value;
-  console.log("Selected IP:", selectedEspValue); // Get the selected value from the dropdown
+  console.log("Selected LEDS:", position); // Get the selected value from the dropdown
   if (selectedEspValue === "select") {
     // Check if the user has not selected anything
     alert("Please select an ESP.");
@@ -145,13 +145,9 @@ function createEditButton(item) {
     document.getElementById("name").value = item.name;
     document.getElementById("link").value = item.link;
     document.getElementById("image").value = item.image;
-    document.getElementById("position").value = item.position;
     document.getElementById("quantity").value = item.quantity;
     const selectedValue = item.ip; // The IP to select
-    const selectedIPIndex = findIndexByIP(selectedValue);
-    console.log(`Position  ${selectedIPIndex}`);
-    console.log(`IP:  ${selectedValue}`);
-    selectEspDropdownIP.selectedIndex = selectedIPIndex;
+    selectEspDropdownIP.selectedIndex = findIndexByIP(selectedValue);
     toggleAddForm();
 
     isEditingItem = true;
@@ -161,15 +157,6 @@ function createEditButton(item) {
 
   return editBtn;
 }
-
-
-
-
-// Locate item
-function locateItem(item) {
-  console.log(`Position of ${item.name}: ${item.position}`);
-}
-
 // Create locate button
 function createLocateButton(item) {
   const locateBtn = document.createElement("button");
@@ -353,13 +340,6 @@ function createItemElement(item) {
   a.classList.add("hover:font-bold", "hover:underline", "hover:text-blue-700"); // Add hover styles
   p.appendChild(a);
   div.appendChild(p);
-
-  const span = document.createElement("span");
-  const positionLabel = document.createElement("strong");
-  positionLabel.innerText = "Position: ";
-  span.appendChild(positionLabel);
-  span.append(item.position);
-  div.appendChild(span);
 
   const innerWrapper = document.createElement("div");
   innerWrapper.classList.add("grid", "grid-cols-3", "gap-2");

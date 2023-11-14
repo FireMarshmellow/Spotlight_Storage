@@ -32,7 +32,6 @@ function addEsp(event) {
         serpentineDirection,
         compartment_count,
     };
-
     // Check if we are editing an existing ESP or adding a new one
     if (isEditing) {
         // We are editing, so send a PUT request to update the existing ESP
@@ -43,7 +42,6 @@ function addEsp(event) {
         })
             .then((response) => response.json())
             .then((data) => {
-                console.log("ESP item updated:", data);
                 ESPformContainer.reset();
                 toggleESPForm();
                 populateSelectEspDropdown();
@@ -131,11 +129,10 @@ function populateSelectEspDropdown() {
     fetch("/api/esp")
         .then((response) => response.json())
         .then((data) => {
-            console.log(data);
             data.forEach((esp) => {
                 const option = document.createElement("option");
                 option.value = esp.id;
-                option.textContent = esp.esp_ip;
+                option.textContent = esp.name;
                 selectEspDropdown.appendChild(option);
             });
         })
@@ -184,23 +181,4 @@ function deleteESP() {
             .catch((error) => console.error(error));
     }
 }
-document.getElementById("generate_pos").addEventListener("click", function () {
-    // Store form values in localStorage
-    localStorage.setItem("esp_ip", document.getElementById("esp_ip").value);
-    localStorage.setItem("esp_rows", document.getElementById("rows").value);
-    localStorage.setItem("esp_cols", document.getElementById("cols").value);
-    localStorage.setItem("esp_startTop", document.getElementById("start_top").value);
-    localStorage.setItem("esp_startLeft", document.getElementById("start_left").value);
-    localStorage.setItem("serpentine_direction", document.getElementById("serpentine_direction").value);
-    localStorage.setItem("compartment_count", document.getElementById("compartment_count").value);
-
-    // Specify the URL of the grid_gen.html file
-    var url = "grid_gen.html";
-
-    // Open the URL in a new window
-    window.open(url, "_blank");
-});
-
-
 delEspButton.addEventListener("click", deleteESP);
-//document.getElementById("segment_size").addEventListener("input", updateSegmentSizeOutput);

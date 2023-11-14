@@ -13,10 +13,6 @@ app.config['JSON_SORT_KEYS'] = False
 def index():
     return render_template('index.html')
 
-@app.route('/grid_gen.html')
-def grid():
-    return render_template('grid_gen.html')
-
 @app.route('/api/esp/', methods=['GET', 'POST'])
 def esps():
     if request.method == 'GET':
@@ -46,14 +42,6 @@ def esps():
     else:
         return jsonify({"error": "Method not allowed"}), 405
 
-@app.route('/api/esp/<id>', methods=['GET'])
-def get_esp_settings(id):
-    esp_settings = db.get_esp_settings_by_ip(id)
-    if esp_settings:
-        return jsonify(esp_settings), 200
-    else:
-        return jsonify({"error": "ESP settings not found"}), 404
-
 
 @app.route('/api/esp/<id>', methods=['GET', 'PUT', 'DELETE'])
 def handle_esp(id):
@@ -64,6 +52,7 @@ def handle_esp(id):
     elif request.method == 'PUT':
         esp_data = request.get_json()
         db.update_esp_settings(id, esp_data)
+        print(f"saved data of {esp_data}")
         return jsonify({'success': True})
 
     elif request.method == 'DELETE':

@@ -16,7 +16,7 @@ def get_db():
             name TEXT NOT NULL,
             link TEXT NOT NULL,
             image TEXT,
-            position INTEGER,
+            position TEXT,
             quantity INTEGER,
             ip TEXT
         )
@@ -125,6 +125,7 @@ def update_esp_settings(id, esp_settings):
             SET name = ?, esp_ip = ?, rows = ?, cols = ?, start_top = ?, start_left = ?, serpentine_direction = ?, compartment_count = ?,
             WHERE id = ?
         ''', [
+            id,
             esp_settings['esp_name'],
             esp_settings['esp_ip'],
             esp_settings['rows'],
@@ -132,9 +133,7 @@ def update_esp_settings(id, esp_settings):
             esp_settings['startTop'],
             esp_settings['startLeft'],
             esp_settings['serpentineDirection'],
-            esp_settings['compartment_count'],
-            
-            id
+            esp_settings['compartment_count']
         ])
         conn.commit()
     except sqlite3.Error as e:

@@ -6,6 +6,21 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .grid-container {
+            display: grid;
+            gap: 5px; /* Reduced gap between checkboxes */
+            margin-bottom: 20px;
+        }
+
+
+        .grid-cell {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+        }
+    </style>
 </head>
 
 <body class="bg-gray-100 font-sans leading-normal tracking-normal">
@@ -45,11 +60,6 @@
                            class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
                 </div>
                 <div class="mb-4">
-                    <label for="position" class="block text-gray-700 font-bold mb-2">Position:</label>
-                    <input type="number" id="position" name="position" required
-                           class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
-                </div>
-                <div class="mb-4">
                     <label for="quantity" class="block text-gray-700 font-bold mb-2">Quantity:</label>
                     <input type="number" id="quantity" name="quantity" required
                            class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
@@ -57,6 +67,25 @@
                 <div class="mb-4">
                     <label for="ip" class="block text-gray-700 font-bold mb-2">Select ESP:</label>
                     <select id="ip" name="ip" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">                   </select>
+                </div>
+                <div class="mb-4">
+                    <label for="generate_pos" class="block text-gray-700 font-bold mb-2">Generate Positions:</label>
+                    <button type="button" id="generate_pos" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mb-2">Select LEDS</button>
+                </div>
+                <div id="select_led_container" class="container mx-auto mt-8" style="display: none">
+                    <div class="mb-4">
+                        <button type="button" id="test_lights" onclick="TestLights()"
+                                class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mb-2">Test Lights</button>
+                    </div>
+                    <div class="mb-4">
+                        <div class="grid-container" id="gridContainer"></div>
+                        <div class="mb-4">
+                            <button type="button" id="clear_grid" onclick="clearAll()"
+                                    class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mb-2">Clear All</button>
+                            <button type="button" id="save_grid" onclick="submitLights()"
+                                    class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mb-2">Save LEDs</button>
+                        </div>
+                    </div>
                 </div>
                 <button type="button" id="save-item"
                         class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">Add</button>
@@ -125,12 +154,6 @@
                         </select>
                     </div>
                 </div>
-
-                <div class="mb-4">
-                    <label for="generate_pos" class="block text-gray-700 font-bold mb-2">Generate Positions:</label>
-                    <button type="button" id="generate_pos" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mb-2">Go to Grid Generator</button>
-                </div>
-
                 <div class="flex items-left my-5 mx-auto">
                     <button type="button" id="add-esp" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mb-2">Add</button>
                     <button type="button" id="delete-esp" class="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded mb-2" style="margin-left: 10px;">Delete</button>
@@ -147,6 +170,7 @@
 </div>
 <script src="{{ url_for('static', filename='script.js') }}"></script>
 <script src="{{ url_for('static', filename='esp.js') }}"></script>
+<script src="{{ url_for('static', filename='gen_grid.js') }}"></script>
 
 </body>
 
