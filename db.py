@@ -1,3 +1,4 @@
+import json
 import sqlite3
 
 # Defining the path of the SQLite database file
@@ -64,7 +65,7 @@ def delete_item(id):
 def get_espdb():
     conn = sqlite3.connect(DATABASE_ESP)
     conn.row_factory = sqlite3.Row
-    # Modify the ESP table to include new columns
+    # Modify the ESP table to include new columns and arrays
     conn.execute('''
         CREATE TABLE IF NOT EXISTS esp (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -74,20 +75,16 @@ def get_espdb():
             cols INTEGER,
             start_top TEXT,
             start_left TEXT,
-            serpentine_direction TEXT
+            serpentine_direction TEXT,
+            compartment_count INTEGER
         )
     ''')
     conn.commit()
     return conn
 
-
-
-
-
-
 # Function to write ESP settings to the database
 def write_esp_settings(esp_settings):
-    required_fields = ['esp_name', 'esp_ip', 'rows', 'cols', 'startTop', 'startLeft', 'serpentineDirection']
+    required_fields = ['esp_name', 'esp_ip', 'rows', 'cols', 'startTop', 'startLeft', 'serpentineDirection','compartment_count']
     if not all(field in esp_settings for field in required_fields):
         print("Missing required fields in esp_settings")
         return None
@@ -96,16 +93,17 @@ def write_esp_settings(esp_settings):
     try:
         cursor = conn.cursor()
         cursor.execute('''
-            INSERT INTO esp (name, esp_ip, rows, cols, start_top, start_left, serpentine_direction)
-            VALUES (?, ?, ?, ?, ?, ?, ?)
+            INSERT INTO esp (name, esp_ip, rows, cols, start_top, start_left, serpentine_direction, compartment_count)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
         ''', [
-            esp_settings['esp_name'],  # Changed to 'esp_name'
+            esp_settings['esp_name'],
             esp_settings['esp_ip'],
             esp_settings['rows'],
             esp_settings['cols'],
-            esp_settings['startTop'],  # Changed to 'startTop'
-            esp_settings['startLeft'],  # Changed to 'startLeft'
-            esp_settings['serpentineDirection']  # Changed to 'serpentineDirection'
+            esp_settings['startTop'],
+            esp_settings['startLeft'],
+            esp_settings['serpentineDirection'],
+            esp_settings['compartment_count']  # Convert array to JSON string
         ])
         lastId = cursor.lastrowid
         conn.commit()
@@ -118,26 +116,31 @@ def write_esp_settings(esp_settings):
 
     return lastId
 
-
-
-
-
-
-
-
-
 # Function to update ESP settings in the database
 def update_esp_settings(id, esp_settings):
     conn = get_espdb()
     try:
-        conn.execute('UPDATE esp SET name = ?, esp_ip = ?, rows = ?, cols = ?, start_top = ?, start_left = ?, serpentine_direction = ? WHERE id = ?',
-             [esp_settings['esp_name'], esp_settings['esp_ip'], esp_settings['rows'], esp_settings['cols'], esp_settings['startTop'], esp_settings['startLeft'], esp_settings['serpentineDirection'], id])
+        conn.execute('''
+            UPDATE esp
+            SET name = ?, esp_ip = ?, rows = ?, cols = ?, start_top = ?, start_left = ?, serpentine_direction = ?, compartment_count = ?,
+            WHERE id = ?
+        ''', [
+            esp_settings['esp_name'],
+            esp_settings['esp_ip'],
+            esp_settings['rows'],
+            esp_settings['cols'],
+            esp_settings['startTop'],
+            esp_settings['startLeft'],
+            esp_settings['serpentineDirection'],
+            esp_settings['compartment_count'],
+            
+            id
+        ])
         conn.commit()
     except sqlite3.Error as e:
         conn.rollback()
     finally:
         conn.close()
-
 
 # Function to get ESP settings from the database by ID
 def get_esp_settings(id):

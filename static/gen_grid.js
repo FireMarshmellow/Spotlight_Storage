@@ -1,6 +1,5 @@
 
 var currentCompartment = 1; // Default compartment ID
-var compartment_count = 4; // Default Compartment Count
 function generateGrid() {
     var rows = parseInt(localStorage.getItem("esp_rows"));
     var cols = parseInt(localStorage.getItem('esp_cols'));
@@ -121,8 +120,15 @@ function clearAll() {
     var checkboxes = document.querySelectorAll('input[name="ledPositions"]');
     checkboxes.forEach(cb => cb.checked = false);
 }
+// Wrap your script in a function to execute when the DOM is fully loaded
+document.addEventListener("DOMContentLoaded", function () {
+    // Your script here
+    populatepos();
+});
+
 function populatepos() {
-    compartment_count = parseInt(document.getElementById("compartment_count").value) || 4;
+    var compartment_count = parseInt(localStorage.getItem("compartment_count"));
+    console.log("compartment_count:", compartment_count);
     var selectElement = document.getElementById("position_map");
 
     // Clear previous options
@@ -146,6 +152,7 @@ function saveLEDPositions() {
     var savedData = JSON.parse(localStorage.getItem('led_positions')) || {};
     savedData[currentCompartment] = positions;
     localStorage.setItem('led_positions', JSON.stringify(savedData));
+    console.log("Saved Data:", savedData);
 }
 
 // Function to handle compartment change and update the grid

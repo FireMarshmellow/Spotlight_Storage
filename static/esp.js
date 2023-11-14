@@ -20,6 +20,7 @@ function addEsp(event) {
     const startTop = document.getElementById("start_top").value; // Assuming you have an input with id 'start_top'
     const startLeft = document.getElementById("start_left").value; // Assuming you have an input with id 'start_left'
     const serpentineDirection = document.getElementById("serpentine_direction").value; // Assuming you have an input with id 'serpentine_direction'
+    const compartment_count = document.getElementById("compartment_count").value;
 
     const espItem = { 
         esp_name, 
@@ -28,7 +29,8 @@ function addEsp(event) {
         cols, 
         startTop, 
         startLeft, 
-        serpentineDirection 
+        serpentineDirection,
+        compartment_count,
     };
 
     // Check if we are editing an existing ESP or adding a new one
@@ -100,6 +102,7 @@ function resetDropdown () {
                 document.getElementById("start_top").value = espData.start_top || '';
                 document.getElementById("start_left").value = espData.start_left || '';
                 document.getElementById("serpentine_direction").value = espData.serpentine_direction || '';
+                document.getElementById("compartment_count").value = espData.compartment_count || '';
                 // ... any other fields you need to populate
             })
             .catch((error) => console.error(error));
@@ -189,6 +192,7 @@ document.getElementById("generate_pos").addEventListener("click", function () {
     localStorage.setItem("esp_startTop", document.getElementById("start_top").value);
     localStorage.setItem("esp_startLeft", document.getElementById("start_left").value);
     localStorage.setItem("serpentine_direction", document.getElementById("serpentine_direction").value);
+    localStorage.setItem("compartment_count", document.getElementById("compartment_count").value);
 
     // Specify the URL of the grid_gen.html file
     var url = "grid_gen.html";

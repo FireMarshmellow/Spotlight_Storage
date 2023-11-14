@@ -71,63 +71,72 @@
                         <option value="add" selected>Add ESP</option>
                     </select>
                 </div>
-                        <div class="mb-4">
-            <label for="esp_name" class="block text-gray-700 font-bold mb-2">Name:</label>
-            <input type="text" id="esp_name" name="esp_name" required
-                   class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
-        </div>
+
                 <div class="mb-4">
-                    <label for="esp_ip" class="block text-gray-700 font-bold mb-2">ESP IP:</label>
-                    <input type="text" id="esp_ip" name="esp_ip" required
-                           class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
-                </div>
-                <div class="mb-4">
-                    <label for="rows" class="block text-gray-700 font-bold mb-2">Rows:</label>
-                    <input type="number" id="rows" name="rows" min="1" value="4"  required
-                           class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
-                </div>
-                <div class="mb-4">
-                    <label for="cols" class="block text-gray-700 font-bold mb-2">Columns:</label>
-                    <input type="number" id="cols" name="cols" min="1" value="4"  required
-                           class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
-                </div>
-                <div class="mb-4">
-                    <label for="startTop" class="block text-gray-700 font-bold mb-2">Start Top:</label>
-                    <select id="start_top"  required
-                            class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
-                        <option value="top">Top</option>
-                        <option value="bottom">Bottom</option>
-                    </select>
-                </div>
-                <div class="mb-4">
-                    <label for="start_left" class="block text-gray-700 font-bold mb-2">Start Left:</label>
-                    <select id="start_left"  required
-                            class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
-                        <option value="left">Left</option>
-                        <option value="right">Right</option>
-                    </select>
-                </div>
-                <div class="mb-4">
-                    <label for="serpentineDirection" class="block text-gray-700 font-bold mb-2">Serpentine Direction:</label>
-                    <select id="serpentine_direction"  required
-                            class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
-                        <option value="horizontal">Horizontal</option>
-                        <option value="vertical">Vertical</option>
-                    </select>
-                </div>
-                <div class="mb-4">
-                    <label for="generate_pos" class="block text-gray-700 font-bold mb-2">Generate Positions:</label>
-                    <button type="button" id="generate_pos"
-                            class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mb-2">Go to Grid Generator</button>
-                </div>
-                <div class="flex items-left my-5 mx-auto">
-                    <button type="button" id="add-esp"
-                            class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mb-2">Add</button>
-                    <button type="button" id="delete-esp"
-                            class="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded mb-2" style="margin-left: 10px;">Delete</button>
+                    <label for="esp_name" class="block text-gray-700 font-bold mb-2">Name:</label>
+                    <input type="text" id="esp_name" name="esp_name" required class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
                 </div>
 
+                <div class="mb-4">
+                    <label for="esp_ip" class="block text-gray-700 font-bold mb-2">ESP IP:</label>
+                    <input type="text" id="esp_ip" name="esp_ip" required class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                </div>
+
+                <div class="mb-4 flex flex-wrap">
+                    <div class="w-full md:w-1/3 md:pr-2">
+                        <label for="rows" class="block text-gray-700 font-bold mb-2">Rows:</label>
+                        <input type="number" id="rows" name="rows" min="1" value="4" required class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                    </div>
+
+                    <div class="w-full md:w-1/3 md:pl-2">
+                        <label for="cols" class="block text-gray-700 font-bold mb-2">Columns:</label>
+                        <input type="number" id="cols" name="cols" min="1" value="4" required class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                    </div>
+                    <div class="w-full md:w-1/3 md:pl-2">
+                        <label for="compartment_count" class="block text-gray-700 font-bold mb-2" style="overflow: hidden;">
+                            Compartment count:
+                        </label>
+                        <input type="number" id="compartment_count" name="compartment_count" min="1" value="4" required class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                    </div>
+                </div>
+
+                <div class="mb-4 flex flex-wrap">
+                    <div class="w-full md:w-1/3 md:pr-2">
+                        <label for="start_top" class="block text-gray-700 font-bold mb-2">Start Top:</label>
+                        <select id="start_top" required class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                            <option value="top">Top</option>
+                            <option value="bottom">Bottom</option>
+                        </select>
+                    </div>
+
+                    <div class="w-full md:w-1/3 md:px-2">
+                        <label for="start_left" class="block text-gray-700 font-bold mb-2">Start Left:</label>
+                        <select id="start_left" required class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                            <option value="left">Left</option>
+                            <option value="right">Right</option>
+                        </select>
+                    </div>
+
+                    <div class="w-full md:w-1/3 md:pl-2">
+                        <label for="serpentine_direction" class="block text-gray-700 font-bold mb-2">Serpentine Direction:</label>
+                        <select id="serpentine_direction" required class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                            <option value="horizontal">Horizontal</option>
+                            <option value="vertical">Vertical</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="mb-4">
+                    <label for="generate_pos" class="block text-gray-700 font-bold mb-2">Generate Positions:</label>
+                    <button type="button" id="generate_pos" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mb-2">Go to Grid Generator</button>
+                </div>
+
+                <div class="flex items-left my-5 mx-auto">
+                    <button type="button" id="add-esp" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mb-2">Add</button>
+                    <button type="button" id="delete-esp" class="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded mb-2" style="margin-left: 10px;">Delete</button>
+                </div>
             </form>
+
         </div>
         <input type="text" id="search" placeholder="Search items..."
                class="shadow appearance-none border rounded w-2/3 py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">

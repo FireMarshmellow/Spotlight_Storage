@@ -14,7 +14,7 @@ def index():
     return render_template('index.html')
 
 @app.route('/grid_gen.html')
-def grip():
+def grid():
     return render_template('grid_gen.html')
 
 @app.route('/api/esp/', methods=['GET', 'POST'])
