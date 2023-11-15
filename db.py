@@ -51,7 +51,7 @@ def get_item(id):
     conn = get_db()
     item = conn.execute('SELECT * FROM items WHERE id = ?', [id]).fetchone()
     conn.close()
-    return item
+    return dict(item) if item else None
 
 def delete_item(id):
     conn = get_db()
@@ -92,10 +92,7 @@ def write_esp_settings(esp_settings):
     conn = get_espdb()
     try:
         cursor = conn.cursor()
-        cursor.execute('''
-            INSERT INTO esp (name, esp_ip, rows, cols, start_top, start_left, serpentine_direction, compartment_count)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-        ''', [
+        cursor.execute('INSERT INTO esp (name, esp_ip, rows, cols, start_top, start_left, serpentine_direction, compartment_count) VALUES (?, ?, ?, ?, ?, ?, ?, ?)', [
             esp_settings['esp_name'],
             esp_settings['esp_ip'],
             esp_settings['rows'],
@@ -117,15 +114,11 @@ def write_esp_settings(esp_settings):
     return lastId
 
 # Function to update ESP settings in the database
+# Function to update ESP settings in the database
 def update_esp_settings(id, esp_settings):
     conn = get_espdb()
     try:
-        conn.execute('''
-            UPDATE esp
-            SET name = ?, esp_ip = ?, rows = ?, cols = ?, start_top = ?, start_left = ?, serpentine_direction = ?, compartment_count = ?,
-            WHERE id = ?
-        ''', [
-            id,
+        conn.execute('UPDATE esp SET name = ?, esp_ip = ?, rows = ?, cols = ?, start_top = ?, start_left = ?, serpentine_direction = ?, compartment_count = ? WHERE id = ?', [
             esp_settings['esp_name'],
             esp_settings['esp_ip'],
             esp_settings['rows'],
@@ -133,13 +126,16 @@ def update_esp_settings(id, esp_settings):
             esp_settings['startTop'],
             esp_settings['startLeft'],
             esp_settings['serpentineDirection'],
-            esp_settings['compartment_count']
+            esp_settings['compartment_count'],
+            id
         ])
         conn.commit()
     except sqlite3.Error as e:
         conn.rollback()
+
     finally:
         conn.close()
+
 
 # Function to get ESP settings from the database by ID
 def get_esp_settings(id):
@@ -147,6 +143,7 @@ def get_esp_settings(id):
     esp_settings = conn.execute('SELECT * FROM esp WHERE id = ?', [id]).fetchone()
     conn.close()
     if esp_settings:
+        print(esp_settings)
         return dict(esp_settings)
     else:
         return None  # Return None if no matching settings are found
@@ -168,14 +165,7 @@ def delete_esp_settings(id):
         conn.rollback()
     finally:
         conn.close()
-def read_esp():
-    conn = get_espdb()
-    esps = conn.execute('SELECT * FROM esp').fetchall()
-    conn.close()
-    return [dict(esp) for esp in esps]
-
 def get_esp_settings_by_ip(id):
-    print('the esp_id is', id)
     conn = get_espdb()  # Get a database connection
     try:
         cursor = conn.cursor()

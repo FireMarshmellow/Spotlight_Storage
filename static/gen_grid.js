@@ -7,6 +7,21 @@ function generateGrid() {
         alert("Please select an ESP");
         return;
     }
+    var positionArray = [];
+    if (editingItemId !== null) {
+        // Fetch data from the API using editingItemId
+        fetch(`/api/items/${editingItemId}`)
+            .then(response => response.json())
+            .then(data => {
+                // Assuming the API response has a 'position' property
+                var positionString = data.position;
+
+                // Convert the position string to an array of numbers
+                positionArray = positionString.split(',').map(Number).filter(num => !isNaN(num));
+                // Log the converted position array
+                console.log('LED data:', positionArray);
+            })
+    }
     var espId = document.getElementById("ip").value; // Get the selected ESP ID from the dropdown
     fetch(`/api/esp/${espId}`)
         .then(response => response.json())
@@ -46,6 +61,10 @@ function generateGrid() {
                     checkbox.id = 'led' + ledNumber;
                     checkbox.name = 'ledPositions';
                     checkbox.value = ledNumber;
+                    if (isEditing === false && positionArray.includes(ledNumber)) {
+                        checkbox.checked = true;
+                    }
+
                     var cell = document.createElement('div');
                     cell.className = 'grid-cell';
                     cell.appendChild(checkbox);
@@ -58,11 +77,6 @@ function generateGrid() {
             console.error('Error fetching ESP data:', error);
         });
 }
-function submitLights() {
-
-}
-
-
 function TestLights() {
     const selectedEspIndex = selectEspDropdownIP.selectedIndex;
     if (selectedEspIndex < 1) {
@@ -97,6 +111,8 @@ function TestLights() {
 function clearAll() {
     var checkboxes = document.querySelectorAll('input[name="ledPositions"]');
     checkboxes.forEach(cb => cb.checked = false);
+    // Clear the stored data in the 'led_positions' key
+    localStorage.removeItem('led_positions');
 }
 
 function submitLights() {

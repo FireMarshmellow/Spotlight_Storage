@@ -72,6 +72,8 @@ function addItem(event) {
         }
       })
       .catch((error) => console.error(error));
+      // Clear the stored data in the 'led_positions' key
+      localStorage.removeItem('led_positions');
 }
 
 
@@ -80,6 +82,8 @@ function addItem(event) {
 function toggleAddForm() {
   const btn = document.getElementById("btn-add");
   const container = document.getElementById("form-container");
+  // Clear the stored data in the 'led_positions' key
+  localStorage.removeItem('led_positions');
   if (container.style.display === "block") {
     container.style.display = "none";
     btn.innerHTML = "Add item";
@@ -146,10 +150,11 @@ function createEditButton(item) {
     document.getElementById("link").value = item.link;
     document.getElementById("image").value = item.image;
     document.getElementById("quantity").value = item.quantity;
+    localStorage.setItem('led_positions', JSON.stringify(item.position))
+    console.log('LED data:', JSON.parse(localStorage.getItem('led_positions')));
     const selectedValue = item.ip; // The IP to select
     selectEspDropdownIP.selectedIndex = findIndexByIP(selectedValue);
     toggleAddForm();
-
     isEditingItem = true;
     editingItemId = item.id;
     document.getElementById("save-item").innerHTML = "Save Changes";
@@ -182,12 +187,6 @@ function createLocateButton(item) {
   });
   return locateBtn;
 }
-
-// add quantity
-function addQuantity(item) {
-  console.log(`Quantity of ${item.name}: ${item.quantity}`);
-}
-
 // Create add quantity button
 function createAddQuantityButton(item) {
   const addQuantityBtn = document.createElement("button");

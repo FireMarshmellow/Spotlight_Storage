@@ -1,4 +1,6 @@
 # Importing necessary modules and packages
+import json
+
 from flask import Flask, render_template, jsonify, request
 import db
 import requests
@@ -46,8 +48,11 @@ def esps():
 @app.route('/api/esp/<id>', methods=['GET', 'PUT', 'DELETE'])
 def handle_esp(id):
     if request.method == 'GET':
-        esp_data = db.get_esp_settings(id)
-        return jsonify(esp_data) if esp_data else jsonify({'error': 'ESP not found'}), 404
+        esp_data = db.get_esp_settings_by_ip(id)
+        if esp_data is not None:
+            return jsonify(esp_data)
+        else:
+            return jsonify({'error': 'ESP not found'}), 404
 
     elif request.method == 'PUT':
         esp_data = request.get_json()
@@ -72,7 +77,7 @@ def items():
         return jsonify(item)
 
 # Route to handle GET, PUT, DELETE requests for a specific item
-@app.route('/api/items/<id>', methods=['GET', 'PUT', 'DELETE'])
+@app.route('/api/items/<id>', methods=['GET', 'PUT', 'DELETE', 'POST'])
 def item(id):
     if request.method == 'GET':
         item = db.get_item(id)
@@ -89,23 +94,33 @@ def item(id):
     elif request.method == 'DELETE':
         db.delete_item(id)
         return jsonify({'success': True})
+    elif request.method == 'POST':
+        item = db.get_item(id)
+        if request.form.get('action') == 'locate':
+            light(item['position'], item['ip'])
+            return jsonify({'success': True})
+        else:
+            return jsonify({ 'error': 'Invalid action' }), 400
+
 
 # Function to send request to WLED
 def send_request(target_ip, segments):
     url = f"http://{target_ip}/json/state"
     state = {"seg": segments}
-    print(segments)
+    #print(segments)
     requests.post(url, json=state)
     
 # Function to control lights
 def light(positions, ip):
     segments = [{"id": 1, "start": 0, "stop": 1000, "col": [0, 0, 0]}]
     delSegments = [{"id": 1, "start": 0, "stop": 0, "col": [0, 0, 0]}]
-    for i, pos in enumerate(positions):
+    #print("Recieved positions",positions)
+    positions_list = json.loads(positions)
+    for i, pos in enumerate(positions_list):
         if pos is None:
             continue  # Skip if pos is None
-        start_num = pos - 1
-        stop_num = pos
+        start_num = int(pos) - 1
+        stop_num = int(pos)
         segments.append({"id": i+2, "start": start_num, "stop": stop_num, "col": [255, 0, 0]})
         delSegments.append({"id": i+2, "start": start_num, "stop": 0, "col": [0, 0, 0]})
 
@@ -123,17 +138,33 @@ def light(positions, ip):
 @app.route('/test_lights', methods=['POST'])
 def control_lights():
     lights_list = request.get_json()
-    print("Received lights list:", lights_list)  # Debugging print statement
+    #print("Received lights list:", lights_list)  # Debugging print statement
 
     for ip, positions in lights_list.items():
         # Validate positions list
         if not positions or not all(isinstance(pos, int) for pos in positions):
             return {'error': 'Invalid positions list'}, 400
 
-        light(positions, ip)
+        test_light(positions, ip)
     return {'status': 'Lights controlled'}
 
-
+def test_light(positions, ip):
+    segments = [{"id": 1, "start": 0, "stop": 1000, "col": [0, 0, 0]}]
+    delSegments = [{"id": 1, "start": 0, "stop": 0, "col": [0, 0, 0]}]
+    #print("Recieved positions",positions)
+    for i, pos in enumerate(positions):
+        if pos is None:
+            continue  # Skip if pos is None
+        start_num = int(pos) - 1
+        stop_num = int(pos)
+        segments.append({"id": i+2, "start": start_num, "stop": stop_num, "col": [255, 255, 255]})
+        delSegments.append({"id": i+2, "start": start_num, "stop": 0, "col": [0, 0, 0]})
+    # Send the initial segments
+    send_request(ip, segments)
+    # Wait for a response or confirmation from the device (you may need to adjust the sleep duration)
+    time.sleep(2)
+    # Send the delSegments after receiving confirmation
+    send_request(ip, delSegments)
 
 if __name__ == '__main__':
     app.run(host="0.0.0.0", debug=True)
