@@ -66,6 +66,7 @@ function addItem(event) {
                 const li = createItemElement(data);
                 itemList.appendChild(li);
                 form.reset();
+                isEditingItem = false;
                 toggleAddForm();
               })
               .catch((error) => console.error(error));
@@ -74,6 +75,7 @@ function addItem(event) {
       .catch((error) => console.error(error));
       // Clear the stored data in the 'led_positions' key
       localStorage.removeItem('led_positions');
+
 }
 
 
@@ -82,11 +84,11 @@ function addItem(event) {
 function toggleAddForm() {
   const btn = document.getElementById("btn-add");
   const container = document.getElementById("form-container");
-  // Clear the stored data in the 'led_positions' key
-  localStorage.removeItem('led_positions');
-  if (container.style.display === "block") {
+  if (container.style.display === "block" && isEditingItem === false) {
     container.style.display = "none";
     btn.innerHTML = "Add item";
+    form.reset();
+    document.getElementById("save-item").innerHTML = "Add";
   } else {
     container.style.display = "block";
     btn.innerHTML = "Close";
@@ -158,6 +160,11 @@ function createEditButton(item) {
     isEditingItem = true;
     editingItemId = item.id;
     document.getElementById("save-item").innerHTML = "Save Changes";
+    // Scroll to the top of the page
+    window.scrollTo({
+      top: 0,
+      behavior: "auto" // You can change this to "auto" for an instant scroll
+    });
   });
 
   return editBtn;
@@ -291,11 +298,15 @@ search.addEventListener("input", filterItems);
 function createItemElement(item) {
   const li = document.createElement("li");
   li.dataset.id = item.id;
+  li.dataset.name = item.name;
+  li.dataset.quantity = parseInt(item.quantity, 10);  // Store as numbers
+  li.dataset.ip = item.ip;
   li.classList.add("item");
 
   const wrapper = document.createElement("div");
   wrapper.classList.add(
-      "bg-gray-100",
+      "bg-gray-800",
+      "text-gray-100",
       "drop-shadow-md",
       "h-full",
       "w-11/12",
@@ -312,7 +323,7 @@ function createItemElement(item) {
 
   const img = document.createElement("img");
   img.src = item.image;
-  img.classList.add("h-32", "w-32", "rounded-lg", "mx-auto");
+  img.classList.add("h-32", "w-32", "rounded-lg", "mx-auto","bg-gray-800");
   wrapper.appendChild(img);
 
   const div = document.createElement("div");
@@ -328,14 +339,21 @@ function createItemElement(item) {
 
   const h2 = document.createElement("h2");
   h2.innerText = item.name;
-  h2.classList.add("text-lg", "text-slate");
+  h2.classList.add(
+      "text-lg",
+      "text-slate",
+      "overflow-hidden",
+      "whitespace-nowrap",
+      "overflow-ellipsis",
+      "hover:whitespace-normal",
+  );
   div.appendChild(h2);
 
   const p = document.createElement("p");
   const a = document.createElement("a");
   a.href = item.link;
   a.target = "_blank";
-  a.innerText = "Nachschub besorgen";
+  a.innerText = "Buy more";
   a.classList.add("hover:font-bold", "hover:underline", "hover:text-blue-700"); // Add hover styles
   p.appendChild(a);
   div.appendChild(p);
@@ -383,15 +401,18 @@ function loadItems() {
         data.forEach((item) => {
           const li = createItemElement(item);
           itemList.appendChild(li);
+
         });
       })
       .catch((error) => console.error(error));
+
 }
 
 loadItems();
 
 
 document.getElementById("save-item").addEventListener("click", addItem);
+document.getElementById("btn-add").addEventListener("click", function() {isEditingItem = false;});
 document.getElementById("btn-add").addEventListener("click", toggleAddForm);
 document.getElementById("btn-add").addEventListener("click", populateEspDropdown);
 //Function to Ad ESPs
@@ -427,9 +448,51 @@ function findIndexByIP(ip) {
   }
   return 0; // Return 0 if no match is found.
 }
+document.getElementById("sort_method").addEventListener("click", sortItems);
+document.getElementById("sort_method").addEventListener("change", sortItems);
+
+// Sorting function
+function sortItems() {
+  const sortMethod = document.getElementById("sort_method").value;
+
+  // Get the list of items
+  const items = Array.from(itemList.children);
+  // Sort the items based on the selected sorting method
+  const sortedItems = items.sort((a, b) => {
+    const itemA = a.dataset[sortMethod];
+    const itemB = b.dataset[sortMethod];
+    if (sortMethod === 'position' || sortMethod === 'quantity') {
+      // Convert values to numbers for numeric comparison
+      return parseInt(itemA, 10) - parseInt(itemB, 10);
+    } else {
+      // For other fields, use string comparison
+      updateSortTitle()
+      return itemA.localeCompare(itemB);
+    }
+  });
+
+  // Clear the current list
+  itemList.innerHTML = '';
+
+  // Append the sorted items to the list
+  sortedItems.forEach(item => {
+    itemList.appendChild(item);
+  });
+}
+
+function updateSortTitle() {
+  var select = document.getElementById("sort_method");
+  var selectedOption = select.options[select.selectedIndex];
+  var title = document.getElementById("sort_title");
+
+  title.textContent = "Sort by: " + selectedOption.textContent;
+}
+
+
 
 
 // Define a function to populate the "select_esp" dropdown
 populateEspDropdown();
+updateSortTitle();
 
 

@@ -4,6 +4,7 @@ import sqlite3
 # Defining the path of the SQLite database file
 DATABASE = 'data.db'
 DATABASE_ESP= 'esp.db'
+DATABASE_SETTING= 'settings.db'
 # Function to connect to the database
 def get_db():
     conn = sqlite3.connect(DATABASE)
@@ -43,9 +44,14 @@ def write_item(item):
 # Function to update data in the database
 def update_item(id, data):
     conn = get_db()
-    conn.execute('UPDATE items SET name = ?, link = ?, image = ?, position = ?, quantity = ?, ip = ? WHERE id = ?', [data['name'], data['link'], data['image'], data['position'], data['quantity'], data['ip'], id])
-    conn.commit()
-    conn.close()
+    try:
+        conn.execute('UPDATE items SET name = ?, link = ?, image = ?, position = ?, quantity = ?, ip = ? WHERE id = ?', [data['name'], data['link'], data['image'], data['position'], data['quantity'], data['ip'], id])
+        conn.commit()
+
+    except sqlite3.Error as e:
+        conn.rollback()
+    finally:
+        conn.close()
 
 def get_item(id):
     conn = get_db()
@@ -187,4 +193,35 @@ def get_esp_settings_by_ip(id):
     finally:
         conn.close()
 
+def get_settingsdb():
+    conn = sqlite3.connect(DATABASE_SETTING)
+    conn.row_factory = sqlite3.Row
+    # Create the settings table if it does not exist
+    conn.execute('''
+        CREATE TABLE IF NOT EXISTS settings (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            brightness INTEGER
+        )
+    ''')
 
+    conn.commit()
+    return conn
+
+# Function to read settings from the database
+def read_settings():
+    conn = get_settingsdb()
+    settings = conn.execute('SELECT * FROM settings').fetchone()
+    conn.close()
+    if settings is None:
+        return {}
+    else:
+        return dict(settings)
+
+# Function to update settings in the database
+def update_settings(settings):
+    conn = get_settingsdb()
+    cursor = conn.cursor()
+    cursor.execute('DELETE FROM settings')  # Clear existing settings
+    cursor.execute('INSERT INTO settings (brightness) VALUES (?)', [settings['brightness']])
+    conn.commit()
+    conn.close()

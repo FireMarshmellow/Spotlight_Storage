@@ -17,9 +17,8 @@ function generateGrid() {
                 var positionString = data.position;
 
                 // Convert the position string to an array of numbers
+                positionString = positionString.replace('[', '').replace(']', '');
                 positionArray = positionString.split(',').map(Number).filter(num => !isNaN(num));
-                // Log the converted position array
-                console.log('LED data:', positionArray);
             })
     }
     var espId = document.getElementById("ip").value; // Get the selected ESP ID from the dropdown
@@ -71,7 +70,7 @@ function generateGrid() {
                     gridContainer.appendChild(cell);
                 }
             }
-            document.getElementById("select_led_container").style.display = "block"; // Show select_led_container
+            togglegrid(); // Show select_led_container
         })
         .catch((error) => {
             console.error('Error fetching ESP data:', error);
@@ -129,6 +128,18 @@ function submitLights() {
     localStorage.setItem('led_positions', JSON.stringify(savedData));
 
     console.log("Saved Data:", savedData);
-    document.getElementById("select_led_container").style.display = "none"; // Close select_led_container
+    togglegrid(); // Close select_led_container
 }
 
+function togglegrid() {
+
+    const container = document.getElementById("select_led_container");
+    const btn = document.getElementById("generate_pos");
+    if (container.style.display === "block" ) {
+        container.style.display = "none";
+        btn.innerHTML = "Select LEDS";
+    } else {
+        container.style.display = "block";
+        btn.innerHTML = "Close Selection";
+    }
+}
