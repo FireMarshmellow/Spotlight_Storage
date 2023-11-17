@@ -1,18 +1,26 @@
 # Importing necessary modules and packages
-from flask import Flask, render_template, jsonify, request
+import json
+
+from flask import Flask, render_template, jsonify, request, send_from_directory
+from requests import Timeout
+
 import db
 import requests
 import time
-import threading
+
 # Creating a Flask application instance
 app = Flask(__name__)
 app.config['JSON_SORT_KEYS'] = False
-# Global variable to store the timer start time
-app.timer_start_time = time.time()
-# Define default values for settings
-app.segment_size = 5
-app.led_count = 300
 app.brightness = 0.5
+app.led_count = 300
+# Route to the home page of the web application
+@app.route('/')
+def index():
+    return render_template('index.html')
+# Route to Favicon
+@app.route('/favicon.ico')
+def favicon():
+    return send_from_directory(app.root_path, 'favicon.ico', mimetype='image/vnd.microsoft.icon')
 def get_unique_ips_from_database():
     # Get all items from the database
     items = db.read_items()
@@ -35,15 +43,9 @@ def set_global_brightness():
 def set_global_settings(target_ip):
     esp_settings = db.get_esp_settings_by_ip(target_ip)
     if esp_settings:
-        app.segment_size = esp_settings['segment_size']  # Set segment size from database
         app.led_count = esp_settings['led_count']  # Set LED count from database
     else:
-        # Handle the case where ESP settings are not found in the database
-        # You can set default values or raise an error as needed.
-        app.segment_size = 5
         app.led_count = 300
-
-
 @app.route('/api/settings', methods=['GET', 'POST'])
 def settings():
     if request.method == 'GET':
@@ -54,147 +56,190 @@ def settings():
         settings = request.get_json()
         db.update_settings(settings)  # Update settings in the database
         return jsonify({ 'success': True })
-# Route to the home page of the web application
 @app.route('/api/esp/', methods=['GET', 'POST'])
 def esps():
     if request.method == 'GET':
-        esps = db.read_esp()
-        return jsonify(esps)
+        try:
+            esps_data = db.read_esp()  # Fetch ESP data from the database
+            return jsonify(esps_data), 200
+        except Exception as e:
+            print(f"Error fetching ESP data: {e}")  # Log the error for debugging
+            return jsonify({"error": "An error occurred fetching ESP data"}), 500
+
     elif request.method == 'POST':
-        esp = request.get_json()
-        id = db.write_esp_settings(esp)
-        esp['id'] = id
-        return jsonify(esp)
+        try:
+            esp_data = request.get_json()
+            if not esp_data:
+                return jsonify({"error": "No data provided"}), 400
 
-@app.route('/api/esp/<id>', methods=['GET'])
-def get_esp_by_id(id):
-    esp_data = db.get_esp_settings(id)
-    if esp_data:
-        return jsonify({
-            'id': esp_data[0],
-            'esp_ip': esp_data[1],
-            'led_count': esp_data[2],
-            'segment_size': esp_data[3]
-        })
-@app.route('/api/esp/<id>', methods=['PUT'])
-def update_esp_by_id(id):
-    # Parse the JSON data from the request
-    esp_data = request.get_json()
+            id = db.write_esp_settings(esp_data)
+            if id is None:
+                raise ValueError("Failed to write ESP settings")
 
-    # Update the ESP settings in the database
-    db.update_esp_settings(id, esp_data)
+            esp_data['id'] = id
+            return jsonify(esp_data), 201
+        except Exception as e:
+            print(f"Error on writing ESP data: {e}")  # Log the error
+            return jsonify({"error": "An error occurred writing ESP data"}), 500
 
-    return jsonify({'success': True})
-@app.route('/api/esp/<id>', methods=['DELETE'])
-def delete_esp_by_id(id):
-    # Delete the ESP settings in the database
-    db.delete_esp_settings(id)
-    return jsonify({'success': True})
-@app.route('/')
-def index():
-    return render_template('index.html')
+    else:
+        return jsonify({"error": "Method not allowed"}), 405
+
+
+@app.route('/api/esp/<id>', methods=['GET', 'PUT', 'DELETE'])
+def handle_esp(id):
+    if request.method == 'GET':
+        esp_data = db.get_esp_settings_by_ip(id)
+        if esp_data is not None:
+            return jsonify(esp_data)
+        else:
+            return jsonify({'error': 'ESP not found'}), 404
+
+    elif request.method == 'PUT':
+        esp_data = request.get_json()
+        db.update_esp_settings(id, esp_data)
+        print(f"saved data of {esp_data}")
+        return jsonify({'success': True})
+
+    elif request.method == 'DELETE':
+        db.delete_esp_settings(id)
+        return jsonify({'success': True})
 
 # Route to handle GET and POST requests for items
 @app.route('/api/items', methods=['GET', 'POST'])
 def items():
     if request.method == 'GET':
-        # If the request method is GET, read data from the database and return as JSON
         items = db.read_items()
         return jsonify(items)
     elif request.method == 'POST':
-        # If the request method is POST, add new item to the database and return the item as JSON
         item = request.get_json()
         id = db.write_item(item)
         item['id'] = id
-
         return jsonify(item)
 
-# Route to handle GET, PUT, DELETE and POST requests for an individual item
+# Route to handle GET, PUT, DELETE requests for a specific item
 @app.route('/api/items/<id>', methods=['GET', 'PUT', 'DELETE', 'POST'])
 def item(id):
-    item = db.get_item(id)
-    if not item:
-        return jsonify({ 'error': 'Item not found' }), 404
     if request.method == 'GET':
-        # If the request method is GET, return the item as JSON
-        return jsonify(dict(item))
+        item = db.get_item(id)
+        if item:
+            return jsonify(item)
+        else:
+            return jsonify({'error': 'Item not found'}), 404
+
     elif request.method == 'PUT':
-        # If the request method is PUT, update the item in the database and return the updated item as JSON
         db.update_item(id, request.get_json())
         item = db.get_item(id)
         return jsonify(dict(item))
+
     elif request.method == 'DELETE':
-        # If the request method is DELETE, remove the item from the database and return a success message as JSON
         db.delete_item(id)
-        return jsonify({ 'success': True })
+        return jsonify({'success': True})
     elif request.method == 'POST':
-        # If the request method is POST, check if the request is for locating the item, and send the position to a WLED API
+        item = db.get_item(id)
         if request.form.get('action') == 'locate':
-
-            if item['quantity'] > 0:
-                lights(item['position'], item['ip'], empty=False)  # Call the 'lights' function without turning the LEDs red
-                #print(f"Position of {item['name']}: {item['position']}: {item['ip']}")
-                return jsonify({'success': True})
-            else:
-                lights(item['position'], item['ip'], empty=True)  # Call the 'lights' function with the red flag set to True
-                #print(f"Position of {item['name']}: {item['position']}: {item['ip']}")
-                return jsonify({'success': True})
-        elif request.form.get('action') == 'addQuantity': #incrementing the quantity by 1 instead of append a digit next to the current quantity
-            item['quantity'] = int(item['quantity']) + 1
-            db.update_item(id, item)
-            return jsonify({ 'success': True })
-        elif request.form.get('action') == 'removeQuantity':
-            item['quantity'] -= 1
-            db.update_item(id, item)
-            return jsonify({ 'success': True })
-        elif request.form.get('action') == 'setQuantity':
-            new_quantity = int(request.form.get('quantity'))
-            if new_quantity >= 1:
-                item['quantity'] = new_quantity
-                db.update_item(id, item)
-                return jsonify({ 'success': True })
-
+            light(item['position'], item['ip'])
+            return jsonify({'success': True})
         else:
             return jsonify({ 'error': 'Invalid action' }), 400
 
-# Route to handle DELETE requests for an individual item
-@app.route('/api/items/<id>', methods=['DELETE'])
-def delete_item(id):
-    db.delete_item(id)
-    return jsonify({ 'success': True })
 
-def send_request(target_ip, data):
+# Function to send request to WLED
+def send_segment_request(target_ip, segments):
     url = f"http://{target_ip}/json/state"
-    response = requests.post(url, json=data)
-def lights(position, ip, empty=False):
-    set_global_settings(ip)
+    state = {"seg": segments}
+    try:
+        response = requests.post(url, json=state)
+        # Check for successful response, and handle accordingly
+        if response.status_code == 200:
+            # Success
+            print("Request was successful")
+        else:
+            # Handle other status codes (e.g., 404, 500, etc.) as needed
+            print(f"Request failed with status code {response.status_code}")
+    except ConnectionError as e:
+        # Handle connection errors
+        print(f"Connection error: {e}")
+    except Timeout as e:
+        # Handle timeout errors
+        print(f"Timeout error: {e}")
+
+def send_request(target_ip, data, timeout=0.2):
+    url = f"http://{target_ip}/json/state"
+
+    try:
+        response = requests.post(url, json=data, timeout=timeout)
+        # Check for successful response, and handle accordingly
+        if response.status_code == 200:
+            # Success
+            print("Request was successful")
+        else:
+            # Handle other status codes (e.g., 404, 500, etc.) as needed
+            print(f"Request failed with status code {response.status_code}")
+    except ConnectionError as e:
+        # Handle connection errors
+        print(f"Connection error: {e}")
+    except Timeout as e:
+        # Handle timeout errors
+        print(f"Timeout error: {e}")
+
+# Function to control lights
+def light(positions, ip):
+    segments = [{"id": 1, "start": 0, "stop": 1000, "col": [0, 0, 0]}]
+    delSegments = [{"id": 1, "start": 0, "stop": 0, "col": [0, 0, 0]}]
     set_global_brightness()
-    start_num = round((int(position) - 1) * app.segment_size)
-    end_num = round(start_num + app.segment_size)
-    if empty:
-        # Turn LEDs red
-            pulsate_data = {"on":True,"bri":255,"transition":0,"mainseg":0,"seg":[{"id":0,"start":start_num,"stop":end_num,"grp":1,"spc":0,"of":0,"on":True,
-                    "frz":False,"bri":255,"cct":127,"set":0,"col":[[255*app.brightness,0,0],[0,0,0],[0,0,0]],
-                    "fx":2,"sx":200,"ix":200,"pal":0,"c1":128,"c2":128,"c3":16,"sel":True,
-                    "rev":False,"mi":False,"o1":False,"o2":False,"o3":False,"si":0,"m12":0},
-                    {"stop":0},{"stop":0},{"stop":0},{"stop":0},{"stop":0},{"stop":0},{"stop":0},
-                    {"stop":0},{"stop":0},{"stop":0},{"stop":0},{"stop":0},{"stop":0},{"stop":0},
-                    {"stop":0}]}
+    #print("Recieved positions",positions)
+    positions_list = json.loads(positions)
+    for i, pos in enumerate(positions_list):
+        if pos is None:
+            continue  # Skip if pos is None
+        start_num = int(pos) - 1
+        stop_num = int(pos)
+        segments.append({"id": i+2, "start": start_num, "stop": stop_num, "col": ([0, 255*app.brightness, 0],[255,255,255],[255,255,255])})#each [] is one of the RGB-values
+        delSegments.append({"id": i+2, "start": start_num, "stop": 0, "col": [0, 0, 0]})
+
+    # Send the initial segments
+    send_segment_request(ip, segments)
+
+    # Wait for a response or confirmation from the device (you may need to adjust the sleep duration)
+    time.sleep(2)
+
+    # Send the delSegments after receiving confirmation
+    send_segment_request(ip, delSegments)
 
 
-    else:
-        # Use green color
-            pulsate_data = {"on":True,"bri":255,"transition":0,"mainseg":0,"seg":[{"id":0,"start":start_num,"stop":end_num,"grp":1,"spc":0,"of":0,"on":True,
-                  "frz":False,"bri":255,"cct":127,"set":0,"col":[[0,255*app.brightness,0],[0,0,0],[0,0,0]],
-                 "fx":2,"sx":200,"ix":200,"pal":0,"c1":128,"c2":128,"c3":16,"sel":True,
-                 "rev":False,"mi":False,"o1":False,"o2":False,"o3":False,"si":0,"m12":0},
-                {"stop":0},{"stop":0},{"stop":0},{"stop":0},{"stop":0},{"stop":0},{"stop":0},
-                {"stop":0},{"stop":0},{"stop":0},{"stop":0},{"stop":0},{"stop":0},{"stop":0},
-                {"stop":0}]}
-    send_request(ip, pulsate_data)
 
+@app.route('/test_lights', methods=['POST'])
+def control_lights():
+    lights_list = request.get_json()
+    #print("Received lights list:", lights_list)  # Debugging print statement
 
-# Route to turn the LED on
+    for ip, positions in lights_list.items():
+        # Validate positions list
+        if not positions or not all(isinstance(pos, int) for pos in positions):
+            return {'error': 'Invalid positions list'}, 400
+
+        test_light(positions, ip)
+    return {'status': 'Lights controlled'}
+
+def test_light(positions, ip):
+    segments = [{"id": 1, "start": 0, "stop": 1000, "col": [0, 0, 0]}]
+    delSegments = [{"id": 1, "start": 0, "stop": 0, "col": [0, 0, 0]}]
+    #print("Recieved positions",positions)
+    for i, pos in enumerate(positions):
+        if pos is None:
+            continue  # Skip if pos is None
+        start_num = int(pos) - 1
+        stop_num = int(pos)
+        segments.append({"id": i+2, "start": start_num, "stop": stop_num, "col": ([255, 255, 255],[255,255,255],[255,255,255])})
+        delSegments.append({"id": i+2, "start": start_num, "stop": 0, "col": [0, 0, 0]})
+    # Send the initial segments
+    send_segment_request(ip, segments)
+    # Wait for a response or confirmation from the device (you may need to adjust the sleep duration)
+    time.sleep(2)
+    # Send the delSegments after receiving confirmation
+    send_segment_request(ip, delSegments)
+
 @app.route('/led/on', methods=['GET'])
 def turn_led_on():
     set_global_brightness()
@@ -241,4 +286,3 @@ def apply_brightness():
         return jsonify()
 if __name__ == '__main__':
     app.run(host="0.0.0.0", debug=True)
-    set_global_brightness()

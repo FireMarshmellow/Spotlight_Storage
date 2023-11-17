@@ -1,7 +1,4 @@
-const onButton = document.getElementById('on-button');
-const offButton = document.getElementById('off-button');
-const partyButton = document.getElementById('party-button');
-const brightnessButton = document.getElementById('apply-brightness');
+
 // Function to update brightness output
 function updateBrightnessOutput() {
     const brightnessSlider = document.getElementById("brightness");
@@ -24,7 +21,8 @@ function applyBrightness() {
         })
         .catch((error) => console.error(error));
 }
-
+const brightnessButton = document.getElementById('apply-brightness');
+brightnessButton.addEventListener("click", applyBrightness)
 function addSettings(event) {
     event.preventDefault();
     const brightness = document.getElementById("brightness").value;
@@ -76,12 +74,12 @@ function toggleSideMenu() {
 }
 
 // Add event listeners to the "On" and "Off" buttons
-
+const onButton = document.getElementById('on-button');
+const offButton = document.getElementById('off-button');
+const partyButton = document.getElementById('party-button');
 
 onButton.addEventListener('click', () => {sendLedRequest('on')});
 offButton.addEventListener('click', () => {sendLedRequest('off')});
 partyButton.addEventListener('click', () => {sendLedRequest('party')});
-brightnessButton.addEventListener("click", applyBrightness)
 document.getElementById("brightness").addEventListener("input", function (event) {updateBrightnessOutput();});
 loadSettings();
-

@@ -13,12 +13,25 @@ let editingEspId = null; // Track the ID of the ESP being edited
 function addEsp(event) {
     event.preventDefault();
 
+    const esp_name = document.getElementById("esp_name").value;
     const esp_ip = document.getElementById("esp_ip").value;
-    const led_count = document.getElementById("led_count").value;
-    const segment_size = document.getElementById("segment_size").value;
+    const rows = document.getElementById("rows").value; // Assuming you have an input with id 'rows'
+    const cols = document.getElementById("cols").value; // Assuming you have an input with id 'cols'
+    const startTop = document.getElementById("start_top").value; // Assuming you have an input with id 'start_top'
+    const startLeft = document.getElementById("start_left").value; // Assuming you have an input with id 'start_left'
+    const serpentineDirection = document.getElementById("serpentine_direction").value; // Assuming you have an input with id 'serpentine_direction'
+    const compartment_count = document.getElementById("compartment_count").value;
 
-    const espItem = { esp_ip, led_count, segment_size };
-
+    const espItem = { 
+        esp_name, 
+        esp_ip, 
+        rows, 
+        cols, 
+        startTop, 
+        startLeft, 
+        serpentineDirection,
+        compartment_count,
+    };
     // Check if we are editing an existing ESP or adding a new one
     if (isEditing) {
         // We are editing, so send a PUT request to update the existing ESP
@@ -29,7 +42,6 @@ function addEsp(event) {
         })
             .then((response) => response.json())
             .then((data) => {
-                console.log("ESP item updated:", data);
                 ESPformContainer.reset();
                 toggleESPForm();
                 populateSelectEspDropdown();
@@ -68,11 +80,7 @@ function toggleESPForm() {
     }
 }
 
-/*function updateSegmentSizeOutput() {
-    const segmentsizeSlider = document.getElementById("segment_size");
-    const segmentsizeOutput = document.getElementById("segment-size-output");
-    segmentsizeOutput.innerText = segmentsizeSlider.value + " Leds/Segment";
-}*/
+
 function resetDropdown () {
     const selectedEspId = selectEspDropdown.value;
 
@@ -85,17 +93,20 @@ function resetDropdown () {
         fetch(`/api/esp/${selectedEspId}`)
             .then((response) => response.json())
             .then((espData) => {
-                document.getElementById("esp_ip").value = espData.esp_ip;
-                document.getElementById("led_count").value = espData.led_count;
-                document.getElementById("segment_size").value = espData.segment_size;
-                //updateSegmentSizeOutput();
+                document.getElementById("esp_name").value = espData.name || '';
+                document.getElementById("esp_ip").value = espData.esp_ip || '';
+                document.getElementById("rows").value = espData.rows || '';
+                document.getElementById("cols").value = espData.cols || '';
+                document.getElementById("start_top").value = espData.start_top || '';
+                document.getElementById("start_left").value = espData.start_left || '';
+                document.getElementById("serpentine_direction").value = espData.serpentine_direction || '';
+                document.getElementById("compartment_count").value = espData.compartment_count || '';
+                // ... any other fields you need to populate
             })
             .catch((error) => console.error(error));
     } else {
         // Clear the input fields when "Add ESP" is selected
         document.getElementById("esp_ip").value = "";
-        document.getElementById("led_count").value = "";
-        document.getElementById("segment_size").value = "";
        // updateSegmentSizeOutput();
         isEditing = false; // Reset the editing flag
         addEspButton.innerHTML = "Add"; // Change the button text back to "Add ESP"
@@ -121,7 +132,7 @@ function populateSelectEspDropdown() {
             data.forEach((esp) => {
                 const option = document.createElement("option");
                 option.value = esp.id;
-                option.textContent = esp.esp_ip;
+                option.textContent = esp.name;
                 selectEspDropdown.appendChild(option);
             });
         })
@@ -170,6 +181,4 @@ function deleteESP() {
             .catch((error) => console.error(error));
     }
 }
-
 delEspButton.addEventListener("click", deleteESP);
-//document.getElementById("segment_size").addEventListener("input", updateSegmentSizeOutput);
