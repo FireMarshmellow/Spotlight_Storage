@@ -117,7 +117,7 @@ function clearAll() {
 function submitLights() {
     var checkboxes = document.querySelectorAll('input[name="ledPositions"]:checked');
     var positions = Array.from(checkboxes).map(cb => parseInt(cb.value, 10));
-
+    localStorage.removeItem('led_positions');
     // Retrieve existing LED positions from localStorage
     var savedData = JSON.parse(localStorage.getItem('led_positions')) || [];
 
@@ -135,7 +135,7 @@ function togglegrid() {
 
     const container = document.getElementById("select_led_container");
     const btn = document.getElementById("generate_pos");
-    if (container.style.display === "block" ) {
+    if (container.style.display === "block") {
         container.style.display = "none";
         btn.innerHTML = "Select LEDS";
     } else {

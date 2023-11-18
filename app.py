@@ -138,7 +138,7 @@ def item(id):
     elif request.method == 'POST':
         item = db.get_item(id)
         if request.form.get('action') == 'locate':
-            light(item['position'], item['ip'])
+            light(item['position'], item['ip'],item['quantity'])
             return jsonify({'success': True})
         else:
             return jsonify({ 'error': 'Invalid action' }), 400
@@ -170,6 +170,7 @@ def send_request(target_ip, data, timeout=0.2):
     try:
         response = requests.post(url, json=data, timeout=timeout)
         # Check for successful response, and handle accordingly
+
         if response.status_code == 200:
             # Success
             print("Request was successful")
@@ -184,10 +185,16 @@ def send_request(target_ip, data, timeout=0.2):
         print(f"Timeout error: {e}")
 
 # Function to control lights
-def light(positions, ip):
+def light(positions, ip,quantity):
     segments = [{"id": 1, "start": 0, "stop": 1000, "col": [0, 0, 0]}]
-    delSegments = [{"id": 1, "start": 0, "stop": 0, "col": [0, 0, 0]}]
     set_global_brightness()
+    #Turn on LEDS first
+    on_data = {"on":True,"bri":round(255*app.brightness),"seg":[{"id":0,"start":0,"stop":app.led_count}]}
+    send_request(ip, on_data)
+    print(on_data)
+    color = [0, 255, 0]
+    if quantity < 1:
+        color =[255, 0, 0]
     #print("Recieved positions",positions)
     positions_list = json.loads(positions)
     for i, pos in enumerate(positions_list):
@@ -195,33 +202,9 @@ def light(positions, ip):
             continue  # Skip if pos is None
         start_num = int(pos) - 1
         stop_num = int(pos)
-        segments.append({"id": i+2, "start": start_num, "stop": stop_num, "col": ([0, 255*app.brightness, 0],[255,255,255],[255,255,255])})#each [] is one of the RGB-values
-        delSegments.append({"id": i+2, "start": start_num, "stop": 0, "col": [0, 0, 0]})
-
+        segments.append({"id": i+2, "start": start_num, "stop": stop_num, "col": [color,[0,0,0],[0,0,0]]})#each [] is one of the RGB-values
     # Send the initial segments
     send_segment_request(ip, segments)
-
-    # Wait for a response or confirmation from the device (you may need to adjust the sleep duration)
-    time.sleep(2)
-
-    # Send the delSegments after receiving confirmation
-    send_segment_request(ip, delSegments)
-
-
-
-@app.route('/test_lights', methods=['POST'])
-def control_lights():
-    lights_list = request.get_json()
-    #print("Received lights list:", lights_list)  # Debugging print statement
-
-    for ip, positions in lights_list.items():
-        # Validate positions list
-        if not positions or not all(isinstance(pos, int) for pos in positions):
-            return {'error': 'Invalid positions list'}, 400
-
-        test_light(positions, ip)
-    return {'status': 'Lights controlled'}
-
 def test_light(positions, ip):
     segments = [{"id": 1, "start": 0, "stop": 1000, "col": [0, 0, 0]}]
     delSegments = [{"id": 1, "start": 0, "stop": 0, "col": [0, 0, 0]}]
@@ -239,6 +222,21 @@ def test_light(positions, ip):
     time.sleep(2)
     # Send the delSegments after receiving confirmation
     send_segment_request(ip, delSegments)
+
+@app.route('/test_lights', methods=['POST'])
+def control_lights():
+    lights_list = request.get_json()
+    #print("Received lights list:", lights_list)  # Debugging print statement
+
+    for ip, positions in lights_list.items():
+        # Validate positions list
+        if not positions or not all(isinstance(pos, int) for pos in positions):
+            return {'error': 'Invalid positions list'}, 400
+
+        test_light(positions, ip)
+    return {'status': 'Lights controlled'}
+
+
 
 @app.route('/led/on', methods=['GET'])
 def turn_led_on():

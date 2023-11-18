@@ -6,7 +6,7 @@ let editingItemId = null; // Track the ID of the item being edited
 // Add item to list
 function addItem(event) {
   event.preventDefault();
-
+  submitLights();
   const name = document.getElementById("name").value;
   const link = document.getElementById("link").value;
   const image = document.getElementById("image").value;
@@ -21,7 +21,6 @@ function addItem(event) {
     alert("Please select an ESP.");
     return;
   }
-
   // Fetch the IP associated with the selected ESP
   fetch(`/api/esp/${selectedEspValue}`)
       .then((response) => response.json())
@@ -48,9 +47,9 @@ function addItem(event) {
                 const li = itemList.querySelector(`li[data-id="${editingItemId}"]`);
                 const updatedLi = createItemElement(data);
                 itemList.replaceChild(updatedLi, li);
+                isEditingItem = false; // Reset the editing flag
                 form.reset();
                 toggleAddForm();
-                isEditingItem = false; // Reset the editing flag
                 document.getElementById("btn-add").innerHTML = "Add item"; // Change the button text back to "Add item"
               })
               .catch((error) => console.error(error));
@@ -160,6 +159,7 @@ function createEditButton(item) {
     isEditingItem = true;
     editingItemId = item.id;
     document.getElementById("save-item").innerHTML = "Save Changes";
+    generateGrid();
     // Scroll to the top of the page
     window.scrollTo({
       top: 0,

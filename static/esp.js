@@ -20,7 +20,6 @@ function addEsp(event) {
     const startTop = document.getElementById("start_top").value; // Assuming you have an input with id 'start_top'
     const startLeft = document.getElementById("start_left").value; // Assuming you have an input with id 'start_left'
     const serpentineDirection = document.getElementById("serpentine_direction").value; // Assuming you have an input with id 'serpentine_direction'
-    const compartment_count = document.getElementById("compartment_count").value;
 
     const espItem = { 
         esp_name, 
@@ -30,7 +29,6 @@ function addEsp(event) {
         startTop, 
         startLeft, 
         serpentineDirection,
-        compartment_count,
     };
     // Check if we are editing an existing ESP or adding a new one
     if (isEditing) {
@@ -43,9 +41,9 @@ function addEsp(event) {
             .then((response) => response.json())
             .then((data) => {
                 ESPformContainer.reset();
-                toggleESPForm();
                 populateSelectEspDropdown();
                 isEditing = false; // Reset the editing flag
+                toggleESPForm();
                 addEspButton.innerHTML = "Save Changes"; // Change the button text back to "Add ESP"
             })
             .catch((error) => console.error(error));
@@ -100,7 +98,6 @@ function resetDropdown () {
                 document.getElementById("start_top").value = espData.start_top || '';
                 document.getElementById("start_left").value = espData.start_left || '';
                 document.getElementById("serpentine_direction").value = espData.serpentine_direction || '';
-                document.getElementById("compartment_count").value = espData.compartment_count || '';
                 // ... any other fields you need to populate
             })
             .catch((error) => console.error(error));
