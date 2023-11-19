@@ -188,8 +188,10 @@ def light(positions, ip,quantity = 1, testing =False):
         delSegments.append({"id": i+2, "start": start_num, "stop": 0, "col":[255,255,255]})
     on_data = {"on":True,"bri":255*app.brightness,"transition":0,"mainseg":0,"seg": segments}
     send_request(ip, on_data)
-    if app.timeout != 0:
+    if app.timeout != 0 and not testing:
         time.sleep(app.timeout)
+        off_data = {"on":True,"bri":255*app.brightness,"transition":5,"mainseg":0,"seg": delSegments}
+        send_request(ip, off_data)
     if testing:
         time.sleep(app.timeout+3)
         off_data = {"on":True,"bri":255*app.brightness,"transition":5,"mainseg":0,"seg": delSegments}
