@@ -1,5 +1,7 @@
 
 document.getElementById("generate_pos").addEventListener("click", generateGrid);
+document.getElementById("select_led_container").style.display = "none";
+document.getElementById("generate_pos").innerHTML = "Select LEDS";
 function generateGrid() {
     const selectedEspIndex = selectEspDropdownIP.selectedIndex;
     if (selectedEspIndex < 1) {
@@ -8,7 +10,8 @@ function generateGrid() {
         return;
     }
     var positionArray = [];
-    if (editingItemId !== null) {
+    console.log("positionArray LEDS:", positionArray); // Get the selected value from the dropdown
+    if (editingItemId !== null && isEditingItem) {
         // Fetch data from the API using editingItemId
         fetch(`/api/items/${editingItemId}`)
             .then(response => response.json())
@@ -123,12 +126,13 @@ function submitLights() {
 
     // Save LED positions to localStorage
     savedData = savedData.concat(positions);
-
+    console.log("savedData LEDS:", savedData); // Get the selected value from the dropdown
     // Save updated data back to localStorage
     localStorage.setItem('led_positions', JSON.stringify(savedData));
 
-    console.log("Saved Data:", savedData);
-    togglegrid(); // Close select_led_container
+    //console.log("Saved Data:", savedData);
+    document.getElementById("select_led_container").style.display = "none";
+    document.getElementById("generate_pos").innerHTML = "Select LEDS";
 }
 
 function togglegrid() {
@@ -138,6 +142,7 @@ function togglegrid() {
     if (container.style.display === "block") {
         container.style.display = "none";
         btn.innerHTML = "Select LEDS";
+        submitLights();
     } else {
         container.style.display = "block";
         btn.innerHTML = "Close Selection";

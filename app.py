@@ -3,7 +3,6 @@ import json
 
 from flask import Flask, render_template, jsonify, request, send_from_directory
 from requests import Timeout
-
 import db
 import requests
 import time
@@ -11,16 +10,22 @@ import time
 # Creating a Flask application instance
 app = Flask(__name__)
 app.config['JSON_SORT_KEYS'] = False
-app.brightness = 0.5
+
+#Default Values
+app.brightness = 1
 app.led_count = 300
-# Route to the home page of the web application
-@app.route('/')
-def index():
-    return render_template('index.html')
+app.delSegments = ""
+
+
 # Route to Favicon
 @app.route('/favicon.ico')
 def favicon():
     return send_from_directory(app.root_path, 'favicon.ico', mimetype='image/vnd.microsoft.icon')
+# Route to the home page of the web application
+@app.route('/')
+def index():
+    return render_template('index.html')
+
 def get_unique_ips_from_database():
     # Get all items from the database
     items = db.read_items()
@@ -143,27 +148,6 @@ def item(id):
         else:
             return jsonify({ 'error': 'Invalid action' }), 400
 
-
-# Function to send request to WLED
-def send_segment_request(target_ip, segments):
-    url = f"http://{target_ip}/json/state"
-    state = {"seg": segments}
-    try:
-        response = requests.post(url, json=state)
-        # Check for successful response, and handle accordingly
-        if response.status_code == 200:
-            # Success
-            print("Request was successful")
-        else:
-            # Handle other status codes (e.g., 404, 500, etc.) as needed
-            print(f"Request failed with status code {response.status_code}")
-    except ConnectionError as e:
-        # Handle connection errors
-        print(f"Connection error: {e}")
-    except Timeout as e:
-        # Handle timeout errors
-        print(f"Timeout error: {e}")
-
 def send_request(target_ip, data, timeout=0.2):
     url = f"http://{target_ip}/json/state"
 
@@ -185,13 +169,13 @@ def send_request(target_ip, data, timeout=0.2):
         print(f"Timeout error: {e}")
 
 # Function to control lights
-def light(positions, ip,quantity):
-    segments = [{"id": 1, "start": 0, "stop": 1000, "col": [0, 0, 0]}]
+def light(positions, ip,quantity = 1, testing =False):
+    if app.delSegments:
+        off_data = {"on":False,"bri":0,"transition":0,"mainseg":0,"seg": app.delSegments}
+        send_request(ip, off_data)
     set_global_brightness()
-    #Turn on LEDS first
-    on_data = {"on":True,"bri":round(255*app.brightness),"seg":[{"id":0,"start":0,"stop":app.led_count}]}
-    send_request(ip, on_data)
-    print(on_data)
+    segments = [{"id": 1, "start": 0, "stop": 1000, "col": [0, 0, 0]}]
+    delSegments = [{"id": 1, "start": 0, "stop": 0, "col": [0, 0, 0]}]
     color = [0, 255, 0]
     if quantity < 1:
         color =[255, 0, 0]
@@ -202,38 +186,28 @@ def light(positions, ip,quantity):
             continue  # Skip if pos is None
         start_num = int(pos) - 1
         stop_num = int(pos)
-        segments.append({"id": i+2, "start": start_num, "stop": stop_num, "col": [color,[0,0,0],[0,0,0]]})#each [] is one of the RGB-values
-    # Send the initial segments
-    send_segment_request(ip, segments)
-def test_light(positions, ip):
-    segments = [{"id": 1, "start": 0, "stop": 1000, "col": [0, 0, 0]}]
-    delSegments = [{"id": 1, "start": 0, "stop": 0, "col": [0, 0, 0]}]
-    #print("Recieved positions",positions)
-    for i, pos in enumerate(positions):
-        if pos is None:
-            continue  # Skip if pos is None
-        start_num = int(pos) - 1
-        stop_num = int(pos)
-        segments.append({"id": i+2, "start": start_num, "stop": stop_num, "col": ([255, 255, 255],[255,255,255],[255,255,255])})
-        delSegments.append({"id": i+2, "start": start_num, "stop": 0, "col": [0, 0, 0]})
-    # Send the initial segments
-    send_segment_request(ip, segments)
-    # Wait for a response or confirmation from the device (you may need to adjust the sleep duration)
-    time.sleep(2)
-    # Send the delSegments after receiving confirmation
-    send_segment_request(ip, delSegments)
+        segments.append({"id": i+2, "start": start_num, "stop": stop_num, "col": [color,[0,0,0],[0,0,0]]})
+        delSegments.append({"id": i+2, "start": start_num, "stop": 0, "col":[255,255,255]})
+    on_data = {"on":True,"bri":255*app.brightness,"transition":0,"mainseg":0,"seg": segments}
+    send_request(ip, on_data)
+    if testing:
+        time.sleep(5)
+        off_data = {"on":True,"bri":255*app.brightness,"transition":5,"mainseg":0,"seg": delSegments}
+        send_request(ip, off_data)
+    app.delSegments = delSegments
 
 @app.route('/test_lights', methods=['POST'])
-def control_lights():
+def test_lights():
+    set_global_brightness()
     lights_list = request.get_json()
+    testing= True
     #print("Received lights list:", lights_list)  # Debugging print statement
-
     for ip, positions in lights_list.items():
         # Validate positions list
         if not positions or not all(isinstance(pos, int) for pos in positions):
             return {'error': 'Invalid positions list'}, 400
-
-        test_light(positions, ip)
+        positions_json = json.dumps(positions)
+        light(positions_json, ip,1,testing)
     return {'status': 'Lights controlled'}
 
 
@@ -245,7 +219,7 @@ def turn_led_on():
         ips = get_unique_ips_from_database()
         for ip in ips:
             set_global_settings(ip)
-            on_data = {"on":True,"bri":255,"transition":0,"mainseg":0,"seg":[{"id":0,"start":0,"stop":app.led_count,"grp":1,"spc":0,"of":0,"on":True,"frz":False,"bri":255,"cct":127,"set":0,"col":[[255*app.brightness,255*app.brightness,255*app.brightness],[0,0,0],[0,0,0]],"fx":0,"sx":128,"ix":128,"pal":0,"c1":128,"c2":128,"c3":16,"sel":True,"rev":False,"mi":False,"o1":False,"o2":False,"o3":False,"si":0,"m12":0},{"stop":0},{"stop":0},{"stop":0},{"stop":0},{"stop":0},{"stop":0},{"stop":0},{"stop":0},{"stop":0},{"stop":0},{"stop":0},{"stop":0},{"stop":0},{"stop":0},{"stop":0}]}
+            on_data = {"on":True,"bri":255*app.brightness,"transition":0,"mainseg":0,"seg":[{"id":0,"grp":1,"spc":0,"of":0,"on":True,"frz":False,"bri":255,"cct":127,"set":0,"col":[[255*app.brightness,255*app.brightness,255*app.brightness],[0,0,0],[0,0,0]],"fx":0,"sx":128,"ix":128,"pal":0,"c1":128,"c2":128,"c3":16,"sel":True,"rev":False,"mi":False,"o1":False,"o2":False,"o3":False,"si":0,"m12":0},{"stop":0},{"stop":0},{"stop":0},{"stop":0},{"stop":0},{"stop":0},{"stop":0},{"stop":0},{"stop":0},{"stop":0},{"stop":0},{"stop":0},{"stop":0},{"stop":0},{"stop":0}]}
             send_request(ip, on_data)
         return jsonify({ 'success': True})
 
@@ -258,7 +232,7 @@ def turn_led_off():
         ips = get_unique_ips_from_database()
         for ip in ips:
             set_global_settings(ip)
-            off_data = {"on":False,"bri":128,"transition":0,"mainseg":0,"seg":[{"id":0,"start":0,"stop":app.led_count,"grp":1}]}
+            off_data = {"on":False,"bri":128,"transition":0,"mainseg":0,"seg":[{"id":1,"start":0,"stop":0,"grp":1}]}
             send_request(ip, off_data)
         return jsonify()
 # Route to turn the LED to Party
@@ -269,7 +243,7 @@ def turn_led_party():
         ips = get_unique_ips_from_database()
         for ip in ips:
             set_global_settings(ip)
-            party_data = {"on":True,"bri":round(255*app.brightness),"transition":5,"mainseg":0,"seg":[{"id":0,"start":0,"stop":app.led_count,"grp":1,"spc":0,"of":0,"on":True,"frz":False,"bri":255,"cct":127,"set":0,"col":[[255,255,255],[0,0,0],[0,0,0]],"fx":9,"sx":128,"ix":128,"pal":0,"c1":128,"c2":128,"c3":16,"sel":True,"rev":False,"mi":False,"o1":False,"o2":False,"o3":False,"si":0,"m12":0},{"stop":0},{"stop":0},{"stop":0},{"stop":0},{"stop":0},{"stop":0},{"stop":0},{"stop":0},{"stop":0},{"stop":0},{"stop":0},{"stop":0},{"stop":0},{"stop":0},{"stop":0}]}
+            party_data = {"on":True,"bri":round(255*app.brightness),"transition":5,"mainseg":0,"seg":[{"id":0,"grp":1,"spc":0,"of":0,"on":True,"frz":False,"bri":255,"cct":127,"set":0,"col":[[255,255,255],[0,0,0],[0,0,0]],"fx":9,"sx":128,"ix":128,"pal":0,"c1":128,"c2":128,"c3":16,"sel":True,"rev":False,"mi":False,"o1":False,"o2":False,"o3":False,"si":0,"m12":0},{"stop":0},{"stop":0},{"stop":0},{"stop":0},{"stop":0},{"stop":0},{"stop":0},{"stop":0},{"stop":0},{"stop":0},{"stop":0},{"stop":0},{"stop":0},{"stop":0},{"stop":0}]}
             send_request(ip, party_data)
         return jsonify()
 @app.route('/led/brightness', methods=['GET'])

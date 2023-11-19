@@ -15,10 +15,15 @@ function addItem(event) {
   const selectedEspDropdown = document.getElementById("ip"); // Get the selected ESP dropdown
 
   const selectedEspValue = selectedEspDropdown.value;
-  console.log("Selected LEDS:", position); // Get the selected value from the dropdown
+
   if (selectedEspValue === "select") {
     // Check if the user has not selected anything
     alert("Please select an ESP.");
+    return;
+  }
+  if (position === "[]") {
+    // Check if the user has not selected anything
+    alert("Please select an LEDS to light up.");
     return;
   }
   // Fetch the IP associated with the selected ESP
@@ -83,6 +88,7 @@ function addItem(event) {
 function toggleAddForm() {
   const btn = document.getElementById("btn-add");
   const container = document.getElementById("form-container");
+  document.getElementById("select_led_container").style.display = "none";
   if (container.style.display === "block" && isEditingItem === false) {
     container.style.display = "none";
     btn.innerHTML = "Add item";
@@ -91,6 +97,10 @@ function toggleAddForm() {
   } else {
     container.style.display = "block";
     btn.innerHTML = "Close";
+    if(isEditingItem === false){
+      form.reset();
+      localStorage.removeItem('led_positions');
+    }
   }
 }
 
@@ -146,25 +156,26 @@ function createEditButton(item) {
       "mx-auto"
   );
   editBtn.addEventListener("click", () => {
-
+    isEditingItem = true;
     document.getElementById("name").value = item.name;
     document.getElementById("link").value = item.link;
     document.getElementById("image").value = item.image;
     document.getElementById("quantity").value = item.quantity;
+    console.log("item quantity:", item.quantity);
     localStorage.setItem('led_positions', JSON.stringify(item.position))
-    console.log('LED data:', JSON.parse(localStorage.getItem('led_positions')));
+    //console.log('LED data:', JSON.parse(localStorage.getItem('led_positions')));
     const selectedValue = item.ip; // The IP to select
     selectEspDropdownIP.selectedIndex = findIndexByIP(selectedValue);
+    window.scrollTo({
+      top: 10,
+      behavior: "auto" // You can change this to "auto" for an instant scroll
+    });
     toggleAddForm();
-    isEditingItem = true;
     editingItemId = item.id;
     document.getElementById("save-item").innerHTML = "Save Changes";
     generateGrid();
     // Scroll to the top of the page
-    window.scrollTo({
-      top: 0,
-      behavior: "auto" // You can change this to "auto" for an instant scroll
-    });
+
   });
 
   return editBtn;
@@ -454,19 +465,18 @@ document.getElementById("sort_method").addEventListener("change", sortItems);
 // Sorting function
 function sortItems() {
   const sortMethod = document.getElementById("sort_method").value;
-
+  updateSortTitle();
   // Get the list of items
   const items = Array.from(itemList.children);
   // Sort the items based on the selected sorting method
   const sortedItems = items.sort((a, b) => {
     const itemA = a.dataset[sortMethod];
     const itemB = b.dataset[sortMethod];
-    if (sortMethod === 'position' || sortMethod === 'quantity') {
+    if (sortMethod === 'quantity') {
       // Convert values to numbers for numeric comparison
       return parseInt(itemA, 10) - parseInt(itemB, 10);
     } else {
       // For other fields, use string comparison
-      updateSortTitle()
       return itemA.localeCompare(itemB);
     }
   });

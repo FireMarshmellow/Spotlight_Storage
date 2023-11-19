@@ -156,42 +156,44 @@
                            placeholder="Enter the link"
                            class="shadow appearance-none border rounded w-full py-2 px-3 placeholder:text-gray-500  text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
                 </div>
-
-                <div class="mb-4">
+                <div class="mb-4 flex flex-wrap">
+                <div class="w-full md:w-2/4 md:pr-2">
                     <label for="image" class="block text-gray-200 font-bold mb-2">Image:</label>
                     <input type="url" id="image" name="image" required
                            placeholder="Enter the image URL"
                            class="shadow appearance-none border rounded w-full py-2 px-3 placeholder:text-gray-500  text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
                 </div>
-
-                <div class="mb-4">
+                <div class="w-full md:w-2/4 md:pl-2">
                     <label for="quantity" class="block text-gray-200 font-bold mb-2">Quantity:</label>
                     <input type="number" id="quantity" name="quantity" required
                            placeholder="Enter the quantity"
                            class="shadow appearance-none border rounded w-full placeholder:text-gray-500 py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
                 </div>
-
-                <div class="mb-4">
+                </div>
+                <div class="mb-4 flex flex-wrap">
+                <div class="w-full md:w-3/5 md:pr-2">
                     <label for="ip" class="block text-gray-200 font-bold mb-2">Select ESP:</label>
                     <select id="ip" name="ip" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">                   </select>
                 </div>
-                <div class="mb-4">
+                <div class="w-full md:w-2/5 md:pl-2 text-right">
                     <label for="generate_pos" class="block text-gray-200 font-bold mb-2">Generate Positions:</label>
                     <button type="button" id="generate_pos" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mb-2">Select LEDS</button>
                 </div>
+                </div>
                 <div id="select_led_container" class="container mx-auto mt-8" style="display: none">
-                    <div class="mb-4">
-                        <button type="button" id="test_lights" onclick="TestLights()"
-                                class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mb-2">Test Lights</button>
-                    </div>
-                    <div class="mb-4">
-                        <div class="grid-container" id="gridContainer"></div>
-                        <div class="mb-4">
+                    <div class="mb-4 flex flex-wrap">
+                        <div class="w-full md:w-1/4 ">
+                            <button type="button" id="test_lights" onclick="TestLights()"
+                                    class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mb-2">Test Lights</button>
+                        </div>
+                        <div class="w-full md:w-1/4 md:pl-2">
                             <button type="button" id="clear_grid" onclick="clearAll()"
                                     class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mb-2">Clear All</button>
-                            <button type="button" id="save_grid" onclick="submitLights()"
-                                    class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mb-2">Save LEDs</button>
                         </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <div class="grid-container" id="gridContainer"></div>
                     </div>
                 </div>
                 <button type="button" id="save-item"
