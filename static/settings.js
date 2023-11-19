@@ -7,6 +7,16 @@ function updateBrightnessOutput() {
     addSettings(event);
 
 }
+function updateTimeoutOutput() {
+    const timeoutSlider = document.getElementById("timeout");
+    const timeoutOutput = document.getElementById("timeout-output");
+    timeoutOutput.innerText = timeoutSlider.value + " S";
+    if(timeoutSlider.value < 1){
+        timeoutOutput.innerText = "Turn off timeout"
+    }
+    addSettings(event);
+
+}
 function applyBrightness() {
     // Send a POST request to update the LED brightness
     fetch("/led/brightness", { })
@@ -21,14 +31,15 @@ function applyBrightness() {
         })
         .catch((error) => console.error(error));
 }
-const brightnessButton = document.getElementById('apply-brightness');
-brightnessButton.addEventListener("click", applyBrightness)
+const settingsButton = document.getElementById('apply-settings');
+settingsButton.addEventListener("click", applyBrightness)
 function addSettings(event) {
     event.preventDefault();
     const brightness = document.getElementById("brightness").value;
+    const timeout = document.getElementById("timeout").value;
 
 
-    const settings = {brightness };
+    const settings = {brightness, timeout };
 
     // Save the settings in the database using fetch
     fetch("/api/settings", {
@@ -49,6 +60,7 @@ function loadSettings() {
         .then((settings) => {
             // Update input fields with the retrieved settings
             document.getElementById("brightness").value = settings.brightness;
+            document.getElementById("timeout").value = settings.timeout;
         })
         .catch((error) => console.error(error));
 }
@@ -64,6 +76,7 @@ function sendLedRequest(state) {
 function toggleSideMenu() {
     var sideMenu = document.getElementById("mySideMenu");
     updateBrightnessOutput();
+    updateTimeoutOutput();
     if (sideMenu.style.width === "250px") {
         sideMenu.style.width = "0";
         addSettings(event);
@@ -82,4 +95,5 @@ onButton.addEventListener('click', () => {sendLedRequest('on')});
 offButton.addEventListener('click', () => {sendLedRequest('off')});
 partyButton.addEventListener('click', () => {sendLedRequest('party')});
 document.getElementById("brightness").addEventListener("input", function (event) {updateBrightnessOutput();});
+document.getElementById("timeout").addEventListener("input", function (event) {updateTimeoutOutput();});
 loadSettings();

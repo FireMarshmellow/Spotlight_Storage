@@ -107,15 +107,22 @@
 
         </li>
         <li>
-            <label for="brightness" class="block text-gray-200 font-bold mb-2" style="margin-left: 10px;">Brightness:</label>
+            <label for="brightness" class="block text-gray-200 font-bold mb-2 pr-2" style="margin-left: 10px;">Brightness:</label>
             <div class="w-full" style="margin-left: 10px; padding-right: 10px;">
                 <input type="range" id="brightness" name="brightness" min="0" max="100" step="1" class="w-full">
             </div>
             <output for="brightness" id="brightness-output" class="text-gray-200 text-sm mt-2" style="margin-left: 10px;">50</output>
         </li>
         <li>
-            <button id="apply-brightness" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-8 rounded focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500", style="margin-bottom: 10px;margin-left: 10px;">
-                Apply
+            <label for="timeout" class="block text-gray-200 font-bold mb-2 pr-2" style="margin-left: 10px;">Timeout in Seconds:</label>
+            <div class="w-full" style="margin-left: 10px; padding-right: 10px;">
+                <input type="range" id="timeout" name="brightness" min="0" max="200" step="1" class="w-full">
+            </div>
+            <output for="timeout" id="timeout-output" class="text-gray-200 text-sm mt-2" style="margin-left: 10px;">5</output>
+        </li>
+        <li>
+            <button id="apply-settings" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-8 rounded focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500", style="margin-bottom: 10px;margin-left: 10px;">
+                Apply Settings
             </button>
         </li>
 

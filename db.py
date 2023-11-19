@@ -197,7 +197,8 @@ def get_settingsdb():
     conn.execute('''
         CREATE TABLE IF NOT EXISTS settings (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
-            brightness INTEGER
+            brightness INTEGER,
+            timeout INTEGER
         )
     ''')
 
@@ -219,6 +220,6 @@ def update_settings(settings):
     conn = get_settingsdb()
     cursor = conn.cursor()
     cursor.execute('DELETE FROM settings')  # Clear existing settings
-    cursor.execute('INSERT INTO settings (brightness) VALUES (?)', [settings['brightness']])
+    cursor.execute('INSERT INTO settings (brightness, timeout) VALUES (?,?)', [settings['brightness'], settings['timeout']])
     conn.commit()
     conn.close()
