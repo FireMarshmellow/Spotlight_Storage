@@ -1,4 +1,4 @@
-# WARNING: This version is not compatible with the same database from version 2. Converter coming soon.
+# WARNING: This version is not compatible with the same database from version 2, Use the provided converter to update your database file.
 
 # MIMOSA - short for "Mellow_Labs Inventory Management and Organization System Apparatus". Just like a refreshing mimosa, this system will make your life brighter and more organized!
 
