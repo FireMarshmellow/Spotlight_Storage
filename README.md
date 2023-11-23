@@ -39,3 +39,4 @@ LEDs : https://amzn.to/3VcoaIY
 ## Development
 
 If you would like to help with development, we have a Trello board for to-dos and feature requests. Please contact us for access.
+[trello.com/mimosa-todos](https://trello.com/invite/b/es69yaRU/ATTI349558717e0304248c5ca4064938da9bAE64E809/mimosa-todos)
