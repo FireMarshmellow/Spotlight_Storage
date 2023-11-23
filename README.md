@@ -18,11 +18,12 @@ D1 mini: https://amzn.to/440mfet
 
 LEDs : https://amzn.to/3VcoaIY
 
-## Features
+## New Features
 
-- inventory management
-- search
-- locate items
+- Support for multiple LEDs per item
+- Dark mode
+- Adjustable timeout
+- Settings panel
 
 ## Installation
 
@@ -34,14 +35,6 @@ LEDs : https://amzn.to/3VcoaIY
 ## dependencies:
 
 - python 3.6
-
-
-## New Features
-
-- Support for multiple LEDs per item
-- Dark mode
-- Adjustable timeout
-- Settings panel
 
 ## Development
 
