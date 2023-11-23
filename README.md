@@ -1,3 +1,5 @@
+# WARNING: This version is not compatible with the same database from version 2. Converter coming soon.
+
 # MIMOSA - short for "Mellow_Labs Inventory Management and Organization System Apparatus". Just like a refreshing mimosa, this system will make your life brighter and more organized!
 
 ## Videos
@@ -32,3 +34,15 @@ LEDs : https://amzn.to/3VcoaIY
 ## dependencies:
 
 - python 3.6
+
+
+## New Features
+
+- Support for multiple LEDs per item
+- Dark mode
+- Adjustable timeout
+- Settings panel
+
+## Development
+
+If you would like to help with development, we have a Trello board for to-dos and feature requests. Please contact us for access.
