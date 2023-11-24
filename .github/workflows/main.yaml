@@ -1,20 +1,22 @@
-name: Attach Executable to Release
+name: Build Windows Executable with PyInstaller
 
 on:
   push:
     branches:
-      - Main
+      - Main  # Trigger on pushes to main branch
+
 jobs:
-  build-and-upload:
-    runs-on: windows-latest
+  build_executable:
+    runs-on: windows-latest  # Run the job on a Windows runner
+
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v4  # Checkout the code in the repository
 
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
-          python-version: '3.x'
+          python-version: '3.x'  # Set up Python 3.x
 
       - name: Install Dependencies
         run: |
@@ -23,19 +25,14 @@ jobs:
           if (Test-Path requirements.txt) { pip install -r requirements.txt }
         shell: pwsh
 
-      - name: Build Executable with PyInstaller and Tag
+      - name: Build Executable with PyInstaller
         run: |
-          $exeName = "mimosa-v${{ github.event.release.tag_name }}.exe"
-          pyinstaller --onefile --add-data "templates;templates" --add-data "static;static" --add-data "favicon.ico;." --name $exeName app.py
-          Move-Item "dist/$exeName" "$exeName"
+          pyinstaller --onefile --add-data "templates;templates" --add-data "static;static" --add-data "favicon.ico;." --name mimosa app.py
+          Move-Item "dist/mimosa.exe" "mimosa.exe"  # Move the executable to the root directory
         shell: pwsh
 
-      - name: Upload Executable to Release
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Upload Executable Artifact
+        uses: actions/upload-artifact@v3
         with:
-          upload_url: ${{ github.event.release.upload_url }}
-          asset_path: ./${{ github.event.release.tag_name }}.exe
-          asset_name: mimosa-v${{ github.event.release.tag_name }}.exe
-          asset_content_type: application/octet-stream
+          name: mimosa-executable
+          path: mimosa.exe  # Upload the executable from the root directory
