@@ -1,0 +1,41 @@
+name: Attach Executable to Release
+
+on:
+  release:
+    types: [published]
+
+jobs:
+  build-and-upload:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.x'
+
+      - name: Install Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install pyinstaller
+          if (Test-Path requirements.txt) { pip install -r requirements.txt }
+        shell: pwsh
+
+      - name: Build Executable with PyInstaller and Tag
+        run: |
+          $exeName = "mimosa-v${{ github.event.release.tag_name }}.exe"
+          pyinstaller --onefile --add-data "templates;templates" --add-data "static;static" --add-data "favicon.ico;." --name $exeName app.py
+          Move-Item "dist/$exeName" "$exeName"
+        shell: pwsh
+
+      - name: Upload Executable to Release
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ github.event.release.upload_url }}
+          asset_path: ./${{ github.event.release.tag_name }}.exe
+          asset_name: mimosa-v${{ github.event.release.tag_name }}.exe
+          asset_content_type: application/octet-stream
