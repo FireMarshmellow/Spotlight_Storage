@@ -26,7 +26,7 @@ jobs:
 
       - name: Build Executable with PyInstaller
         run: |
-          python -m PyInstaller --onefile --add-data "templates:templates" --add-data "static:static" app.py  # Build the executable
+          python -m PyInstaller --onefile --add-data "templates:templates" --add-data "static:static" --name mimosa.exe app.py  # Build the executable
 
       - name: Upload Executable Artifact
         uses: actions/upload-artifact@v3
