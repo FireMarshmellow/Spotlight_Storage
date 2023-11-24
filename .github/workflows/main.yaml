@@ -1,4 +1,4 @@
-name: Build Flask Executable with PyInstaller
+name: Build Windows Executable with PyInstaller
 
 on:
   push:
@@ -7,7 +7,7 @@ on:
 
 jobs:
   build_executable:
-    runs-on: ubuntu-latest  # Run the job on an Ubuntu runner
+    runs-on: windows-latest  # Run the job on a Windows runner
 
     steps:
       - name: Checkout Repository
@@ -26,10 +26,10 @@ jobs:
 
       - name: Build Executable with PyInstaller
         run: |
-          python -m PyInstaller --onefile --add-data "templates:templates" --add-data "static:static" --name mimosa.exe app.py  # Build the executable
+          pyinstaller --onefile --add-data "templates;templates" --add-data "static;static" app.py  # Build the executable
 
       - name: Upload Executable Artifact
         uses: actions/upload-artifact@v3
         with:
-          name: flask-executable
-          path: dist/mimosa.exe  # Upload the built executable from the dist folder
+          name: windows-flask-executable
+          path: dist/app.exe  # Upload the built executable from the dist folder
