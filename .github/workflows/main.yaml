@@ -1,9 +1,9 @@
 name: Attach Executable to Release
 
 on:
-  release:
-    types: [published]
-
+  push:
+    branches:
+      - main
 jobs:
   build-and-upload:
     runs-on: windows-latest
