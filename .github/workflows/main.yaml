@@ -3,7 +3,7 @@ name: Build and Release Docker
 on:
   push:
     branches:
-      - Main
+      - Wip
 
 jobs:
   docker:
