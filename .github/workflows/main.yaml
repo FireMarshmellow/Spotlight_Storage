@@ -3,7 +3,7 @@ name: Attach Executable to Release
 on:
   push:
     branches:
-      - main
+      - Main
 jobs:
   build-and-upload:
     runs-on: windows-latest
