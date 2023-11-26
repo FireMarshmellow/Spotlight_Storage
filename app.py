@@ -27,6 +27,46 @@ def favicon():
 def index():
     return render_template('index.html')
 
+@app.route('/api/tags', methods=['GET', 'POST'])
+def tags():
+    if request.method == 'GET':
+        try:
+            tag_data = db.read_tags()  # Fetch ESP data from the database
+            return jsonify(tag_data), 200
+        except Exception as e:
+            print(f"Error fetching Tag data: {e}")  # Log the error for debugging
+            return jsonify({"error": "An error occurred fetching Tag data"}), 500
+
+    elif request.method == 'POST':
+        try:
+            tag_data = request.get_json()
+            if not tag_data:
+                return jsonify({"error": "No data provided"}), 400
+
+            id = db.write_tag(tag_data)
+            if id is None:
+                raise ValueError("Failed to write Tag")
+            tag_data ['id'] = id
+
+            return jsonify(tag_data), 201
+        except Exception as e:
+            print(f"Error on writing Tag data: {e}")  # Log the error
+            return jsonify({"error": "An error occurred writing Tag data"}), 500
+    else:
+        return jsonify({"error": "Method not allowed"}), 405
+
+@app.route('/api/tag/<id>', methods=['GET', 'PUT', 'DELETE'])
+def handle_tag(id):
+    if request.method == 'PUT':
+        tag_data = request.get_json()
+        db.update_tag(id, tag_data)
+        print(f"saved data of {tag_data}")
+        return jsonify({'success': True})
+
+    elif request.method == 'DELETE':
+        db.delete_tag(id)
+        return jsonify({'success': True})
+
 def get_unique_ips_from_database():
     # Get all items from the database
     items = db.read_items()
@@ -145,7 +185,7 @@ def item(id):
         else:
             return jsonify({ 'error': 'Invalid action' }), 400
 
-def send_request(target_ip, data, timeout=0.2):
+def send_request(target_ip, data, timeout=0.4):
     url = f"http://{target_ip}/json/state"
 
     try:
@@ -250,6 +290,7 @@ def apply_brightness():
     set_global_settings()
     if request.method == 'GET':
         ips = get_unique_ips_from_database()
+
         for ip in ips:
             brightness_data = {"on":True,"bri":round(255*app.brightness),"transition":5}
             send_request(ip, brightness_data)

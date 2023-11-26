@@ -13,6 +13,7 @@ function addItem(event) {
   const position = localStorage.getItem('led_positions');
   const quantity = document.getElementById("quantity").value;
   const selectedEspDropdown = document.getElementById("ip"); // Get the selected ESP dropdown
+  const tags = localStorage.getItem('item_tags');
 
   const selectedEspValue = selectedEspDropdown.value;
 
@@ -37,9 +38,10 @@ function addItem(event) {
           image,
           position,
           quantity,
-          ip, // Set the IP as the IP of the selected ESP
+          ip,
+          tags,
         };
-
+        console.log('item data',item)
         if (isEditingItem) {
           // We are editing, so send a PUT request to update the existing item
           fetch(`/api/items/${editingItemId}`, {
@@ -79,6 +81,7 @@ function addItem(event) {
       .catch((error) => console.error(error));
       // Clear the stored data in the 'led_positions' key
       localStorage.removeItem('led_positions');
+      localStorage.removeItem('item_tags');
 
 }
 
@@ -100,6 +103,7 @@ function toggleAddForm() {
     if(isEditingItem === false){
       form.reset();
       localStorage.removeItem('led_positions');
+      localStorage.removeItem('item_tags');
     }
   }
 }
@@ -312,6 +316,7 @@ function createItemElement(item) {
   li.dataset.name = item.name;
   li.dataset.quantity = parseInt(item.quantity, 10);  // Store as numbers
   li.dataset.ip = item.ip;
+  li.dataset.tags = item.tags;
   li.classList.add("item");
 
   const wrapper = document.createElement("div");

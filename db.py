@@ -5,6 +5,7 @@ import sqlite3
 DATABASE = 'data.db'
 DATABASE_ESP= 'esp.db'
 DATABASE_SETTING= 'settings.db'
+DATABASE_TAG= 'tags.db'
 # Function to connect to the database
 def get_db():
     conn = sqlite3.connect(DATABASE)
@@ -19,7 +20,8 @@ def get_db():
             image TEXT,
             position TEXT,
             quantity INTEGER,
-            ip TEXT
+            ip TEXT,
+            tags TEXT 
         )
     ''')
     conn.commit()
@@ -35,7 +37,7 @@ def read_items():
 def write_item(item):
     conn = get_db()
     cursor = conn.cursor()
-    cursor.execute('INSERT INTO items (name, link, image, position, quantity, ip) VALUES (?, ?, ?, ?, ?, ?)', [item['name'], item['link'], item['image'], item['position'], item['quantity'], item['ip']])
+    cursor.execute('INSERT INTO items (name, link, image, position, quantity, ip, tags) VALUES (?, ?, ?, ?, ?, ?, ?)', [item['name'], item['link'], item['image'], item['position'], item['quantity'], item['ip'], item['tags']])
     lastId = cursor.lastrowid
     conn.commit()
     conn.close()
@@ -45,7 +47,7 @@ def write_item(item):
 def update_item(id, data):
     conn = get_db()
     try:
-        conn.execute('UPDATE items SET name = ?, link = ?, image = ?, position = ?, quantity = ?, ip = ? WHERE id = ?', [data['name'], data['link'], data['image'], data['position'], data['quantity'], data['ip'], id])
+        conn.execute('UPDATE items SET name = ?, link = ?, image = ?, position = ?, quantity = ?, ip = ?, tags = ? WHERE id = ?', [data['name'], data['link'], data['image'], data['position'], data['quantity'], data['ip'], data['tags'], id])
         conn.commit()
 
     except sqlite3.Error as e:
@@ -223,3 +225,57 @@ def update_settings(settings):
     cursor.execute('INSERT INTO settings (brightness, timeout) VALUES (?,?)', [settings['brightness'], settings['timeout']])
     conn.commit()
     conn.close()
+
+
+#Tags Database
+def get_tagsdb():
+    conn = sqlite3.connect(DATABASE_TAG)
+    conn.row_factory = sqlite3.Row
+    # Create the settings table if it does not exist
+    conn.execute('''
+        CREATE TABLE IF NOT EXISTS tags (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            tag TEXT
+        )
+    ''')
+
+    conn.commit()
+    return conn
+
+
+def read_tags():
+    conn = get_tagsdb()
+    tags = conn.execute('SELECT * FROM tags').fetchall()
+    conn.close()
+    return [dict(tag) for tag in tags]
+
+
+def update_tag(id,tag):
+    conn = get_tagsdb()
+    try:
+        conn.execute('UPDATE tags SET tag = ? WHERE id = ?', [tag['tag'], id])
+        conn.commit()
+
+    except sqlite3.Error as e:
+        conn.rollback()
+    finally:
+        conn.close()
+
+def write_tag(tag):
+    conn = get_tagsdb()
+    cursor = conn.cursor()
+    cursor.execute('INSERT INTO tags (tag) VALUES (?)', [tag['tag']])
+    lastId = cursor.lastrowid
+    conn.commit()
+    conn.close()
+    return lastId
+
+def delete_tag(id):
+    conn = get_tagsdb()
+    try:
+        conn.execute('DELETE FROM tags WHERE id = ?', [id])
+        conn.commit()
+    except sqlite3.Error as e:
+        conn.rollback()
+    finally:
+        conn.close()

@@ -6,6 +6,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
     <style>
         .grid-container {
             display: grid;
@@ -44,7 +45,7 @@
         }
 
         .menu-button:hover {
-            background-color: rgb(29 78 216);
+            background-color: #1D4ED8FF;
         }
 
         .menu-button {
@@ -81,6 +82,78 @@
 
         #party-button:hover {
             animation: rainbow 4s linear infinite;
+        }
+        .tag {
+            background-color: #3B82F6FF; /* Default background color (change as needed) */
+            color: #ffffff; /* Default text color (change as needed) */
+            font-weight: bold;
+            text-align: center;
+            padding: 0.1rem 1.5rem 0.1rem 1rem;
+            border-radius: 9999px; /* Large border-radius to make it circular */
+            margin-right: 0.25rem; /* Adjust right margin as needed */
+            cursor: pointer;
+            position: relative;
+        }
+
+        .tag:hover {
+            background-color: #1D4ED8FF; /* Hover background color (change as needed) */
+        }
+        .close-btn {
+            color: rgba(246, 59, 87, 0.63);
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            position: absolute;
+            text-align: center;
+            right: 0;
+            transform: translateX(-50%);
+        }
+
+        .close-btn:hover {
+            color: #f63b57;
+        }
+        .container {
+            width: 60%;
+            height: auto; /* Set to 'auto' to expand vertically based on content */
+        }
+
+        .tag-container {
+            border: none;
+            border-radius: 8px;
+            display: flex;
+            flex-wrap: wrap;
+            overflow: auto;
+            justify-content: center;
+        }
+
+        .tag-container .tag {
+            padding: 5px;
+            border: none;
+            margin: 5px;
+            display: flex;
+            flex: 0 0 auto; /* Prevent flex items from growing or shrinking */
+            align-items: center;
+            border-radius: 8px;
+            background: #3B82F6FF;
+            cursor: default;
+        }
+
+        .tag i {
+            font-size: 16px;
+            margin-left: 5px;
+        }
+
+        .container input {
+            flex: 1;
+            padding: 5px;
+            outline: none;
+            border-radius: 4px;
+        }
+        .container select{
+            flex: 1;
+            padding: 5px;
+            outline: none;
+            border-radius: 4px;
         }
     </style>
 </head>
@@ -178,30 +251,34 @@
                 </div>
                 </div>
                 <div class="mb-4 flex flex-wrap">
-                <div class="w-full md:w-3/5 md:pr-2">
+                <div class="w-full md:w-2/4 md:pr-2">
                     <label for="ip" class="block text-gray-200 font-bold mb-2">Select ESP:</label>
                     <select id="ip" name="ip" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">                   </select>
                 </div>
-                <div class="w-full md:w-2/5 md:pl-2 text-right">
+                <div class="w-full md:w-2/4 md:pl-2">
                     <label for="generate_pos" class="block text-gray-200 font-bold mb-2">Generate Positions:</label>
-                    <button type="button" id="generate_pos" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mb-2">Select LEDS</button>
+                    <button type="button" id="generate_pos" class="bg-blue-500 hover:bg-blue-700 text-white w-full font-bold py-1.5  px-4 rounded mb-2">Select LEDS</button>
                 </div>
                 </div>
-                <div id="select_led_container" class="container mx-auto mt-8" style="display: none">
+                <div id="select_led_container" class="container mx-auto" style="display: none">
                     <div class="mb-4 flex flex-wrap">
                         <div class="w-full md:w-1/4 ">
                             <button type="button" id="test_lights" onclick="TestLights()"
-                                    class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mb-2">Test Lights</button>
+                                    class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mb-1">Test Lights</button>
                         </div>
                         <div class="w-full md:w-1/4 md:pl-2">
                             <button type="button" id="clear_grid" onclick="clearAll()"
-                                    class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mb-2">Clear All</button>
+                                    class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mb-1 ">Clear All</button>
                         </div>
                     </div>
-
                     <div class="mb-4">
                         <div class="grid-container" id="gridContainer"></div>
                     </div>
+                </div>
+                <div class="container mb-4 text-gray-200">
+                    <label for="tag-input" class="block text-gray-200 font-bold mb-2">Tags:</label>
+                    <input  id="tag-input" name="tag-input" placeholder="Add Tags" class="text-gray-700 placeholder:text-gray-500"  />
+                    <div class="tag-container"></div>
                 </div>
                 <button type="button" id="save-item"
                         class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">Add</button>
@@ -271,11 +348,11 @@
             </form>
 
         </div>
-        <div class="flex items-center">
+        <div class="flex items-center mt-2">
         <input type="text" id="search" placeholder="Search items..."
-               class="flex-1 shadow appearance-none  rounded w-full py-2 px-3 text-gray-200 bg-gray-950 leading-tight focus:outline-none focus:shadow-outline">
+               class="flex-1 shadow appearance-none  rounded w-full py-2 px-3 text-white bg-gray-950 leading-tight focus:outline-none focus:shadow-outline">
 
-            <div class="relative ml-2">
+            <div class="relative ml-1">
                 <div id="sort_title" class="flex-1 shadow appearance-none rounded py-2 px-3 text-gray-200 bg-gray-950 leading-tight focus:outline-none focus:shadow-outline">
                     Sort by: ID <!-- Initial title, replace with the default selected value -->
                 </div>
@@ -286,8 +363,15 @@
                     <option value="ip">Box</option>
                 </select>
             </div>
+
         </div>
-    </div>
+        <div class="container">
+        <div class="mt-1 mb-4 tag-container ">
+            <div id="tag-list" class="flex justify-center ml-1 w-full text-left text-gray-200 pr-2">
+            </div>
+        </div>
+        </div>
+
     <ul id="item-list"
         class="relative grid sm:grid-cols-1 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 max-w-5xl mx-auto w-11/12 md:5/6 lg:full">
     </ul>
@@ -296,6 +380,7 @@
     <script src="{{ url_for('static', filename='esp.js') }}"></script>
     <script src="{{ url_for('static', filename='gen_grid.js') }}"></script>
     <script src="{{ url_for('static', filename='settings.js') }}"></script>
+    <script src="{{ url_for('static', filename='tags.js') }}"></script>
 </body>
 
 </html>
