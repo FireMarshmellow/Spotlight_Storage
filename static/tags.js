@@ -1,6 +1,9 @@
 let isLoadingTags = false;
 const tagList = document.getElementById('tag-list');
-const tagContainer = document.querySelector('.tag-container');
+const AddTagIcon = document.getElementById('add_form_tag_toggle');
+const filterIcon = document.getElementById('filter_tag_toggle');
+const tagContainer = document.getElementById('add_form_tag_container');
+const FilterTagContainer = document.getElementById('filter_tag_container');
 const input = document.getElementById('tag-input');
 
 let tags = [];
@@ -28,12 +31,7 @@ tagList.addEventListener('click', (event) => {
             const itemTags = item.dataset.tags;
             const cleanedTags = itemTags.replace(/[\[\]'"`]/g, ''); // Remove square brackets, single quotes, double quotes, and backticks
             const itemTagsArray = cleanedTags.split(',');
-
-            console.log('filter', filter);
-            console.log('itemTagsArray', itemTagsArray);
-
             let shouldDisplay = true;
-
             if (filter.length > 0) {
                 // Check if all filters are present in itemTagsArray
                 filter.forEach(searchText => {
@@ -44,7 +42,6 @@ tagList.addEventListener('click', (event) => {
                     }
                 });
             }
-
             if (shouldDisplay) {
                 item.style.display = "flex";
             } else {
@@ -53,7 +50,27 @@ tagList.addEventListener('click', (event) => {
         });
     }
 });
-
+function resetTagSelection() {
+    const allTags = tagContainer.querySelectorAll('.tag');
+    allTags.forEach((tag) => {
+        tag.classList.remove('selected');
+    });
+    applyTagFilter(tagContainer)
+}
+function PopulateTagSelection(itemTagsArray){
+    const allTags = tagContainer.querySelectorAll('.tag');
+    console.log('itemTagsArray', itemTagsArray)
+    console.log('allTags', allTags)
+    allTags.forEach(tagElement => {
+            const tag = tagElement.querySelector('i').getAttribute('data-item');
+            console.log('tag', tag)
+            // Check if the tag is in itemTagsArray
+            if (itemTagsArray.includes(tag)) {
+                tagElement.classList.add('selected');
+                applyTagFilter(tagContainer);
+            }
+    });
+}
 // Updated applyTagFilter to log immediately after tag click
 function applyTagFilter(container) {
     const allTags = Array.from(container.getElementsByClassName('tag'));
@@ -96,7 +113,7 @@ function loadTags() {
             tagsArray.forEach((tagData) => {
                 isLoadingTags = true
                 const  input = createTag(tagData);
-                tagContainer.prepend(input)
+                tagContainer.append(input)
                 isLoadingTags = false
                 tags.push(tagData)
             });
@@ -177,7 +194,11 @@ function addTags(tagData){
 }
 input.addEventListener('keyup', function (e){
     if (e.key === 'Enter' && input.value !=='') {
-        // Set the id for the new tag
+        const computedStyle = window.getComputedStyle(tagContainer);
+        if (computedStyle.display === "none") {
+            // Toggle the visibility of the tag container
+            tagContainer.classList.toggle('hidden');
+        }
         const newId = tags.length + 1;
         const newTag = { id: newId, tag: input.value };
         tags.push(newTag);
@@ -186,4 +207,12 @@ input.addEventListener('keyup', function (e){
     }
 })
 loadTags();
+AddTagIcon.addEventListener('click', function () {
+        // Toggle the visibility of the tag container
+        tagContainer.classList.toggle('hidden');
+});
 
+filterIcon.addEventListener('click', function () {
+    // Toggle the visibility of the tag container
+    FilterTagContainer.classList.toggle('hidden');
+});

@@ -14,9 +14,8 @@ function addItem(event) {
   const quantity = document.getElementById("quantity").value;
   const selectedEspDropdown = document.getElementById("ip"); // Get the selected ESP dropdown
   const tags = localStorage.getItem('item_tags');
-
   const selectedEspValue = selectedEspDropdown.value;
-
+  console.log('Loaded Tags',tags);
   if (selectedEspValue === "select") {
     // Check if the user has not selected anything
     alert("Please select an ESP.");
@@ -104,6 +103,7 @@ function toggleAddForm() {
       form.reset();
       localStorage.removeItem('led_positions');
       localStorage.removeItem('item_tags');
+      resetTagSelection();
     }
   }
 }
@@ -165,14 +165,17 @@ function createEditButton(item) {
     document.getElementById("link").value = item.link;
     document.getElementById("image").value = item.image;
     document.getElementById("quantity").value = item.quantity;
-    console.log("item quantity:", item.quantity);
     localStorage.setItem('led_positions', JSON.stringify(item.position))
+    const cleanedTags = item.tags.replace(/[\[\]'"`\\]/g, '');
+    const itemTagsArray = cleanedTags.split(',');
+    localStorage.setItem('item_tags', JSON.stringify(itemTagsArray))
+    PopulateTagSelection(itemTagsArray);
     //console.log('LED data:', JSON.parse(localStorage.getItem('led_positions')));
     const selectedValue = item.ip; // The IP to select
     selectEspDropdownIP.selectedIndex = findIndexByIP(selectedValue);
     window.scrollTo({
       top: 10,
-      behavior: "auto" // You can change this to "auto" for an instant scroll
+      behavior: "auto"
     });
     toggleAddForm();
     editingItemId = item.id;

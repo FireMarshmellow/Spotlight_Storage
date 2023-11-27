@@ -49,7 +49,7 @@
         }
 
         .menu-button {
-            position: absolute;
+            position: fixed;
             top: 10px;
             left: 10px;
             z-index: 2;
@@ -257,7 +257,7 @@
                 </div>
                 <div class="w-full md:w-2/4 md:pl-2">
                     <label for="generate_pos" class="block text-gray-200 font-bold mb-2">Generate Positions:</label>
-                    <button type="button" id="generate_pos" class="bg-blue-500 hover:bg-blue-700 text-white w-full font-bold py-1.5  px-4 rounded mb-2">Select LEDS</button>
+                    <button type="button" id="generate_pos" class="bg-blue-500 hover:bg-blue-700 text-white w-full font-bold py-1  px-4 rounded mb-2">Select LEDS</button>
                 </div>
                 </div>
                 <div id="select_led_container" class="container mx-auto" style="display: none">
@@ -277,8 +277,10 @@
                 </div>
                 <div class="container mb-4 text-gray-200">
                     <label for="tag-input" class="block text-gray-200 font-bold mb-2">Tags:</label>
-                    <input  id="tag-input" name="tag-input" placeholder="Add Tags" class="text-gray-700 placeholder:text-gray-500"  />
-                    <div class="tag-container"></div>
+                    <input  id="tag-input" name="tag-input" placeholder="Add Tags" class="text-gray-700 placeholder:text-gray-500 mb-4" />
+                    <i class="material-symbols-outlined" style="text-align: end; align-content: baseline; font-size: 28px;" id="add_form_tag_toggle">filter_list</i>
+
+                    <div class="tag-container hidden" id="add_form_tag_container"></div>
                 </div>
                 <button type="button" id="save-item"
                         class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">Add</button>
@@ -348,12 +350,12 @@
             </form>
 
         </div>
-        <div class="flex items-center mt-2">
+        <div class="flex items-center mt-2 mb-4">
         <input type="text" id="search" placeholder="Search items..."
-               class="flex-1 shadow appearance-none  rounded w-full py-2 px-3 text-white bg-gray-950 leading-tight focus:outline-none focus:shadow-outline">
+               class="flex-1 shadow appearance-none   w-full text-white bg-gray-950 leading-tight focus:outline-none focus:shadow-outline">
 
             <div class="relative ml-1">
-                <div id="sort_title" class="flex-1 shadow appearance-none rounded py-2 px-3 text-gray-200 bg-gray-950 leading-tight focus:outline-none focus:shadow-outline">
+                <div id="sort_title" class="flex-1 shadow appearance-none rounded py-1.5 px-3 text-gray-200 bg-gray-950 leading-tight focus:outline-none focus:shadow-outline">
                     Sort by: ID <!-- Initial title, replace with the default selected value -->
                 </div>
                 <select id="sort_method" class="absolute top-0 left-0 opacity-0 w-full h-full cursor-pointer text-gray-200 bg-gray-950" onchange="sortItems()">
@@ -363,12 +365,12 @@
                     <option value="ip">Box</option>
                 </select>
             </div>
+            <i class="material-symbols-outlined" style="text-align: end; align-content: baseline; font-size: 28px;" id="filter_tag_toggle">filter_list</i>
 
         </div>
         <div class="container">
-        <div class="mt-1 mb-4 tag-container ">
-            <div id="tag-list" class="flex justify-center ml-1 w-full text-left text-gray-200 pr-2">
-            </div>
+        <div class="mb-4 tag-container hidden " id="filter_tag_container">
+        <div id="tag-list" class="flex justify-center ml-1 w-full text-left text-gray-200 pr-2"> </div>
         </div>
         </div>
 
