@@ -208,11 +208,26 @@ input.addEventListener('keyup', function (e){
 })
 loadTags();
 AddTagIcon.addEventListener('click', function () {
-        // Toggle the visibility of the tag container
+    const computedStyle = window.getComputedStyle(tagContainer);
+    if (computedStyle.display === "none") {
         tagContainer.classList.toggle('hidden');
+        AddTagIcon.innerHTML = 'filter_list_off';
+    }
+    else{
+        tagContainer.classList.toggle('hidden');
+        AddTagIcon.innerHTML ='filter_list';
+    }
 });
 
 filterIcon.addEventListener('click', function () {
-    // Toggle the visibility of the tag container
-    FilterTagContainer.classList.toggle('hidden');
+    const computedStyle = window.getComputedStyle(FilterTagContainer);
+    if (computedStyle.display === "none") {
+        FilterTagContainer.classList.toggle('hidden');
+        filterIcon.innerHTML = 'filter_list_off';
+    }
+    else{
+        FilterTagContainer.classList.toggle('hidden');
+        filterIcon.innerHTML ='filter_list';
+    }
+
 });

@@ -7,156 +7,128 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
-    <style>
-        .grid-container {
-            display: grid;
-            gap: 5px; /* Reduced gap between checkboxes */
-            margin-bottom: 20px;
-        }
-
-
-        .grid-cell {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            text-align: center;
-        }
-        .side-menu {
-            width: 0;
-            position: fixed;
-            top: 0;
-            left: 0;
-            height: 100%;
-            background-color: rgb(31 41 55);
-            overflow-x: hidden;
-            transition: 0.5s;
-            padding-top: 60px;
-            z-index: 1;
-            box-shadow: 5px 0 10px rgba(0, 0, 0, 0.45); /* Add shadow to the side menu */
-        }
-
-        .side-menu a {
-            padding: 8px 8px 8px 32px;
-            text-decoration: none;
-            font-size: 25px;
-            color: rgb(31 41 55);
-            display: block;
-            transition: 0.1s;
-        }
-
-        .menu-button:hover {
-            background-color: #1D4ED8FF;
-        }
-
-        .menu-button {
-            position: fixed;
-            top: 10px;
-            left: 10px;
-            z-index: 2;
-            background-color: #3B82F6FF;
-            color: white;
-            padding: 10px 20px; /* Increase padding in the x-direction */
-            border: none;
-            cursor: pointer;
-            border-radius: 10px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Add shadow to the button */
-            transition: background-color 0.1s, transform 0.1s;
-        }
-        .menu-title {
-            margin-bottom: 10px; /* Add padding to the title */
-            margin-left: 10px; /* Add padding to the title */
-            margin-top: 5px;
-            font-size: 25px;
-            color: white; /* Change title color */
-        }
-        @keyframes rainbow {
-            0% { background-color: red; }
-            14% { background-color: orange; }
-            28% { background-color: yellow; }
-            42% { background-color: green; }
-            57% { background-color: blue; }
-            71% { background-color: indigo; }
-            85% { background-color: violet; }
-            100% { background-color: red; }
-        }
-
-        #party-button:hover {
-            animation: rainbow 4s linear infinite;
-        }
-        .tag {
-            background-color: #3B82F6FF; /* Default background color (change as needed) */
-            color: #ffffff; /* Default text color (change as needed) */
-            font-weight: bold;
-            text-align: center;
-            padding: 0.1rem 1.5rem 0.1rem 1rem;
-            border-radius: 9999px; /* Large border-radius to make it circular */
-            margin-right: 0.25rem; /* Adjust right margin as needed */
-            cursor: pointer;
-            position: relative;
-        }
-
-        .tag:hover {
-            background-color: #1D4ED8FF; /* Hover background color (change as needed) */
-        }
-        .close-btn {
-            color: rgba(246, 59, 87, 0.63);
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            position: absolute;
-            text-align: center;
-            right: 0;
-            transform: translateX(-50%);
-        }
-
-        .close-btn:hover {
-            color: #f63b57;
-        }
-        .container {
-            width: 60%;
-            height: auto; /* Set to 'auto' to expand vertically based on content */
-        }
-
-        .tag-container {
-            border: none;
-            border-radius: 8px;
-            display: flex;
-            flex-wrap: wrap;
-            overflow: auto;
-            justify-content: center;
-        }
-
-        .tag-container .tag {
-            padding: 5px;
-            border: none;
-            margin: 5px;
-            display: flex;
-            flex: 0 0 auto; /* Prevent flex items from growing or shrinking */
-            align-items: center;
-            border-radius: 8px;
-            background: #3B82F6FF;
-            cursor: default;
-        }
-
-        .tag i {
-            font-size: 16px;
-            margin-left: 5px;
-        }
-
-        .container input {
-            flex: 1;
-            padding: 5px;
-            outline: none;
-            border-radius: 4px;
-        }
-        .container select{
-            flex: 1;
-            padding: 5px;
-            outline: none;
-            border-radius: 4px;
-        }
-    </style>
 </head>
+<style>
+
+    .grid-container {
+        display: grid;
+        gap: 5px; /* Reduced gap between checkboxes */
+        margin-bottom: 20px;
+        overflow: auto;
+    }
+
+
+    .grid-cell {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+    }
+    .bigger-checkbox {
+        width: 25px;
+        height: 25px;
+
+
+    }
+    .side-menu {
+        width: 0;
+        position: fixed;
+        top: 0;
+        left: 0;
+        height: 100%;
+        background-color: rgb(31 41 55);
+        overflow-x: hidden;
+        transition: 0.5s;
+        padding-top: 60px;
+        z-index: 1;
+        box-shadow: 5px 0 10px rgba(0, 0, 0, 0.45); /* Add shadow to the side menu */
+    }
+
+    .side-menu a {
+        padding: 8px 8px 8px 32px;
+        text-decoration: none;
+        font-size: 25px;
+        color: rgb(31 41 55);
+        display: block;
+        transition: 0.1s;
+    }
+
+    .menu-button:hover {
+        color: #7092f3;
+    }
+
+    .menu-button {
+        position: fixed;
+        top: 10px;
+        left: 10px;
+        z-index: 2;
+        padding: 10px;
+        color: white;
+    }
+    .menu-title {
+        margin-bottom: 10px; /* Add padding to the title */
+        margin-left: 10px; /* Add padding to the title */
+        margin-top: 5px;
+        font-size: 25px;
+        color: white; /* Change title color */
+    }
+    @keyframes rainbow {
+        0% { background-color: red; }
+        14% { background-color: orange; }
+        28% { background-color: yellow; }
+        42% { background-color: green; }
+        57% { background-color: blue; }
+        71% { background-color: indigo; }
+        85% { background-color: violet; }
+        100% { background-color: red; }
+    }
+
+    #party-button:hover {
+        animation: rainbow 4s linear infinite;
+    }
+    .container {
+        width: 60%;
+        height: auto; /* Set to 'auto' to expand vertically based on content */
+    }
+
+    .tag-container {
+        border: none;
+        border-radius: 8px;
+        display: flex;
+        flex-wrap: wrap;
+        overflow: auto;
+        justify-content: center;
+    }
+
+    .tag-container .tag {
+        padding: 5px;
+        border: none;
+        margin: 5px;
+        display: flex;
+        flex: 0 0 auto; /* Prevent flex items from growing or shrinking */
+        align-items: center;
+        border-radius: 8px;
+        background: #3B82F6FF;
+        cursor: default;
+        font-weight: bold;
+    }
+
+    .tag i {
+        font-size: 16px;
+        margin-left: 5px;
+    }
+    .tag-container .tag:hover {
+        background-color: #1D4ED8FF; /* Hover background color (change as needed) */
+    }
+    /* Input and select styles */
+    .container input,
+    .container select{
+        flex: 1;
+        padding: 5px;
+        outline: none;
+        border-radius: 4px;
+    }
+</style>
 
 <body class="bg-gray-700 font-sans leading-normal tracking-normal">
 <div class="side-menu" id="mySideMenu">
@@ -203,7 +175,7 @@
     </ul>
 </div>
 
-<button class="menu-button" onclick="toggleSideMenu()">&#9776;</button>
+<button class="menu-button" onclick="toggleSideMenu()"><span class="material-symbols-outlined">settings</span></button>
 <div class="container mx-auto mt-8">
     <div class="container mx-auto mt-8">
         <head>
@@ -278,13 +250,14 @@
                 <div class="container mb-4 text-gray-200">
                     <label for="tag-input" class="block text-gray-200 font-bold mb-2">Tags:</label>
                     <input  id="tag-input" name="tag-input" placeholder="Add Tags" class="text-gray-700 placeholder:text-gray-500 mb-4" />
-                    <i class="material-symbols-outlined" style="text-align: end; align-content: baseline; font-size: 28px;" id="add_form_tag_toggle">filter_list</i>
+                    <i class="material-symbols-outlined icon" style="text-align: end; align-content: baseline; font-size: 28px;" id="add_form_tag_toggle">filter_list</i>
 
                     <div class="tag-container hidden" id="add_form_tag_container"></div>
                 </div>
+                <div class="flex mx-auto">
                 <button type="button" id="save-item"
                         class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">Add</button>
-
+                </div>
             </form>
         </div>
         <div id="esp-container" class="hidden w-full md:w-2/3 lg:w-1/2" >
@@ -352,9 +325,9 @@
         </div>
         <div class="flex items-center mt-2 mb-4">
         <input type="text" id="search" placeholder="Search items..."
-               class="flex-1 shadow appearance-none   w-full text-white bg-gray-950 leading-tight focus:outline-none focus:shadow-outline">
+               class="flex-1 shadow appearance-none text-gray-200   w-full text-white bg-gray-950 leading-tight focus:outline-none focus:shadow-outline">
 
-            <div class="relative ml-1">
+            <div class="relative ml-1 mr-1">
                 <div id="sort_title" class="flex-1 shadow appearance-none rounded py-1.5 px-3 text-gray-200 bg-gray-950 leading-tight focus:outline-none focus:shadow-outline">
                     Sort by: ID <!-- Initial title, replace with the default selected value -->
                 </div>
@@ -365,8 +338,8 @@
                     <option value="ip">Box</option>
                 </select>
             </div>
-            <i class="material-symbols-outlined" style="text-align: end; align-content: baseline; font-size: 28px;" id="filter_tag_toggle">filter_list</i>
 
+            <button class="text-gray-200 bg-gray-950 rounded px-3 text-center"><span class="material-symbols-outlined " style="font-size: 28px; color:white " id="filter_tag_toggle">filter_list</span></button>
         </div>
         <div class="container">
         <div class="mb-4 tag-container hidden " id="filter_tag_container">
