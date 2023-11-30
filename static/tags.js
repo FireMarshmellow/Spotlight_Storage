@@ -1,4 +1,3 @@
-let isLoadingTags = false;
 const tagList = document.getElementById('tag-list');
 const AddTagIcon = document.getElementById('add_form_tag_toggle');
 const filterIcon = document.getElementById('filter_tag_toggle');
@@ -9,7 +8,6 @@ const input = document.getElementById('tag-input');
 let tags = [];
 tagContainer.addEventListener('click', (event) => {
     const tagElement = event.target.closest('.tag');
-
     if (tagElement) {
         // Toggle the 'selected' class for the clicked tag
         tagElement.classList.toggle('selected');
@@ -26,7 +24,6 @@ tagList.addEventListener('click', (event) => {
         tagElement.classList.toggle('selected');
         const filter = applyTagFilter(tagList);
         const items = Array.from(itemList.children);
-
         Array.from(items).forEach((item) => {
             const itemTags = item.dataset.tags;
             const cleanedTags = itemTags.replace(/[\[\]'"`]/g, ''); // Remove square brackets, single quotes, double quotes, and backticks
@@ -58,11 +55,11 @@ function resetTagSelection() {
     applyTagFilter(tagContainer)
 }
 function PopulateTagSelection(itemTagsArray){
-    const allTags = tagContainer.querySelectorAll('.tag');
-    console.log('itemTagsArray', itemTagsArray)
+    const allTags = Array.from(tagContainer.getElementsByClassName('tag'));
     console.log('allTags', allTags)
     allTags.forEach(tagElement => {
-            const tag = tagElement.querySelector('i').getAttribute('data-item');
+        console.log('tagElement', tagElement)
+            const tag = tagElement.innerHTML;
             console.log('tag', tag)
             // Check if the tag is in itemTagsArray
             if (itemTagsArray.includes(tag)) {
@@ -70,6 +67,15 @@ function PopulateTagSelection(itemTagsArray){
                 applyTagFilter(tagContainer);
             }
     });
+    const computedStyle = window.getComputedStyle(tagContainer);
+    if (computedStyle.display === "none") {
+        tagContainer.classList.toggle('hidden');
+        AddTagIcon.innerHTML = 'filter_list_off';
+    }
+    else{
+        tagContainer.classList.toggle('hidden');
+        AddTagIcon.innerHTML ='filter_list';
+    }
 }
 // Updated applyTagFilter to log immediately after tag click
 function applyTagFilter(container) {
@@ -78,14 +84,13 @@ function applyTagFilter(container) {
     let tag = "";
     // Iterate through all tags
     allTags.forEach(tagElement => {
-        if (container === tagContainer){
-             tag = tagElement.querySelector('i').getAttribute('data-item')
+        if(container === tagContainer){
+        tag = tagElement.innerHTML;}else{
+            tag = tagElement.querySelector('span').getAttribute('data-item')
         }
-        else {
-             tag = tagElement.innerHTML;
-        }
+
         // Check if the tag is selected
-        if (tagElement.classList.contains('selected') && tag !== 'add_tag') {
+        if (tagElement.classList.contains('selected')) {
             selectedTags.push(tag);
 
             tagElement.style.backgroundColor = '#1D4ED8FF'; // Dark blue background color for selected tags
@@ -93,6 +98,8 @@ function applyTagFilter(container) {
             tagElement.style.backgroundColor = ''; // Reset background color for unselected tags
         }
     });
+    localStorage.removeItem('item_tags');
+    localStorage.setItem('item_tags', JSON.stringify(selectedTags));
     console.log('selectedTags', selectedTags);
     return selectedTags
 
@@ -104,84 +111,35 @@ function loadTags() {
     // Fetch the settings from the server
     fetch("/api/tags")
         .then((response) => response.json())
-        .then((tags) => {
-
-            // Ensure that tags is an array or convert it to an array
-            const tagsArray = Array.isArray(tags) ? tags : [tags];
-            tags = tagsArray;
-            console.log('Current tags array:', tags);
-            tagsArray.forEach((tagData) => {
-                isLoadingTags = true
-                const  input = createTag(tagData);
-                tagContainer.append(input)
-                isLoadingTags = false
-                tags.push(tagData)
+        .then((tagdata) => {
+            console.log(tagdata);
+            tagdata.forEach(({ tag, count }) => {
+                const input = createTag(tag, count);
+                tagContainer.append(input);
+                tags.push(tag);
             });
 
         })
         .catch((error) => console.error(error));
 
 }
-function createTag(tagData){
-    const { id, tag } = tagData;
-    const newTagElement = document.createElement('span');
-    newTagElement.classList.add('tag');
-    newTagElement.innerHTML = tag;
-    newTagElement.id = id;
-    tagList.appendChild(newTagElement);
+function createTag(tag, count){
+    const FilterTag = document.createElement('div');
+    FilterTag.classList.add('tag');
+    FilterTag.innerHTML = tag;
     const div = document.createElement('div');
-    div.setAttribute('class', 'tag');
-    div.id = id;
-    const span = document.createElement('span');
-    span.innerHTML = tag;
-    const closeBtn = document.createElement('i');
-    closeBtn.setAttribute('class', 'material-symbols-outlined');
-    closeBtn.setAttribute('data-item', tag);
-    closeBtn.setAttribute('data-id', id); // Adding id attribute
-    closeBtn.innerHTML = 'close';
-
-    closeBtn.addEventListener('click', function() {
-        removeTag(div);
-        newTagElement.remove();
-    });
-
-    div.appendChild(span);
-    tagList.appendChild(div);
-    div.appendChild(closeBtn);
-    // Save Tag to DB
-    if(!isLoadingTags) {
-        // Update the tag_save object to use the correct property name
-        const tag_save = { tag: tag };
-        console.log('save tag:', tag_save);
-
-        fetch("/api/tags", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(tag_save),
-        })
-            .then((response) => response.json())
-            .then((data) => {
-                console.log("Tag added:", data);
-            })
-            .catch((error) => console.error(error));
-    }
-
+    div.classList.add('tag');
+    div.innerHTML = tag;
+    const TagCount = document.createElement('span');
+    TagCount.setAttribute('data-item', tag);
+    TagCount.innerHTML = count;
+    TagCount.classList.add("text-gray-500")
+    TagCount.style.marginLeft = '10px';
+    div.appendChild(TagCount);
+    FilterTag.appendChild(TagCount);
+    tagList.appendChild(FilterTag);
     return div;
 }
-function removeTag(tagElement) {
-    const id = tagElement.id;
-    tagElement.remove();
-    tags = tags.filter(tag => tag.id !== id);
-
-    // Delete item from database
-    fetch(`/api/tag/${id}`, { method: "DELETE" })
-        .then(() => {
-            // The tag has been successfully removed from the server
-            // Apply any additional logic if needed
-        })
-        .catch((error) => console.error(error));
-}
-
 function resetTags(){
     document.querySelectorAll('.tag').forEach(function (tag)
     {
@@ -189,7 +147,7 @@ function resetTags(){
     })
 }
 function addTags(tagData){
-        const  input = createTag(tagData);
+        const  input = createTag(tagData, 1);
         tagContainer.append(input)
 }
 input.addEventListener('keyup', function (e){
@@ -199,8 +157,7 @@ input.addEventListener('keyup', function (e){
             // Toggle the visibility of the tag container
             tagContainer.classList.toggle('hidden');
         }
-        const newId = tags.length + 1;
-        const newTag = { id: newId, tag: input.value };
+        const newTag = input.value;
         tags.push(newTag);
         addTags(newTag)
         input.value = '';
@@ -224,6 +181,7 @@ filterIcon.addEventListener('click', function () {
     if (computedStyle.display === "none") {
         FilterTagContainer.classList.toggle('hidden');
         filterIcon.innerHTML = 'filter_list_off';
+        loadTags();
     }
     else{
         FilterTagContainer.classList.toggle('hidden');

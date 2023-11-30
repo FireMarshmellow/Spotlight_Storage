@@ -34,43 +34,11 @@ def index():
 def tags():
     if request.method == 'GET':
         try:
-            tag_data = db.read_tags()  # Fetch ESP data from the database
+            tag_data = db.get_all_tags()  # Fetch ESP data from the database
             return jsonify(tag_data), 200
         except Exception as e:
             print(f"Error fetching Tag data: {e}")  # Log the error for debugging
             return jsonify({"error": "An error occurred fetching Tag data"}), 500
-
-    elif request.method == 'POST':
-        try:
-            tag_data = request.get_json()
-            if not tag_data:
-                return jsonify({"error": "No data provided"}), 400
-
-            id = db.write_tag(tag_data)
-            if id is None:
-                raise ValueError("Failed to write Tag")
-            tag_data['id'] = id
-
-            return jsonify(tag_data), 201
-        except Exception as e:
-            print(f"Error on writing Tag data: {e}")  # Log the error
-            return jsonify({"error": "An error occurred writing Tag data"}), 500
-    else:
-        return jsonify({"error": "Method not allowed"}), 405
-
-
-@app.route('/api/tag/<id>', methods=['GET', 'PUT', 'DELETE'])
-def handle_tag(id):
-    if request.method == 'PUT':
-        tag_data = request.get_json()
-        db.update_tag(id, tag_data)
-        print(f"saved data of {tag_data}")
-        return jsonify({'success': True})
-
-    elif request.method == 'DELETE':
-        db.delete_tag(id)
-        return jsonify({'success': True})
-
 
 def get_unique_ips_from_database():
     # Get all items from the database
