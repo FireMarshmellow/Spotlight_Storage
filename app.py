@@ -1,5 +1,8 @@
 # Importing necessary modules and packages
+import ipaddress
 import json
+import re
+from urllib.parse import urlparse
 
 from flask import Flask, render_template, jsonify, request, send_from_directory
 from requests import Timeout
@@ -40,14 +43,15 @@ def tags():
             print(f"Error fetching Tag data: {e}")  # Log the error for debugging
             return jsonify({"error": "An error occurred fetching Tag data"}), 500
 
+
 def get_unique_ips_from_database():
     # Get all items from the database
-    items = db.read_items()
+    ips = db.read_esp()
     # Create a set to store unique IP addresses
     unique_ips = set()
     # Iterate through the items and extract unique IPs
-    for item in items:
-        ip = item.get('ip')
+    for ip in ips:
+        ip = ip.get('esp_ip')
         if ip:
             unique_ips.add(ip)
     # Convert the set of unique IPs back to a list (if needed)
@@ -55,6 +59,14 @@ def get_unique_ips_from_database():
 
     return unique_ips_list
 
+def is_valid_url_or_ip(input_str):
+    ip_pattern = re.compile(r"\b(?:\d{1,3}\.){3}\d{1,3}\b")  # Simple IP address regex
+    url_pattern = re.compile(r"([a-zA-Z0-9-]+)\.([a-zA-Z]{2,})")
+
+    if ip_pattern.match(input_str):
+        return True
+
+    return bool(url_pattern.match(input_str))
 
 def set_global_settings():
     settings = db.read_settings()
@@ -142,8 +154,8 @@ def items():
 # Route to handle GET, PUT, DELETE requests for a specific item
 @app.route('/api/items/<id>', methods=['GET', 'PUT', 'DELETE', 'POST'])
 def item(id):
+    item = db.get_item(id)
     if request.method == 'GET':
-        item = db.get_item(id)
         if item:
             return jsonify(item)
         else:
@@ -151,16 +163,19 @@ def item(id):
 
     elif request.method == 'PUT':
         db.update_item(id, request.get_json())
-        item = db.get_item(id)
         return jsonify(dict(item))
 
     elif request.method == 'DELETE':
         db.delete_item(id)
         return jsonify({'success': True})
     elif request.method == 'POST':
-        item = db.get_item(id)
+
         if request.form.get('action') == 'locate':
-            light(item['position'], item['ip'], item['quantity'])
+            if is_valid_url_or_ip(item['ip']):
+                ip = item['ip']
+            else:
+                ip = db.get_ip_by_name(item['ip'])
+            light(item['position'], ip, item['quantity'])
             return jsonify({'success': True})
         else:
             return jsonify({'error': 'Invalid action'}), 400

@@ -30,7 +30,7 @@ function addItem(event) {
   fetch(`/api/esp/${selectedEspValue}`)
       .then((response) => response.json())
       .then((espData) => {
-        const ip = espData.esp_ip;
+        const ip = espData.name;
         const item = {
           name,
           link,
@@ -451,7 +451,7 @@ function populateEspDropdown() {
         data.forEach((esp) => {
           const option = document.createElement("option");
           option.value = esp.id;
-          option.textContent = esp.esp_ip;
+          option.textContent = esp.name ;
           selectEspDropdownIP.appendChild(option);
         });
       })
@@ -467,7 +467,6 @@ function findIndexByIP(ip) {
   }
   return 0; // Return 0 if no match is found.
 }
-document.getElementById("sort_method").addEventListener("click", sortItems);
 document.getElementById("sort_method").addEventListener("change", sortItems);
 
 // Sorting function

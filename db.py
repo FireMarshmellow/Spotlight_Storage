@@ -105,7 +105,7 @@ def get_espdb():
 
 # Function to write ESP settings to the database
 def write_esp_settings(esp_settings):
-    required_fields = ['esp_name', 'esp_ip', 'rows', 'cols', 'startTop', 'startLeft', 'serpentineDirection']
+    required_fields = ['name', 'esp_ip', 'rows', 'cols', 'startTop', 'startLeft', 'serpentineDirection']
     if not all(field in esp_settings for field in required_fields):
         print("Missing required fields in esp_settings")
         return None
@@ -116,7 +116,7 @@ def write_esp_settings(esp_settings):
         cursor.execute(
             'INSERT INTO esp (name, esp_ip, rows, cols, start_top, start_left, serpentine_direction) VALUES (?, ?, ?, ?, ?, ?, ?)',
             [
-                esp_settings['esp_name'],
+                esp_settings['name'],
                 esp_settings['esp_ip'],
                 esp_settings['rows'],
                 esp_settings['cols'],
@@ -144,7 +144,7 @@ def update_esp_settings(id, esp_settings):
         conn.execute(
             'UPDATE esp SET name = ?, esp_ip = ?, rows = ?, cols = ?, start_top = ?, start_left = ?, serpentine_direction = ? WHERE id = ?',
             [
-                esp_settings['esp_name'],
+                esp_settings['name'],
                 esp_settings['esp_ip'],
                 esp_settings['rows'],
                 esp_settings['cols'],
@@ -179,7 +179,6 @@ def read_esp():
     conn.close()
     return [dict(esp) for esp in esps]
 
-
 # Function to delete ESP settings from the database by ID
 def delete_esp_settings(id):
     conn = get_espdb()
@@ -213,6 +212,11 @@ def get_esp_settings_by_ip(id):
 
     finally:
         conn.close()
+def get_ip_by_name(esp_name):
+    conn = get_espdb()
+    esp = conn.execute('SELECT esp_ip FROM esp WHERE name = ?', (esp_name,)).fetchone()
+    conn.close()
+    return esp['esp_ip'] if esp else None
 
 
 def get_settingsdb():

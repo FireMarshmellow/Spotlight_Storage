@@ -96,11 +96,14 @@ function TestLights() {
         alert("Please select an ESP to Test.");
         return;
     }
-    const selectedOption = selectEspDropdownIP.options[selectedEspIndex];
-    const ip = selectedOption.textContent;
-    var checkboxes = document.querySelectorAll('input[name="ledPositions"]:checked');
-    var positions = Array.from(checkboxes).map(cb => parseInt(cb.value, 10));
-    var data = {};
+    fetch(`/api/esp/${selectedEspIndex}`)
+        .then((response) => response.json())
+        .then((espData) => {
+            console.log(espData);
+            const ip = espData.esp_ip;
+    const checkboxes = document.querySelectorAll('input[name="ledPositions"]:checked');
+    const positions = Array.from(checkboxes).map(cb => parseInt(cb.value, 10));
+    const data = {};
     data[ip] = positions;
 
     fetch('/test_lights', {
@@ -117,7 +120,7 @@ function TestLights() {
         })
         .catch((error) => {
             console.error('Error:', error);
-        });
+        });});
 }
 
 function clearAll() {
