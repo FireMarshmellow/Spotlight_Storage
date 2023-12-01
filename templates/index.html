@@ -127,11 +127,15 @@
         outline: none;
         border-radius: 4px;
     }
+    .hidden {
+        display: none;
+    }
+
 </style>
 
 <body class="bg-gray-700 font-sans leading-normal tracking-normal">
 <div class="side-menu" id="mySideMenu">
-    <h1 id="menu_title"  class="menu-title">LED Settings</h1>
+    <h1 id="menu_title"  class="menu-title">Settings</h1>
     <ul>
         <li>
 
@@ -256,7 +260,8 @@
                     <input  id="tag-input" name="tag-input" placeholder="Add Tags" class="text-gray-700 placeholder:text-gray-500 mb-4" />
                     <i class="material-symbols-outlined icon" style="text-align: end; align-content: baseline; font-size: 28px;" id="add_form_tag_toggle">filter_list</i>
 
-                    <div class="tag-container hidden" id="add_form_tag_container"></div>
+                    <div class="tag-container" id="add_form_tag_container"></div>
+                    <div class="tag-container hidden" id="add_form_tag_container_overflow"></div>
                 </div>
                 <div class="flex mx-auto">
                 <button type="button" id="save-item"
@@ -345,12 +350,13 @@
 
             <button class="text-gray-200 bg-gray-950 rounded px-3 text-center"><span class="material-symbols-outlined " style="font-size: 28px; color:white " id="filter_tag_toggle">filter_list</span></button>
         </div>
-        <div class="container">
-        <div class="mb-4 tag-container hidden " id="filter_tag_container">
+        <div class="container mb-4">
+        <div class="tag-container" id="filter_tag_container">
         <div id="tag-list" class="flex justify-center ml-1 w-full text-left text-gray-200 pr-2"> </div>
-        </div>
+            <div class="tag-container flex justify-center ml-1 w-full text-left text-gray-200 pr-2 hidden" id="filter_tag_container_overflow"></div>
         </div>
 
+        </div>
     <ul id="item-list"
         class="relative grid sm:grid-cols-1 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 max-w-5xl mx-auto w-11/12 md:5/6 lg:full">
     </ul>

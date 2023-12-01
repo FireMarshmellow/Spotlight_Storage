@@ -2,7 +2,8 @@ const tagList = document.getElementById('tag-list');
 const AddTagIcon = document.getElementById('add_form_tag_toggle');
 const filterIcon = document.getElementById('filter_tag_toggle');
 const tagContainer = document.getElementById('add_form_tag_container');
-const FilterTagContainer = document.getElementById('filter_tag_container');
+const tagContainerOverflow = document.getElementById('add_form_tag_container_overflow');
+const FilterTagContainerOverflow = document.getElementById('filter_tag_container_overflow');
 const input = document.getElementById('tag-input');
 
 let tags = [];
@@ -111,11 +112,10 @@ function loadTags() {
     // Fetch the settings from the server
     fetch("/api/tags")
         .then((response) => response.json())
-        .then((tagdata) => {
-            console.log(tagdata);
-            tagdata.forEach(({ tag, count }) => {
-                const input = createTag(tag, count);
-                tagContainer.append(input);
+        .then((TagData) => {
+            console.log(TagData);
+            TagData.forEach(({ tag, count }) => {
+                createTag(tag, count);
                 tags.push(tag);
             });
 
@@ -137,19 +137,25 @@ function createTag(tag, count){
     TagCount.style.marginLeft = '10px';
     div.appendChild(TagCount);
     FilterTag.appendChild(TagCount);
-    tagList.appendChild(FilterTag);
-    return div;
+    if(tags.length >= 6) {
+        FilterTagContainerOverflow.appendChild(FilterTag);
+        tagContainerOverflow.appendChild(div);
+
+    }else{
+        tagList.appendChild(FilterTag);
+        tagContainer.appendChild(div);}
+
+
 }
 function resetTags(){
     document.querySelectorAll('.tag').forEach(function (tag)
     {
         tag.parentElement.removeChild(tag);
     })
+    tags = [];
 }
 function addTags(tagData){
-        const  input = createTag(tagData, 1);
-        tagContainer.append(input)
-}
+         createTag(tagData, 1);}
 input.addEventListener('keyup', function (e){
     if (e.key === 'Enter' && input.value !=='') {
         const computedStyle = window.getComputedStyle(tagContainer);
@@ -165,27 +171,27 @@ input.addEventListener('keyup', function (e){
 })
 loadTags();
 AddTagIcon.addEventListener('click', function () {
-    const computedStyle = window.getComputedStyle(tagContainer);
+    const computedStyle = window.getComputedStyle(tagContainerOverflow);
     if (computedStyle.display === "none") {
-        tagContainer.classList.toggle('hidden');
+        loadTags();
+        tagContainerOverflow.classList.toggle('hidden');
         AddTagIcon.innerHTML = 'filter_list_off';
     }
     else{
-        tagContainer.classList.toggle('hidden');
+        tagContainerOverflow.classList.toggle('hidden');
         AddTagIcon.innerHTML ='filter_list';
     }
 });
 
 filterIcon.addEventListener('click', function () {
-    const computedStyle = window.getComputedStyle(FilterTagContainer);
+    const computedStyle = window.getComputedStyle(FilterTagContainerOverflow);
     if (computedStyle.display === "none") {
-        FilterTagContainer.classList.toggle('hidden');
-        filterIcon.innerHTML = 'filter_list_off';
         loadTags();
+        FilterTagContainerOverflow.classList.toggle('hidden');
+        filterIcon.innerHTML = 'filter_list_off';
     }
     else{
-        FilterTagContainer.classList.toggle('hidden');
+        FilterTagContainerOverflow.classList.toggle('hidden');
         filterIcon.innerHTML ='filter_list';
     }
-
 });

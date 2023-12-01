@@ -276,6 +276,7 @@ def get_all_tags():
         # Count the occurrences of each tag
         tag_counts = Counter(tags)
         unique_tags_with_count = [{'tag': tag, 'count': count} for tag, count in tag_counts.items()]
+        unique_tags_with_count.sort(key=lambda x: x['count'], reverse=True)
         return unique_tags_with_count
     finally:
         conn.close()
