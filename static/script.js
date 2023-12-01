@@ -1,6 +1,7 @@
 const form = document.getElementById("add-form");
 const itemList = document.getElementById("item-list");
 const selectEspDropdownIP = document.getElementById("ip");
+const CopyBnt = document.getElementById("copy-item")
 let isEditingItem = false;
 let editingItemId = null; // Track the ID of the item being edited
 // Add item to list
@@ -177,12 +178,11 @@ function createEditButton(item) {
       top: 10,
       behavior: "auto"
     });
+    CopyBnt.style.display = "block";
     toggleAddForm();
     editingItemId = item.id;
     document.getElementById("save-item").innerHTML = "Save Changes";
     generateGrid();
-    // Scroll to the top of the page
-
   });
 
   return editBtn;
@@ -504,7 +504,10 @@ function updateSortTitle() {
 
   title.textContent = "Sort by: " + selectedOption.textContent;
 }
-
+CopyBnt.addEventListener('click', function (){
+  isEditingItem = false;
+  addItem(event);
+})
 
 
 

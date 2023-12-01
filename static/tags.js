@@ -4,6 +4,7 @@ const filterIcon = document.getElementById('filter_tag_toggle');
 const tagContainer = document.getElementById('add_form_tag_container');
 const tagContainerOverflow = document.getElementById('add_form_tag_container_overflow');
 const FilterTagContainerOverflow = document.getElementById('filter_tag_container_overflow');
+const FilterTagContainer = document.getElementById('filter_tag_container');
 const input = document.getElementById('tag-input');
 
 let tags = [];
@@ -16,14 +17,14 @@ tagContainer.addEventListener('click', (event) => {
         localStorage.setItem('item_tags', JSON.stringify(selectedTags));
     }
 });
-tagList.addEventListener('click', (event) => {
+FilterTagContainer.addEventListener('click', (event) => {
     localStorage.removeItem('item_tags');
     const tagElement = event.target;
 
     if (tagElement.classList.contains('tag')) {
         // Toggle the 'selected' class for the clicked tag
         tagElement.classList.toggle('selected');
-        const filter = applyTagFilter(tagList);
+        const filter = applyTagFilter(FilterTagContainer);
         const items = Array.from(itemList.children);
         Array.from(items).forEach((item) => {
             const itemTags = item.dataset.tags;
@@ -57,26 +58,14 @@ function resetTagSelection() {
 }
 function PopulateTagSelection(itemTagsArray){
     const allTags = Array.from(tagContainer.getElementsByClassName('tag'));
-    console.log('allTags', allTags)
     allTags.forEach(tagElement => {
-        console.log('tagElement', tagElement)
             const tag = tagElement.innerHTML;
-            console.log('tag', tag)
             // Check if the tag is in itemTagsArray
             if (itemTagsArray.includes(tag)) {
                 tagElement.classList.add('selected');
                 applyTagFilter(tagContainer);
             }
     });
-    const computedStyle = window.getComputedStyle(tagContainer);
-    if (computedStyle.display === "none") {
-        tagContainer.classList.toggle('hidden');
-        AddTagIcon.innerHTML = 'filter_list_off';
-    }
-    else{
-        tagContainer.classList.toggle('hidden');
-        AddTagIcon.innerHTML ='filter_list';
-    }
 }
 // Updated applyTagFilter to log immediately after tag click
 function applyTagFilter(container) {
@@ -101,7 +90,6 @@ function applyTagFilter(container) {
     });
     localStorage.removeItem('item_tags');
     localStorage.setItem('item_tags', JSON.stringify(selectedTags));
-    console.log('selectedTags', selectedTags);
     return selectedTags
 
 
@@ -113,7 +101,7 @@ function loadTags() {
     fetch("/api/tags")
         .then((response) => response.json())
         .then((TagData) => {
-            console.log(TagData);
+
             TagData.forEach(({ tag, count }) => {
                 createTag(tag, count);
                 tags.push(tag);
@@ -133,9 +121,8 @@ function createTag(tag, count){
     const TagCount = document.createElement('span');
     TagCount.setAttribute('data-item', tag);
     TagCount.innerHTML = count;
-    TagCount.classList.add("text-gray-500")
+    TagCount.classList.add("text-stone-900")
     TagCount.style.marginLeft = '10px';
-    div.appendChild(TagCount);
     FilterTag.appendChild(TagCount);
     if(tags.length >= 6) {
         FilterTagContainerOverflow.appendChild(FilterTag);
@@ -173,7 +160,9 @@ loadTags();
 AddTagIcon.addEventListener('click', function () {
     const computedStyle = window.getComputedStyle(tagContainerOverflow);
     if (computedStyle.display === "none") {
-        loadTags();
+        if(!isEditingItem){
+            loadTags();
+        }
         tagContainerOverflow.classList.toggle('hidden');
         AddTagIcon.innerHTML = 'filter_list_off';
     }
@@ -186,7 +175,9 @@ AddTagIcon.addEventListener('click', function () {
 filterIcon.addEventListener('click', function () {
     const computedStyle = window.getComputedStyle(FilterTagContainerOverflow);
     if (computedStyle.display === "none") {
-        loadTags();
+        if(!isEditingItem){
+            loadTags();
+        }
         FilterTagContainerOverflow.classList.toggle('hidden');
         filterIcon.innerHTML = 'filter_list_off';
     }

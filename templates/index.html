@@ -260,12 +260,16 @@
                     <input  id="tag-input" name="tag-input" placeholder="Add Tags" class="text-gray-700 placeholder:text-gray-500 mb-4" />
                     <i class="material-symbols-outlined icon" style="text-align: end; align-content: baseline; font-size: 28px;" id="add_form_tag_toggle">filter_list</i>
 
-                    <div class="tag-container" id="add_form_tag_container"></div>
-                    <div class="tag-container hidden" id="add_form_tag_container_overflow"></div>
+                    <div class="tag-container" id="add_form_tag_container">
+                        <div class="tag-container hidden" id="add_form_tag_container_overflow"></div>
+                    </div>
+
                 </div>
                 <div class="flex mx-auto">
                 <button type="button" id="save-item"
-                        class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">Add</button>
+                        class="flex-1 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">Add</button>
+                <button type="button" id="copy-item"
+                        class="flex-1 bg-indigo-500 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline ml-4 hidden">Copy</button>
                 </div>
             </form>
         </div>
@@ -326,8 +330,8 @@
                     </div>
                 </div>
                 <div class="flex items-left my-5 mx-auto">
-                    <button type="button" id="add-esp" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mb-2">Add</button>
-                    <button type="button" id="delete-esp" class="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded mb-2" style="margin-left: 10px;">Delete</button>
+                    <button type="button" id="add-esp" class="flex-1 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mb-2">Add</button>
+                    <button type="button" id="delete-esp" class="flex-1 bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded mb-2 ml-4">Delete</button>
                 </div>
             </form>
 
