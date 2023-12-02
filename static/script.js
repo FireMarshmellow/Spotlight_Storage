@@ -9,7 +9,7 @@ function addItem(event) {
   event.preventDefault();
   submitLights();
   const name = document.getElementById("name").value;
-  const link = document.getElementById("link").value;
+  const link = document.getElementById("link").value || "";
   const image = document.getElementById("image").value;
   const position = localStorage.getItem('led_positions');
   const quantity = document.getElementById("quantity").value;
@@ -41,7 +41,6 @@ function addItem(event) {
           ip,
           tags,
         };
-        console.log('item data',item)
         if (isEditingItem) {
           // We are editing, so send a PUT request to update the existing item
           fetch(`/api/items/${editingItemId}`, {
@@ -70,10 +69,12 @@ function addItem(event) {
               .then((response) => response.json())
               .then((data) => {
                 const li = createItemElement(data);
+                isEditingItem = false;
                 itemList.appendChild(li);
                 form.reset();
-                isEditingItem = false;
                 toggleAddForm();
+                localStorage.removeItem('led_positions');
+                localStorage.removeItem('item_tags');
               })
               .catch((error) => console.error(error));
         }
@@ -324,8 +325,7 @@ function createItemElement(item) {
 
   const wrapper = document.createElement("div");
   wrapper.classList.add(
-      "bg-gray-800",
-      "text-gray-100",
+      "item-wrapper",
       "drop-shadow-md",
       "h-full",
       "w-11/12",
@@ -342,7 +342,7 @@ function createItemElement(item) {
 
   const img = document.createElement("img");
   img.src = item.image;
-  img.classList.add("h-32", "w-32", "rounded-lg", "mx-auto","bg-gray-800");
+  img.classList.add("h-32", "w-32", "rounded-lg", "mx-auto","item-image");
   wrapper.appendChild(img);
 
   const div = document.createElement("div");

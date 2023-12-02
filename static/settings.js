@@ -60,7 +60,6 @@ function loadSettings() {
             document.getElementById("brightness").value = settings.brightness;
             document.getElementById("timeout").value = settings.timeout;
             lightMode = settings.lightMode;
-            activateLightMode();
         })
         .catch((error) => console.error(error));
 }
@@ -77,11 +76,11 @@ function toggleSideMenu() {
     const sideMenu = document.getElementById("mySideMenu");
     updateBrightnessOutput();
     updateTimeoutOutput();
-    activateLightMode();
     if (sideMenu.style.width === "250px") {
         sideMenu.style.width = "0";
         addSettings(event);
     } else {
+        sideMenu.style.display = "block";
         loadSettings();
         sideMenu.style.width = "250px";
     }
@@ -94,65 +93,8 @@ function toggleLightMode() {
 }
 
 function activateLightMode() {
-    const body = document.getElementsByTagName("body")[0];
-    const title = document.getElementById("title");
-    const sideMenu = document.getElementById("mySideMenu");
-    const menuTitle = document.getElementById("menu_title")
-    const menuButton = document.getElementById("menu-button")
-
-    const brightnessOutput = document.getElementById("brightness-output");
-    const brightnessTitle = document.getElementById("brightness-title");
-
-    const timeoutOutput = document.getElementById("timeout-output");
-    const timeoutTitle = document.getElementById("timeout-title");
-
     lightModeButton.innerHTML = lightMode ? "Dark Mode" : "Light Mode";
-
-    const background = "bg-gray-700";
-    const textdark = "text-gray-700";
-    const text = "text-gray-200";
-
-    if (lightMode) {
-        body.classList.remove(background);
-        title.classList.remove(text);
-        title.classList.add(textdark);
-
-        sideMenu.style.backgroundColor = "#f1f1f1";
-
-        menuTitle.classList.add(textdark);
-
-        brightnessOutput.classList.remove(text);
-        timeoutOutput.classList.remove(text);
-        brightnessTitle.classList.remove(text);
-        timeoutTitle.classList.remove(text);
-
-        timeoutOutput.classList.add(textdark);
-        brightnessOutput.classList.add(textdark);
-        brightnessTitle.classList.add(textdark);
-        timeoutTitle.classList.add(textdark);
-        menuButton.classList.add(textdark);
-    } else {
-        body.classList.add(background);
-        title.classList.remove(textdark);
-        title.classList.add(text);
-
-        sideMenu.style.backgroundColor = "#1F2937FF";
-        menuTitle.classList.remove(textdark);
-
-        brightnessOutput.classList.add(text);
-        timeoutOutput.classList.add(text);
-        brightnessTitle.classList.add(text);
-        timeoutTitle.classList.add(text);
-
-        timeoutOutput.classList.remove(textdark);
-        brightnessOutput.classList.remove(textdark);
-        brightnessTitle.classList.remove(textdark);
-        timeoutTitle.classList.remove(textdark);
-        menuButton.classList.remove(textdark);
-    }
-
-
-}
+    document.body.classList.toggle('light-mode');}
 
 // Add event listeners to the "On" and "Off" buttons
 const onButton = document.getElementById("on-button");
@@ -168,3 +110,4 @@ document.getElementById("brightness").addEventListener("input", function (event)
 document.getElementById("timeout").addEventListener("input", function (event) {updateTimeoutOutput();});
 lightModeButton.addEventListener("click", () => {toggleLightMode();});
 loadSettings();
+activateLightMode();

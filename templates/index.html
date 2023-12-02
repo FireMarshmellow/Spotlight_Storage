@@ -7,174 +7,45 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
+    <link rel="stylesheet" type="text/css" href="../static/style.css" media="screen" />
 </head>
-<style>
-
-    .grid-container {
-        display: grid;
-        gap: 5px; /* Reduced gap between checkboxes */
-        margin-bottom: 20px;
-        overflow: auto;
-    }
-
-
-    .grid-cell {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        text-align: center;
-    }
-    .bigger-checkbox {
-        width: 25px;
-        height: 25px;
-
-
-    }
-    .side-menu {
-        width: 0;
-        position: fixed;
-        top: 0;
-        left: 0;
-        height: 100%;
-        overflow-x: hidden;
-        transition: 0.5s;
-        padding-top: 60px;
-        z-index: 1;
-        box-shadow: 5px 0 10px rgba(0, 0, 0, 0.45); /* Add shadow to the side menu */
-    }
-
-    .side-menu a {
-        padding: 8px 8px 8px 32px;
-        text-decoration: none;
-        font-size: 25px;
-        color: #1F2937FF;
-        display: block;
-        transition: 0.1s;
-    }
-
-    .menu-button:hover {
-        color: #7092f3;
-    }
-
-    .menu-button {
-        position: fixed;
-        top: 10px;
-        left: 10px;
-        z-index: 2;
-        padding: 10px;
-        color: white;
-    }
-    .menu-title {
-        margin-bottom: 10px; /* Add padding to the title */
-        margin-left: 10px; /* Add padding to the title */
-        margin-top: 5px;
-        font-size: 25px;
-        color: white; /* Change title color */
-    }
-    @keyframes rainbow {
-        0% { background-color: red; }
-        14% { background-color: orange; }
-        28% { background-color: yellow; }
-        42% { background-color: green; }
-        57% { background-color: blue; }
-        71% { background-color: indigo; }
-        85% { background-color: violet; }
-        100% { background-color: red; }
-    }
-
-    #party-button:hover {
-        animation: rainbow 4s linear infinite;
-    }
-    .container {
-        width: 60%;
-        height: auto; /* Set to 'auto' to expand vertically based on content */
-    }
-
-    .tag-container {
-        border: none;
-        border-radius: 8px;
-        display: flex;
-        flex-wrap: wrap;
-        overflow: auto;
-        justify-content: center;
-    }
-
-    .tag-container .tag {
-        padding: 5px;
-        border: none;
-        margin: 5px;
-        display: flex;
-        flex: 0 0 auto; /* Prevent flex items from growing or shrinking */
-        align-items: center;
-        border-radius: 8px;
-        background: #3B82F6FF;
-        cursor: default;
-        font-weight: bold;
-    }
-
-    .tag i {
-        font-size: 16px;
-        margin-left: 5px;
-    }
-    .tag-container .tag:hover {
-        background-color: #1D4ED8FF; /* Hover background color (change as needed) */
-    }
-    /* Input and select styles */
-    .container input,
-    .container select{
-        flex: 1;
-        padding: 5px;
-        outline: none;
-        border-radius: 4px;
-    }
-    .hidden {
-        display: none;
-    }
-
-</style>
-
-<body class="bg-gray-700 font-sans leading-normal tracking-normal">
-<div class="side-menu" id="mySideMenu">
+<body class="light-mode font-sans leading-normal tracking-normal">
+<div class="side-menu hidden" id="mySideMenu">
     <h1 id="menu_title"  class="menu-title">Settings</h1>
     <ul>
         <li>
-
-            <button id="on-button" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-8 rounded focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500" style="margin-bottom: 10px;margin-left: 10px;">
+            <button id="on-button" class="common-button bg-blue-500 hover:bg-blue-700 mr-4">
                 On
             </button>
         </li>
         <li>
-            <button id="off-button" class="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-8 rounded focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500", style="margin-bottom: 10px;margin-left: 10px;">
+            <button id="off-button" class="common-button bg-red-500 hover:bg-red-700 mr-4">
                 Off
             </button>
         </li>
         <li>
-            <button id="party-button" class="bg-gray-500 hover:bg-rainbow text-white font-bold py-2 px-8 rounded focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500" style="margin-bottom: 10px;margin-left: 10px;">
+            <button id="party-button" class="common-button bg-yellow-500 hover:bg-rainbow mr-4">
                 Party-Mode
             </button>
 
         </li>
         <li>
-            <label id="brightness-title" for="brightness" class="block text-gray-200 font-bold mb-2 pr-2 ml-3">Brightness:</label>
-            <div class="w-full" style="margin-left: 10px; padding-right: 10px;">
-                <input type="range" id="brightness" name="brightness" min="0" max="100" step="1" class="w-full">
-            </div>
-            <output for="brightness" id="brightness-output" class="text-gray-200 text-sm mt-2" style="margin-left: 10px;">50</output>
+            <label id="brightness-title" for="brightness" class="common-label">Brightness:</label>
+            <input type="range" id="brightness" name="brightness" min="0" max="100" step="1" class="common-input">
+            <output for="brightness" id="brightness-output" class="common-output" >50</output>
         </li>
         <li>
-            <label id="timeout-title" for="timeout" class="block text-gray-200 font-bold mb-2 pr-2 ml-3">Timeout in Seconds:</label>
-            <div class="w-full" style="margin-left: 10px; padding-right: 10px;">
-                <input type="range" id="timeout" name="brightness" min="0" max="200" step="1" class="w-full">
-            </div>
-            <output for="timeout" id="timeout-output" class="text-gray-200 text-sm mt-2" style="margin-left: 10px;">5</output>
+            <label id="timeout-title" for="timeout" class="common-label">Timeout in Seconds:</label>
+            <input type="range" id="timeout" name="brightness" min="0" max="200" step="1" class="common-input">
+            <output for="timeout" id="timeout-output" class="common-output">5</output>
         </li>
         <li>
-            <button id="apply-settings" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-8 rounded focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500", style="margin-bottom: 10px;margin-left: 10px;">
+            <button id="apply-settings" class="bg-blue-500 hover:bg-blue-700 common-button mt-4 mr-4">
                 Apply Settings
             </button>
         </li>
         <li>
-            <button id="light-mode" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-8 rounded focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 mb-3 ml-3">
+            <button id="light-mode" class="bg-blue-500 hover:bg-blue-700 common-button mr-4">
                 Light mode
             </button>
         </li>
@@ -186,69 +57,66 @@
 <button  id="menu-button" class="menu-button" onclick="toggleSideMenu()"><span class="material-symbols-outlined">settings</span></button>
 <div class="container mx-auto mt-8">
     <div class="container mx-auto mt-8">
-        <head>
-            <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css">
-        </head>
         <div class="absolut top-10 z-10 w-full  py-1">
-            <h1 id="title" class="text-4xl text-center font-bold mb-8 text-gray-200">M.I.M.O.S.A V3</h1>
+            <h1 id="title" class="text-4xl text-center font-bold mb-8">M.I.M.O.S.A V3</h1>
         </div>
 
     <div class="flex flex-col items-center my-5 mx-auto">
         <div class="relative">
         <button type="button" id="btn-esp"
-                class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mb-2">Add ESP</button>
+                class="common-button bg-blue-500 hover:bg-blue-700">Add ESP</button>
 
         <button type="button" id="btn-add"
-                class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mb-2">Add item</button>
+                class="common-button bg-blue-500 hover:bg-blue-700">Add Item</button>
         </div>
         <div id="form-container" class="hidden w-full md:w-2/3 lg:w-1/2">
-            <form id="add-form" class="bg-gray-800 shadow-md rounded px-8 pt-6 pb-8 mb-4">
+            <form id="add-form" class="shadow-md rounded px-8 pt-6 pb-8 mb-4">
                 <div class="mb-4">
-                    <label for="name" class="block text-gray-200 font-bold mb-2">Name:</label>
+                    <label for="name">Name:</label>
                     <input type="text" id="name" name="name" required
                            placeholder="Enter your name"
-                           class="shadow appearance-none border rounded w-full py-2 px-3 placeholder:text-gray-500  text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                           class="form-input">
                 </div>
 
                 <div class="mb-4">
-                    <label for="link" class="block text-gray-200 font-bold mb-2">Link:</label>
-                    <input type="url" id="link" name="link" required
+                    <label for="link">Link:</label>
+                    <input type="url" id="link" name="link"
                            placeholder="Enter the link"
-                           class="shadow appearance-none border rounded w-full py-2 px-3 placeholder:text-gray-500  text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                           class="form-input">
                 </div>
                 <div class="mb-4 flex flex-wrap">
                 <div class="w-full md:w-2/4 md:pr-2">
                     <label for="image" class="block text-gray-200 font-bold mb-2">Image:</label>
                     <input type="url" id="image" name="image" required
                            placeholder="Enter the image URL"
-                           class="shadow appearance-none border rounded w-full py-2 px-3 placeholder:text-gray-500  text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                           class="form-input">
                 </div>
                 <div class="w-full md:w-2/4 md:pl-2">
-                    <label for="quantity" class="block text-gray-200 font-bold mb-2">Quantity:</label>
+                    <label for="quantity">Quantity:</label>
                     <input type="number" id="quantity" name="quantity" required
                            placeholder="Enter the quantity"
-                           class="shadow appearance-none border rounded w-full placeholder:text-gray-500 py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                           class="form-input">
                 </div>
                 </div>
                 <div class="mb-4 flex flex-wrap">
                 <div class="w-full md:w-2/4 md:pr-2">
-                    <label for="ip" class="block text-gray-200 font-bold mb-2">Select ESP:</label>
-                    <select id="ip" name="ip" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">                   </select>
+                    <label for="ip" >Select ESP:</label>
+                    <select id="ip" name="ip" class="form-input"></select>
                 </div>
                 <div class="w-full md:w-2/4 md:pl-2">
-                    <label for="generate_pos" class="block text-gray-200 font-bold mb-2">Generate Positions:</label>
-                    <button type="button" id="generate_pos" class="bg-blue-500 hover:bg-blue-700 text-white w-full font-bold py-1  px-4 rounded mb-2">Select LEDS</button>
+                    <label for="generate_pos" >Generate Positions:</label>
+                    <button type="button" id="generate_pos" class="flex-1 bg-blue-500 hover:bg-blue-700 common-button w-full">Select LEDS</button>
                 </div>
                 </div>
-                <div id="select_led_container" class="container mx-auto" style="display: none">
+                <div id="select_led_container" class="container mx-auto hidden">
                     <div class="mb-4 flex flex-wrap">
                         <div class="w-full md:w-1/4 ">
                             <button type="button" id="test_lights" onclick="TestLights()"
-                                    class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mb-1">Test Lights</button>
+                                    class="common-button bg-blue-500 hover:bg-blue-700">Test Lights</button>
                         </div>
                         <div class="w-full md:w-1/4 md:pl-2">
                             <button type="button" id="clear_grid" onclick="clearAll()"
-                                    class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mb-1 ">Clear All</button>
+                                    class="common-button bg-blue-500 hover:bg-blue-700 ">Clear All</button>
                         </div>
                     </div>
                     <div class="mb-4">
@@ -256,9 +124,9 @@
                     </div>
                 </div>
                 <div class="container mb-4 text-gray-200">
-                    <label for="tag-input" class="block text-gray-200 font-bold mb-2">Tags:</label>
-                    <input  id="tag-input" name="tag-input" placeholder="Add Tags" class="text-gray-700 placeholder:text-gray-500 mb-4" />
-                    <i class="material-symbols-outlined icon" style="text-align: end; align-content: baseline; font-size: 28px;" id="add_form_tag_toggle">filter_list</i>
+                    <label for="tag-input" >Tags:</label>
+                    <input  id="tag-input" name="tag-input" placeholder="Add Tags" class="form-input placeholder:text-gray-500 mb-4" />
+                    <i class="material-symbols-outlined icon" id="add_form_tag_toggle">filter_list</i>
 
                     <div class="tag-container" id="add_form_tag_container">
                         <div class="tag-container hidden" id="add_form_tag_container_overflow"></div>
@@ -267,84 +135,84 @@
                 </div>
                 <div class="flex mx-auto">
                 <button type="button" id="save-item"
-                        class="flex-1 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">Add</button>
+                        class="flex-1 common-button bg-blue-500 hover:bg-blue-700">Add</button>
                 <button type="button" id="copy-item"
-                        class="flex-1 bg-indigo-500 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline ml-4 hidden">Copy</button>
+                        class="flex-1 common-button bg-purple-500 hover:bg-purple-700 hidden ml-2">Copy</button>
                 </div>
             </form>
         </div>
         <div id="esp-container" class="hidden w-full md:w-2/3 lg:w-1/2" >
-            <form id="esp-form" class="bg-gray-800 shadow-md rounded px-8 pt-6 pb-8 mb-4">
+            <form id="esp-form" class="shadow-md rounded px-8 pt-6 pb-8 mb-4">
                 <div class="mb-4">
-                    <label for="select_esp" class="block text-gray-200 font-bold mb-2">Select ESP:</label>
-                    <select id="select_esp" name="select_esp" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                    <label for="select_esp">Select ESP:</label>
+                    <select id="select_esp" name="select_esp" class="form-input">
                         <option value="add" selected>Add ESP</option>
                     </select>
                 </div>
 
                 <div class="mb-4">
-                    <label for="esp_name" class="block text-gray-200 font-bold mb-2">Name:</label>
-                    <input type="text" id="esp_name" name="esp_name" required class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                    <label for="esp_name">Name:</label>
+                    <input type="text" id="esp_name" name="esp_name" required class="form-input">
                 </div>
 
                 <div class="mb-4">
-                    <label for="esp_ip" class="block text-gray-200 font-bold mb-2">ESP IP:</label>
-                    <input type="text" id="esp_ip" name="esp_ip" required class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                    <label for="esp_ip">ESP IP:</label>
+                    <input type="text" id="esp_ip" name="esp_ip" required class="form-input">
                 </div>
 
                 <div class="mb-4 flex flex-wrap">
                     <div class="w-full md:w-1/2 md:pr-2">
-                        <label for="rows" class="block text-gray-200 font-bold mb-2">Rows:</label>
-                        <input type="number" id="rows" name="rows" min="1" value="4" required class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                        <label for="rows">Rows:</label>
+                        <input type="number" id="rows" name="rows" min="1" value="4" required class="form-input">
                     </div>
 
                     <div class="w-full md:w-1/2 md:pl-2">
-                        <label for="cols" class="block text-gray-200 font-bold mb-2">Columns:</label>
-                        <input type="number" id="cols" name="cols" min="1" value="4" required class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                        <label for="cols" >Columns:</label>
+                        <input type="number" id="cols" name="cols" min="1" value="4" required class="form-input">
                     </div>
                 </div>
 
                 <div class="mb-4 flex flex-wrap">
                     <div class="w-full md:w-1/3 md:pr-2">
-                        <label for="start_top" class="block text-gray-200 font-bold mb-2">Start Top:</label>
-                        <select id="start_top" required class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                        <label for="start_top">Start Top:</label>
+                        <select id="start_top" required class="form-input">
                             <option value="top">Top</option>
                             <option value="bottom">Bottom</option>
                         </select>
                     </div>
 
                     <div class="w-full md:w-1/3 md:px-2">
-                        <label for="start_left" class="block text-gray-200 font-bold mb-2">Start Left:</label>
-                        <select id="start_left" required class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                        <label for="start_left">Start Left:</label>
+                        <select id="start_left" required class="form-input">
                             <option value="left">Left</option>
                             <option value="right">Right</option>
                         </select>
                     </div>
 
                     <div class="w-full md:w-1/3 md:pl-2">
-                        <label for="serpentine_direction" class="block text-gray-200 font-bold mb-2">Serpentine Direction:</label>
-                        <select id="serpentine_direction" required class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                        <label for="serpentine_direction">Serpentine Direction:</label>
+                        <select id="serpentine_direction" required class="form-input">
                             <option value="horizontal">Horizontal</option>
                             <option value="vertical">Vertical</option>
                         </select>
                     </div>
                 </div>
                 <div class="flex items-left my-5 mx-auto">
-                    <button type="button" id="add-esp" class="flex-1 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mb-2">Add</button>
-                    <button type="button" id="delete-esp" class="flex-1 bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded mb-2 ml-4">Delete</button>
+                    <button type="button" id="add-esp" class="flex-1 common-button bg-blue-500 hover:bg-blue-700">Add</button>
+                    <button type="button" id="delete-esp" class="flex-1 common-button bg-red-500 hover:bg-red-700">Delete</button>
                 </div>
             </form>
 
         </div>
         <div class="flex items-center mt-2 mb-4">
         <input type="text" id="search" placeholder="Search items..."
-               class="flex-1 shadow appearance-none text-gray-200   w-full text-white bg-gray-950 leading-tight focus:outline-none focus:shadow-outline">
+               class="flex-1 shadow appearance-none search leading-tight focus:outline-none focus:shadow-outline">
 
             <div class="relative ml-1 mr-1">
-                <div id="sort_title" class="flex-1 shadow appearance-none rounded py-1.5 px-3 text-gray-200 bg-gray-950 leading-tight focus:outline-none focus:shadow-outline">
+                <div id="sort_title" class="flex-1 shadow appearance-none rounded py-1.5 px-3 search leading-tight focus:outline-none focus:shadow-outline">
                     Sort by: ID <!-- Initial title, replace with the default selected value -->
                 </div>
-                <select id="sort_method" class="absolute top-0 left-0 opacity-0 w-full h-full cursor-pointer text-gray-200 bg-gray-950" onchange="sortItems()">
+                <select id="sort_method" class="absolute top-0 left-0 opacity-0 w-full h-full cursor-pointer search" onchange="sortItems()">
                     <option value="id">ID</option>
                     <option value="name">Name</option>
                     <option value="quantity">Quantity</option>
@@ -352,12 +220,11 @@
                 </select>
             </div>
 
-            <button class="text-gray-200 bg-gray-950 rounded px-3 text-center"><span class="material-symbols-outlined " style="font-size: 28px; color:white " id="filter_tag_toggle">filter_list</span></button>
+            <button class="search rounded px-3 text-center"><span class="material-symbols-outlined icon" id="filter_tag_toggle">filter_list</span></button>
         </div>
         <div class="container mb-4">
         <div class="tag-container" id="filter_tag_container">
-        <div id="tag-list" class="flex justify-center ml-1 w-full text-left text-gray-200 pr-2"> </div>
-            <div class="tag-container flex justify-center ml-1 w-full text-left text-gray-200 pr-2 hidden" id="filter_tag_container_overflow"></div>
+            <div class="tag-container hidden" id="filter_tag_container_overflow"></div>
         </div>
 
         </div>

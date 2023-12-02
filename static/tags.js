@@ -1,4 +1,3 @@
-const tagList = document.getElementById('tag-list');
 const AddTagIcon = document.getElementById('add_form_tag_toggle');
 const filterIcon = document.getElementById('filter_tag_toggle');
 const tagContainer = document.getElementById('add_form_tag_container');
@@ -83,7 +82,7 @@ function applyTagFilter(container) {
         if (tagElement.classList.contains('selected')) {
             selectedTags.push(tag);
 
-            tagElement.style.backgroundColor = '#1D4ED8FF'; // Dark blue background color for selected tags
+            tagElement.style.backgroundColor = '#02ad14'; // Dark blue background color for selected tags
         } else {
             tagElement.style.backgroundColor = ''; // Reset background color for unselected tags
         }
@@ -129,7 +128,7 @@ function createTag(tag, count){
         tagContainerOverflow.appendChild(div);
 
     }else{
-        tagList.appendChild(FilterTag);
+        FilterTagContainer.appendChild(FilterTag);
         tagContainer.appendChild(div);}
 
 
