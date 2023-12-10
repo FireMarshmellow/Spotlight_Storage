@@ -1,6 +1,7 @@
 const form = document.getElementById("add-form");
 const itemList = document.getElementById("item-list");
 const selectEspDropdownIP = document.getElementById("ip");
+const CopyBnt = document.getElementById("copy-item")
 let isEditingItem = false;
 let editingItemId = null; // Track the ID of the item being edited
 // Add item to list
@@ -8,14 +9,14 @@ function addItem(event) {
   event.preventDefault();
   submitLights();
   const name = document.getElementById("name").value;
-  const link = document.getElementById("link").value;
+  const link = document.getElementById("link").value || "";
   const image = document.getElementById("image").value;
   const position = localStorage.getItem('led_positions');
   const quantity = document.getElementById("quantity").value;
   const selectedEspDropdown = document.getElementById("ip"); // Get the selected ESP dropdown
-
+  const tags = localStorage.getItem('item_tags');
   const selectedEspValue = selectedEspDropdown.value;
-
+  console.log('Loaded Tags',tags);
   if (selectedEspValue === "select") {
     // Check if the user has not selected anything
     alert("Please select an ESP.");
@@ -30,16 +31,16 @@ function addItem(event) {
   fetch(`/api/esp/${selectedEspValue}`)
       .then((response) => response.json())
       .then((espData) => {
-        const ip = espData.esp_ip;
+        const ip = espData.name;
         const item = {
           name,
           link,
           image,
           position,
           quantity,
-          ip, // Set the IP as the IP of the selected ESP
+          ip,
+          tags,
         };
-
         if (isEditingItem) {
           // We are editing, so send a PUT request to update the existing item
           fetch(`/api/items/${editingItemId}`, {
@@ -68,10 +69,12 @@ function addItem(event) {
               .then((response) => response.json())
               .then((data) => {
                 const li = createItemElement(data);
+                isEditingItem = false;
                 itemList.appendChild(li);
                 form.reset();
-                isEditingItem = false;
                 toggleAddForm();
+                localStorage.removeItem('led_positions');
+                localStorage.removeItem('item_tags');
               })
               .catch((error) => console.error(error));
         }
@@ -79,6 +82,7 @@ function addItem(event) {
       .catch((error) => console.error(error));
       // Clear the stored data in the 'led_positions' key
       localStorage.removeItem('led_positions');
+      localStorage.removeItem('item_tags');
 
 }
 
@@ -100,6 +104,8 @@ function toggleAddForm() {
     if(isEditingItem === false){
       form.reset();
       localStorage.removeItem('led_positions');
+      localStorage.removeItem('item_tags');
+      resetTagSelection();
     }
   }
 }
@@ -123,59 +129,105 @@ function deleteItem(item) {
 function createDeleteButton(item) {
   const deleteBtn = document.createElement("button");
   deleteBtn.innerText = "Delete";
-  deleteBtn.classList.add(
-      "bg-red-500",
-      "hover:bg-red-700",
-      "h-8",
-      "w-full",
-      "rounded-md",
-      "text-white",
-      "text-xs",
-      "justify-center",
-      "items-center",
-      "mx-auto"
-  );
+
+  function setButtonStyle(isHovered) {
+    deleteBtn.innerHTML = isHovered ? "delete" : "Delete";
+    deleteBtn.className = isHovered ? 'material-symbols-outlined' : '';
+    deleteBtn.classList.add(
+        "bg-red-500",
+        "h-8",
+        "w-full",
+        "rounded-md",
+        "text-white",
+        "justify-center",
+        "items-center",
+        "mx-auto"
+    );
+    if (isHovered) {
+      deleteBtn.classList.add("hover:bg-red-700");
+      deleteBtn.classList.add("text-xl");
+    } else {
+      deleteBtn.classList.add("text-xs");
+    }
+  }
+  // Set the initial style
+  setButtonStyle(false);
+  // Set the inner text to "trash_can_open" on hover
+  deleteBtn.addEventListener("mouseover", () => {
+    setButtonStyle(true);
+  });
+  // Set the inner text back to "Delete" when not hovering
+  deleteBtn.addEventListener("mouseout", () => {
+    setButtonStyle(false);
+  });
   deleteBtn.addEventListener("click", () => deleteItem(item));
   return deleteBtn;
 }
+
 
 // Create edit button
 function createEditButton(item) {
   const editBtn = document.createElement("button");
   editBtn.innerText = "Edit";
-  editBtn.classList.add(
-      "bg-blue-500",
-      "hover:bg-blue-700",
-      "h-8",
-      "w-full",
-      "rounded-md",
-      "text-white",
-      "text-xs",
-      "justify-center",
-      "items-center",
-      "mx-auto"
-  );
+
+  function setButtonStyle(isHovered) {
+    editBtn.className = isHovered ? 'material-symbols-outlined' : '';
+    editBtn.classList.add(
+        "bg-blue-500",
+        "h-8",
+        "w-full",
+        "rounded-md",
+        "text-white",
+        "justify-center",
+        "items-center",
+        "mx-auto"
+    );
+    if (isHovered) {
+      editBtn.classList.add("hover:bg-blue-700");
+      editBtn.classList.add("text-xl");
+    } else {
+      editBtn.classList.add("hover:bg-blue-700");
+      editBtn.classList.add("text-xs");
+    }
+  }
+
+  // Set the initial style
+  setButtonStyle(false);
+
+  // Set the inner text to "edit" on hover
+  editBtn.addEventListener("mouseover", () => {
+    editBtn.innerText = "edit";
+    setButtonStyle(true);
+  });
+
+  // Set the inner text back to "Edit" when not hovering
+  editBtn.addEventListener("mouseout", () => {
+    editBtn.innerText = "Edit";
+    setButtonStyle(false);
+  });
   editBtn.addEventListener("click", () => {
     isEditingItem = true;
     document.getElementById("name").value = item.name;
     document.getElementById("link").value = item.link;
     document.getElementById("image").value = item.image;
     document.getElementById("quantity").value = item.quantity;
-    console.log("item quantity:", item.quantity);
     localStorage.setItem('led_positions', JSON.stringify(item.position))
+    const cleanedTags = item.tags.replace(/[\[\]'"`\\]/g, '');
+    const itemTagsArray = cleanedTags.split(',');
+    localStorage.setItem('item_tags', JSON.stringify(itemTagsArray))
+    PopulateTagSelection(itemTagsArray);
     //console.log('LED data:', JSON.parse(localStorage.getItem('led_positions')));
     const selectedValue = item.ip; // The IP to select
     selectEspDropdownIP.selectedIndex = findIndexByIP(selectedValue);
     window.scrollTo({
       top: 10,
-      behavior: "auto" // You can change this to "auto" for an instant scroll
+      behavior: "auto"
     });
+    CopyBnt.style.display = "block";
     toggleAddForm();
     editingItemId = item.id;
     document.getElementById("save-item").innerHTML = "Save Changes";
     generateGrid();
-    // Scroll to the top of the page
-
   });
 
   return editBtn;
@@ -184,18 +236,43 @@ function createEditButton(item) {
 function createLocateButton(item) {
   const locateBtn = document.createElement("button");
   locateBtn.innerText = "Locate";
-  locateBtn.classList.add(
-      "bg-blue-500",
-      "hover:bg-blue-700",
-      "h-8",
-      "w-full",
-      "rounded-md",
-      "text-white",
-      "text-xs",
-      "justify-center",
-      "items-center",
-      "mx-auto"
-  );
+
+  function setButtonStyle(isHovered) {
+    locateBtn.innerHTML = isHovered ? "lightbulb" : "Locate";
+    locateBtn.className = isHovered ? 'material-symbols-outlined' : '';
+    locateBtn.classList.add(
+        "bg-blue-500",
+        "h-8",
+        "w-full",
+        "rounded-md",
+        "text-white",
+        "justify-center",
+        "items-center",
+        "mx-auto"
+    );
+    if (isHovered) {
+      locateBtn.classList.add("hover:bg-blue-700");
+      locateBtn.classList.add("text-xl");
+    } else {
+      locateBtn.classList.add("hover:bg-blue-700");
+      locateBtn.classList.add("text-xs");
+    }
+  }
+
+  // Set the initial style
+  setButtonStyle(false);
+
+  // Set the inner text to "locate" on hover
+  locateBtn.addEventListener("mouseover", () => {
+    locateBtn.innerText = "locate";
+    setButtonStyle(true);
+  });
+
+  // Set the inner text back to "Locate" when not hovering
+  locateBtn.addEventListener("mouseout", () => {
+    locateBtn.innerText = "Locate";
+    setButtonStyle(false);
+  });
   locateBtn.addEventListener("click", () => {
     fetch(`/api/items/${item.id}`, {
       method: "POST",
@@ -208,15 +285,15 @@ function createLocateButton(item) {
 // Create add quantity button
 function createAddQuantityButton(item) {
   const addQuantityBtn = document.createElement("button");
-  addQuantityBtn.innerText = "+";
+  addQuantityBtn.setAttribute('class', 'material-symbols-outlined');
+  addQuantityBtn.innerText = "add_circle";
   addQuantityBtn.classList.add(
-      "bg-blue-500",
-      "hover:bg-blue-700",
+      "text-blue-500",
+      "hover:text-blue-700",
       "h-8",
       "w-8",
       "rounded-full",
-      "text-white",
-      "text-lg",
+      "text-4xl",
       "font-bold",
       "flex",
       "justify-center",
@@ -248,15 +325,15 @@ function removeQuantity(item) {
 // Create remove quantity button
 function createRemoveQuantityButton(item) {
   const removeQuantityBtn = document.createElement("button");
-  removeQuantityBtn.innerText = "-";
+  removeQuantityBtn.setAttribute('class', 'material-symbols-outlined');
+  removeQuantityBtn.innerText = "do_not_disturb_on";
   removeQuantityBtn.classList.add(
-      "bg-blue-500",
-      "hover:bg-red-700",
+      "text-blue-500",
+      "hover:text-red-700",
       "h-8",
       "w-8",
       "rounded-full",
-      "text-white",
-      "text-lg",
+      "text-4xl",
       "font-bold",
       "flex",
       "justify-center",
@@ -312,12 +389,12 @@ function createItemElement(item) {
   li.dataset.name = item.name;
   li.dataset.quantity = parseInt(item.quantity, 10);  // Store as numbers
   li.dataset.ip = item.ip;
+  li.dataset.tags = item.tags;
   li.classList.add("item");
 
   const wrapper = document.createElement("div");
   wrapper.classList.add(
-      "bg-gray-800",
-      "text-gray-100",
+      "item-wrapper",
       "drop-shadow-md",
       "h-full",
       "w-11/12",
@@ -334,7 +411,7 @@ function createItemElement(item) {
 
   const img = document.createElement("img");
   img.src = item.image;
-  img.classList.add("h-32", "w-32", "rounded-lg", "mx-auto","bg-gray-800");
+  img.classList.add("h-32", "w-32", "rounded-lg", "mx-auto","item-image");
   wrapper.appendChild(img);
 
   const div = document.createElement("div");
@@ -443,7 +520,7 @@ function populateEspDropdown() {
         data.forEach((esp) => {
           const option = document.createElement("option");
           option.value = esp.id;
-          option.textContent = esp.esp_ip;
+          option.textContent = esp.name ;
           selectEspDropdownIP.appendChild(option);
         });
       })
@@ -459,7 +536,6 @@ function findIndexByIP(ip) {
   }
   return 0; // Return 0 if no match is found.
 }
-document.getElementById("sort_method").addEventListener("click", sortItems);
 document.getElementById("sort_method").addEventListener("change", sortItems);
 
 // Sorting function
@@ -497,7 +573,10 @@ function updateSortTitle() {
 
   title.textContent = "Sort by: " + selectedOption.textContent;
 }
-
+CopyBnt.addEventListener('click', function (){
+  isEditingItem = false;
+  addItem(event);
+})
 
 
 
