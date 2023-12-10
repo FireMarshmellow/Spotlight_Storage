@@ -12,7 +12,7 @@ function updateTimeoutOutput() {
     const timeoutOutput = document.getElementById("timeout-output");
     timeoutOutput.innerText = timeoutSlider.value + " S";
     if (timeoutSlider.value < 1) {
-        timeoutOutput.innerText = "Turn off timeout";
+        timeoutOutput.innerText = "Timeout off";
     }
     addSettings(event);
 }
@@ -60,6 +60,8 @@ function loadSettings() {
             document.getElementById("brightness").value = settings.brightness;
             document.getElementById("timeout").value = settings.timeout;
             lightMode = settings.lightMode;
+            activateLightMode();
+            console.log(settings);
         })
         .catch((error) => console.error(error));
 }
@@ -74,10 +76,12 @@ function sendLedRequest(state) {
 }
 function toggleSideMenu() {
     const sideMenu = document.getElementById("mySideMenu");
+
     updateBrightnessOutput();
     updateTimeoutOutput();
     if (sideMenu.style.width === "250px") {
         sideMenu.style.width = "0";
+        sideMenu.style.display = "none";
         addSettings(event);
     } else {
         sideMenu.style.display = "block";
@@ -88,26 +92,32 @@ function toggleSideMenu() {
 
 function toggleLightMode() {
     lightMode = !lightMode;
-    activateLightMode();
     addSettings(event);
+    activateLightMode();
 }
 
 function activateLightMode() {
-    lightModeButton.innerHTML = lightMode ? "Dark Mode" : "Light Mode";
-    document.body.classList.toggle('light-mode');}
+    const themeIcon = document.getElementById('theme-icon');
+
+    // Update the themeButton innerHTML based on the current lightMode
+    themeIcon.innerHTML = lightMode ? 'dark_mode' : 'light_mode';
+    if (lightMode) {
+        document.body.classList.add('light-mode');
+
+    } else {
+        document.body.classList.remove('light-mode');
+    }
+}
 
 // Add event listeners to the "On" and "Off" buttons
 const onButton = document.getElementById("on-button");
 const offButton = document.getElementById("off-button");
 const partyButton = document.getElementById("party-button");
-
-const lightModeButton = document.getElementById("light-mode");
-
 onButton.addEventListener('click', () => {sendLedRequest('on')});
 offButton.addEventListener('click', () => {sendLedRequest('off')});
 partyButton.addEventListener('click', () => {sendLedRequest('party')});
 document.getElementById("brightness").addEventListener("input", function (event) {updateBrightnessOutput();});
 document.getElementById("timeout").addEventListener("input", function (event) {updateTimeoutOutput();});
-lightModeButton.addEventListener("click", () => {toggleLightMode();});
+
 loadSettings();
 activateLightMode();

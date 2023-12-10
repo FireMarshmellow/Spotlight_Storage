@@ -6,6 +6,7 @@ const FilterTagContainerOverflow = document.getElementById('filter_tag_container
 const FilterTagContainer = document.getElementById('filter_tag_container');
 const input = document.getElementById('tag-input');
 
+
 let tags = [];
 tagContainer.addEventListener('click', (event) => {
     const tagElement = event.target.closest('.tag');
@@ -82,7 +83,7 @@ function applyTagFilter(container) {
         if (tagElement.classList.contains('selected')) {
             selectedTags.push(tag);
 
-            tagElement.style.backgroundColor = '#02ad14'; // Dark blue background color for selected tags
+            tagElement.style.backgroundColor = '#006e11'; // Dark blue background color for selected tags
         } else {
             tagElement.style.backgroundColor = ''; // Reset background color for unselected tags
         }

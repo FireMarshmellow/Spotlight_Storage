@@ -1,9 +1,6 @@
 # Importing necessary modules and packages
-import ipaddress
 import json
 import re
-from urllib.parse import urlparse
-
 from flask import Flask, render_template, jsonify, request, send_from_directory
 from requests import Timeout
 import db
