@@ -6,15 +6,23 @@ const FilterTagContainerOverflow = document.getElementById('filter_tag_container
 const FilterTagContainer = document.getElementById('filter_tag_container');
 const input = document.getElementById('tag-input');
 
-
+ const maxSelTags = 10
+ const OverflowSizeTags = 6
 let tags = [];
 tagContainer.addEventListener('click', (event) => {
     const tagElement = event.target.closest('.tag');
     if (tagElement) {
+        let selectedTags = applyTagFilter(tagContainer);
+
+        if(selectedTags.length <=maxSelTags || tagElement.classList.contains('selected')){
         // Toggle the 'selected' class for the clicked tag
-        tagElement.classList.toggle('selected');
-         const selectedTags = applyTagFilter(tagContainer);
+         tagElement.classList.toggle('selected');
+         selectedTags= applyTagFilter(tagContainer);
         localStorage.setItem('item_tags', JSON.stringify(selectedTags));
+        }
+        else{
+            alert("Maximum of selected tags reached.");
+        }
     }
 });
 FilterTagContainer.addEventListener('click', (event) => {
@@ -63,7 +71,17 @@ function PopulateTagSelection(itemTagsArray){
             // Check if the tag is in itemTagsArray
             if (itemTagsArray.includes(tag)) {
                 tagElement.classList.add('selected');
-                applyTagFilter(tagContainer);
+                const selectedTags = applyTagFilter(tagContainer);
+
+                if(selectedTags.length>=OverflowSizeTags){
+                    const computedStyle = window.getComputedStyle(tagContainerOverflow);
+                    if (computedStyle.display === "none") {
+                        tagContainerOverflow.classList.toggle('hidden');
+                        AddTagIcon.innerHTML = 'filter_list_off';
+                    }
+
+                }
+
             }
     });
 }
@@ -78,7 +96,6 @@ function applyTagFilter(container) {
         tag = tagElement.innerHTML;}else{
             tag = tagElement.querySelector('span').getAttribute('data-item')
         }
-
         // Check if the tag is selected
         if (tagElement.classList.contains('selected')) {
             selectedTags.push(tag);
@@ -101,10 +118,10 @@ function loadTags() {
     fetch("/api/tags")
         .then((response) => response.json())
         .then((TagData) => {
-
             TagData.forEach(({ tag, count }) => {
                 createTag(tag, count);
                 tags.push(tag);
+
             });
 
         })
@@ -124,7 +141,7 @@ function createTag(tag, count){
     TagCount.classList.add("text-stone-900")
     TagCount.style.marginLeft = '10px';
     FilterTag.appendChild(TagCount);
-    if(tags.length >= 6) {
+    if(tags.length >= OverflowSizeTags+1) {
         FilterTagContainerOverflow.appendChild(FilterTag);
         tagContainerOverflow.appendChild(div);
 
@@ -145,10 +162,10 @@ function addTags(tagData){
          createTag(tagData, 1);}
 input.addEventListener('keyup', function (e){
     if (e.key === 'Enter' && input.value !=='') {
-        const computedStyle = window.getComputedStyle(tagContainer);
-        if (computedStyle.display === "none") {
+        const computedStyle = window.getComputedStyle(tagContainerOverflow);
+        if (computedStyle.display === "none" && tags.length >= OverflowSizeTags) {
             // Toggle the visibility of the tag container
-            tagContainer.classList.toggle('hidden');
+            tagContainerOverflow.classList.toggle('hidden');
         }
         const newTag = input.value;
         tags.push(newTag);
@@ -160,15 +177,15 @@ loadTags();
 AddTagIcon.addEventListener('click', function () {
     const computedStyle = window.getComputedStyle(tagContainerOverflow);
     if (computedStyle.display === "none") {
-        if(!isEditingItem){
-            loadTags();
-        }
         tagContainerOverflow.classList.toggle('hidden');
         AddTagIcon.innerHTML = 'filter_list_off';
     }
     else{
         tagContainerOverflow.classList.toggle('hidden');
         AddTagIcon.innerHTML ='filter_list';
+        if(!isEditingItem){
+            loadTags();
+        }
     }
 });
 

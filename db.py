@@ -268,7 +268,7 @@ def get_all_tags():
 
     try:
         # Fetch all distinct tags from the items table
-        cursor.execute('SELECT DISTINCT tags FROM items')
+        cursor.execute('SELECT tags FROM items')
         raw_tags = [tag['tags'] for tag in cursor.fetchall() if tag['tags']]
 
         # Parse the JSON strings representing lists

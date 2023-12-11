@@ -11,10 +11,9 @@ function generateGrid() {
     }
 
     var positionArray = [];
-    console.log("positionArray LEDS:", positionArray);
 
     // Get the selected ESP ID from the dropdown
-    var espId = document.getElementById("ip").value;
+    const espId = document.getElementById("ip").value;
 
     // Fetch both sets of data concurrently
     Promise.all([
@@ -81,7 +80,6 @@ function generateGrid() {
                     }
                 }
 
-                togglegrid(); // Show select_led_container
             })
             .catch((error) => {
                 console.error('Error fetching ESP data:', error);
@@ -124,18 +122,18 @@ function TestLights() {
 }
 
 function clearAll() {
-    var checkboxes = document.querySelectorAll('input[name="ledPositions"]');
+    const checkboxes = document.querySelectorAll('input[name="ledPositions"]');
     checkboxes.forEach(cb => cb.checked = false);
     // Clear the stored data in the 'led_positions' key
     localStorage.removeItem('led_positions');
 }
 
 function submitLights() {
-    var checkboxes = document.querySelectorAll('input[name="ledPositions"]:checked');
-    var positions = Array.from(checkboxes).map(cb => parseInt(cb.value, 10));
+    const checkboxes = document.querySelectorAll('input[name="ledPositions"]:checked');
+    const positions = Array.from(checkboxes).map(cb => parseInt(cb.value, 10));
     localStorage.removeItem('led_positions');
     // Retrieve existing LED positions from localStorage
-    var savedData = JSON.parse(localStorage.getItem('led_positions')) || [];
+    let savedData = JSON.parse(localStorage.getItem('led_positions')) || [];
 
     // Save LED positions to localStorage
     savedData = savedData.concat(positions);

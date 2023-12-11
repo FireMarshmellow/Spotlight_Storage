@@ -19,15 +19,7 @@ function updateTimeoutOutput() {
 function applyBrightness() {
     // Send a POST request to update the LED brightness
     fetch("/led/brightness", {})
-        .then((response) => {
-            if (response.ok) {
-                // Successfully updated brightness
-                console.log("Brightness updated successfully");
-            } else {
-                // Handle error cases here
-                console.error("Failed to update brightness");
-            }
-        })
+        .then((response) => {})
         .catch((error) => console.error(error));
 }
 const settingsButton = document.getElementById("apply-settings");
@@ -61,7 +53,6 @@ function loadSettings() {
             document.getElementById("timeout").value = settings.timeout;
             lightMode = settings.lightMode;
             activateLightMode();
-            console.log(settings);
         })
         .catch((error) => console.error(error));
 }

@@ -47,8 +47,8 @@
     </ul>
 </div>
 
-<button  id="menu-button" class="menu-button" onclick="toggleSideMenu()"><span class="material-symbols-outlined">settings</span></button>
-<button  id="theme-button" class="theme-button" onclick="toggleLightMode()"><span class="material-symbols-outlined" id="theme-icon">light_mode</span></button>
+<button  id="menu-button" class="menu-button" onclick="toggleSideMenu()"><span class="material-symbols-outlined text-3xl">settings</span></button>
+<button  id="theme-button" class="theme-button" onclick="toggleLightMode()"><span class="material-symbols-outlined text-3xl" id="theme-icon">light_mode</span></button>
 <div class="container mx-auto mt-8">
     <div class="container mx-auto mt-8">
         <div class="absolut top-10 z-10 w-full  py-1">
@@ -99,7 +99,7 @@
                 </div>
                 <div class="w-full md:w-2/4 md:pl-2">
                     <label for="generate_pos" >Generate Positions:</label>
-                    <button type="button" id="generate_pos" class="flex-1 bg-blue-500 hover:bg-blue-700 common-button w-full">Select LEDS</button>
+                    <button type="button" id="generate_pos" onclick="togglegrid()" class="flex-1 bg-blue-500 hover:bg-blue-700 common-button w-full">Select LEDS</button>
                 </div>
                 </div>
                 <div id="select_led_container" class="container mx-auto hidden">

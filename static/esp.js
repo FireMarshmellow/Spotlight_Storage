@@ -13,7 +13,7 @@ let editingEspId = null; // Track the ID of the ESP being edited
 function addEsp(event) {
     event.preventDefault();
 
-    const esp_name = document.getElementById("esp_name").value;
+    const name = document.getElementById("esp_name").value;
     const esp_ip = document.getElementById("esp_ip").value;
     const rows = document.getElementById("rows").value; // Assuming you have an input with id 'rows'
     const cols = document.getElementById("cols").value; // Assuming you have an input with id 'cols'
@@ -22,7 +22,7 @@ function addEsp(event) {
     const serpentineDirection = document.getElementById("serpentine_direction").value; // Assuming you have an input with id 'serpentine_direction'
 
     const espItem = { 
-        esp_name, 
+        name,
         esp_ip, 
         rows, 
         cols, 

@@ -11,12 +11,11 @@ function addItem(event) {
   const name = document.getElementById("name").value;
   const link = document.getElementById("link").value || "";
   const image = document.getElementById("image").value;
-  const position = localStorage.getItem('led_positions');
+  let position = localStorage.getItem('led_positions');
   const quantity = document.getElementById("quantity").value;
   const selectedEspDropdown = document.getElementById("ip"); // Get the selected ESP dropdown
   const tags = localStorage.getItem('item_tags');
   const selectedEspValue = selectedEspDropdown.value;
-  console.log('Loaded Tags',tags);
   if (selectedEspValue === "select") {
     // Check if the user has not selected anything
     alert("Please select an ESP.");
@@ -24,8 +23,12 @@ function addItem(event) {
   }
   if (position === "[]") {
     // Check if the user has not selected anything
-    alert("Please select an LEDS to light up.");
-    return;
+    if(!isEditingItem){alert("Please select an LEDS to light up.");
+      return;}
+    else{
+      position = localStorage.getItem('edit_led_positions');
+      position = JSON.parse(position); // Convert the string to an array
+      }
   }
   // Fetch the IP associated with the selected ESP
   fetch(`/api/esp/${selectedEspValue}`)
@@ -49,9 +52,9 @@ function addItem(event) {
             body: JSON.stringify(item),
           })
               .then((response) => response.json())
-              .then((data) => {
+              .then(() => {
                 const li = itemList.querySelector(`li[data-id="${editingItemId}"]`);
-                const updatedLi = createItemElement(data);
+                const updatedLi = createItemElement(item);
                 itemList.replaceChild(updatedLi, li);
                 isEditingItem = false; // Reset the editing flag
                 form.reset();
@@ -67,22 +70,24 @@ function addItem(event) {
             body: JSON.stringify(item),
           })
               .then((response) => response.json())
-              .then((data) => {
-                const li = createItemElement(data);
+              .then(() => {
+                const li = createItemElement(item);
                 isEditingItem = false;
                 itemList.appendChild(li);
                 form.reset();
                 toggleAddForm();
                 localStorage.removeItem('led_positions');
+                localStorage.removeItem('edit_led_positions');
                 localStorage.removeItem('item_tags');
               })
               .catch((error) => console.error(error));
         }
       })
       .catch((error) => console.error(error));
-      // Clear the stored data in the 'led_positions' key
-      localStorage.removeItem('led_positions');
-      localStorage.removeItem('item_tags');
+  // Clear the stored data in the 'led_positions' key
+  localStorage.removeItem('led_positions');
+  localStorage.removeItem('edit_led_positions');
+  localStorage.removeItem('item_tags');
 
 }
 
@@ -97,14 +102,18 @@ function toggleAddForm() {
     container.style.display = "none";
     btn.innerHTML = "Add item";
     form.reset();
+    loadTags();
     document.getElementById("save-item").innerHTML = "Add";
   } else {
     container.style.display = "block";
     btn.innerHTML = "Close";
     if(isEditingItem === false){
       form.reset();
+      loadTags();
       localStorage.removeItem('led_positions');
+      localStorage.removeItem('edit_led_positions');
       localStorage.removeItem('item_tags');
+      CopyBnt.style.display = "none";
       resetTagSelection();
     }
   }
@@ -207,15 +216,20 @@ function createEditButton(item) {
   });
   editBtn.addEventListener("click", () => {
     isEditingItem = true;
+    loadTags();
     document.getElementById("name").value = item.name;
     document.getElementById("link").value = item.link;
     document.getElementById("image").value = item.image;
     document.getElementById("quantity").value = item.quantity;
     localStorage.setItem('led_positions', JSON.stringify(item.position))
-    const cleanedTags = item.tags.replace(/[\[\]'"`\\]/g, '');
-    const itemTagsArray = cleanedTags.split(',');
-    localStorage.setItem('item_tags', JSON.stringify(itemTagsArray))
-    PopulateTagSelection(itemTagsArray);
+    localStorage.setItem('edit_led_positions', JSON.stringify(item.position))
+
+    if(item.tags){
+      const cleanedTags = item.tags.replace(/[\[\]'"`\\]/g, '');
+      const itemTagsArray = cleanedTags.split(',');
+      localStorage.setItem('item_tags', JSON.stringify(itemTagsArray))
+      PopulateTagSelection(itemTagsArray);
+    }
     //console.log('LED data:', JSON.parse(localStorage.getItem('led_positions')));
     const selectedValue = item.ip; // The IP to select
     selectEspDropdownIP.selectedIndex = findIndexByIP(selectedValue);
