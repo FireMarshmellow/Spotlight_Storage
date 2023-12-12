@@ -25,9 +25,8 @@ app.config['UPLOAD_FOLDER'] = './images'
 @app.route('/favicon.ico')
 def favicon():
     return send_from_directory(app.root_path, 'favicon.ico', mimetype='image/vnd.microsoft.icon')
+
 # Route to the home page of the web application
-
-
 @app.route('/')
 def index():
     return render_template('index.html')
@@ -120,8 +119,6 @@ def handle_esp(id):
         return jsonify({'success': True})
 
 # Route to handle GET and POST requests for items
-
-
 @app.route('/api/items', methods=['GET', 'POST'])
 def items():
     if request.method == 'GET':
@@ -134,8 +131,6 @@ def items():
         return jsonify(item)
 
 # Route to handle GET, PUT, DELETE requests for a specific item
-
-
 @app.route('/api/items/<id>', methods=['GET', 'PUT', 'DELETE', 'POST'])
 def item(id):
     if request.method == 'GET':
@@ -183,8 +178,6 @@ def send_request(target_ip, data, timeout=0.4):
         print(f"Timeout error: {e}")
 
 # Function to control lights
-
-
 def light(positions, ip, quantity=1, testing=False):
     if app.delSegments:
         off_data = {"on": False, "bri": 0, "transition": 0,
@@ -251,8 +244,6 @@ def turn_led_on():
         return jsonify({'success': True})
 
 # Route to turn the LED off
-
-
 @app.route('/led/off', methods=['GET'])
 def turn_led_off():
     set_global_settings()
@@ -265,8 +256,6 @@ def turn_led_off():
             send_request(ip, off_data)
         return jsonify()
 # Route to turn the LED to Party
-
-
 @app.route('/led/party', methods=['GET'])
 def turn_led_party():
     set_global_settings()
