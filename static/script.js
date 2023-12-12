@@ -3,9 +3,32 @@ const itemList = document.getElementById("item-list");
 const selectEspDropdownIP = document.getElementById("ip");
 let isEditingItem = false;
 let editingItemId = null; // Track the ID of the item being edited
+
+// Uploads the file selected in the "Add Item" form (if applicable)
+async function uploadImage() {
+  const formData = new FormData(document.getElementById('add-form'))
+  const file = formData.get('file')
+  // returns undefined if no file is selected
+  if (file.name.length == 0) {
+    console.log('no file uploaded')
+    return
+  }
+  const response = await fetch('/upload', { body: formData, method: 'POST' })
+  const imageURL = await response.text()
+  console.log(`uploaded file to ${imageURL}`)
+  return new URL(window.location.href + imageURL)
+}
+
 // Add item to list
-function addItem(event) {
+async function addItem(event) {
   event.preventDefault();
+
+  let localImage = await uploadImage();
+  if (!!localImage) {
+    // set image path to newly uploaded file
+    document.getElementById("image").value = localImage
+  }
+
   submitLights();
   const name = document.getElementById("name").value;
   const link = document.getElementById("link").value;
@@ -28,57 +51,57 @@ function addItem(event) {
   }
   // Fetch the IP associated with the selected ESP
   fetch(`/api/esp/${selectedEspValue}`)
-      .then((response) => response.json())
-      .then((espData) => {
-        const ip = espData.esp_ip;
-        const item = {
-          name,
-          link,
-          image,
-          position,
-          quantity,
-          ip, // Set the IP as the IP of the selected ESP
-        };
+    .then((response) => response.json())
+    .then((espData) => {
+      const ip = espData.esp_ip;
+      const item = {
+        name,
+        link,
+        image,
+        position,
+        quantity,
+        ip, // Set the IP as the IP of the selected ESP
+      };
 
-        if (isEditingItem) {
-          // We are editing, so send a PUT request to update the existing item
-          fetch(`/api/items/${editingItemId}`, {
-            method: "PUT",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(item),
+      if (isEditingItem) {
+        // We are editing, so send a PUT request to update the existing item
+        fetch(`/api/items/${editingItemId}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(item),
+        })
+          .then((response) => response.json())
+          .then((data) => {
+            const li = itemList.querySelector(`li[data-id="${editingItemId}"]`);
+            const updatedLi = createItemElement(data);
+            itemList.replaceChild(updatedLi, li);
+            isEditingItem = false; // Reset the editing flag
+            form.reset();
+            toggleAddForm();
+            document.getElementById("btn-add").innerHTML = "Add item"; // Change the button text back to "Add item"
           })
-              .then((response) => response.json())
-              .then((data) => {
-                const li = itemList.querySelector(`li[data-id="${editingItemId}"]`);
-                const updatedLi = createItemElement(data);
-                itemList.replaceChild(updatedLi, li);
-                isEditingItem = false; // Reset the editing flag
-                form.reset();
-                toggleAddForm();
-                document.getElementById("btn-add").innerHTML = "Add item"; // Change the button text back to "Add item"
-              })
-              .catch((error) => console.error(error));
-        } else {
-          // Add the item with the correct IP
-          fetch("/api/items", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(item),
+          .catch((error) => console.error(error));
+      } else {
+        // Add the item with the correct IP
+        fetch("/api/items", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(item),
+        })
+          .then((response) => response.json())
+          .then((data) => {
+            const li = createItemElement(data);
+            itemList.appendChild(li);
+            form.reset();
+            isEditingItem = false;
+            toggleAddForm();
           })
-              .then((response) => response.json())
-              .then((data) => {
-                const li = createItemElement(data);
-                itemList.appendChild(li);
-                form.reset();
-                isEditingItem = false;
-                toggleAddForm();
-              })
-              .catch((error) => console.error(error));
-        }
-      })
-      .catch((error) => console.error(error));
-      // Clear the stored data in the 'led_positions' key
-      localStorage.removeItem('led_positions');
+          .catch((error) => console.error(error));
+      }
+    })
+    .catch((error) => console.error(error));
+  // Clear the stored data in the 'led_positions' key
+  localStorage.removeItem('led_positions');
 
 }
 
@@ -97,7 +120,7 @@ function toggleAddForm() {
   } else {
     container.style.display = "block";
     btn.innerHTML = "Close";
-    if(isEditingItem === false){
+    if (isEditingItem === false) {
       form.reset();
       localStorage.removeItem('led_positions');
     }
@@ -111,11 +134,11 @@ function deleteItem(item) {
   if (response) {
     // Delete item from database
     fetch(`/api/items/${id}`, { method: "DELETE" })
-        .then(() => {
-          const li = itemList.querySelector(`li[data-id="${id}"]`);
-          li.parentNode.removeChild(li);
-        })
-        .catch((error) => console.error(error));
+      .then(() => {
+        const li = itemList.querySelector(`li[data-id="${id}"]`);
+        li.parentNode.removeChild(li);
+      })
+      .catch((error) => console.error(error));
   }
 }
 
@@ -124,16 +147,16 @@ function createDeleteButton(item) {
   const deleteBtn = document.createElement("button");
   deleteBtn.innerText = "Delete";
   deleteBtn.classList.add(
-      "bg-red-500",
-      "hover:bg-red-700",
-      "h-8",
-      "w-full",
-      "rounded-md",
-      "text-white",
-      "text-xs",
-      "justify-center",
-      "items-center",
-      "mx-auto"
+    "bg-red-500",
+    "hover:bg-red-700",
+    "h-8",
+    "w-full",
+    "rounded-md",
+    "text-white",
+    "text-xs",
+    "justify-center",
+    "items-center",
+    "mx-auto"
   );
   deleteBtn.addEventListener("click", () => deleteItem(item));
   return deleteBtn;
@@ -144,16 +167,16 @@ function createEditButton(item) {
   const editBtn = document.createElement("button");
   editBtn.innerText = "Edit";
   editBtn.classList.add(
-      "bg-blue-500",
-      "hover:bg-blue-700",
-      "h-8",
-      "w-full",
-      "rounded-md",
-      "text-white",
-      "text-xs",
-      "justify-center",
-      "items-center",
-      "mx-auto"
+    "bg-blue-500",
+    "hover:bg-blue-700",
+    "h-8",
+    "w-full",
+    "rounded-md",
+    "text-white",
+    "text-xs",
+    "justify-center",
+    "items-center",
+    "mx-auto"
   );
   editBtn.addEventListener("click", () => {
     isEditingItem = true;
@@ -185,16 +208,16 @@ function createLocateButton(item) {
   const locateBtn = document.createElement("button");
   locateBtn.innerText = "Locate";
   locateBtn.classList.add(
-      "bg-blue-500",
-      "hover:bg-blue-700",
-      "h-8",
-      "w-full",
-      "rounded-md",
-      "text-white",
-      "text-xs",
-      "justify-center",
-      "items-center",
-      "mx-auto"
+    "bg-blue-500",
+    "hover:bg-blue-700",
+    "h-8",
+    "w-full",
+    "rounded-md",
+    "text-white",
+    "text-xs",
+    "justify-center",
+    "items-center",
+    "mx-auto"
   );
   locateBtn.addEventListener("click", () => {
     fetch(`/api/items/${item.id}`, {
@@ -210,18 +233,18 @@ function createAddQuantityButton(item) {
   const addQuantityBtn = document.createElement("button");
   addQuantityBtn.innerText = "+";
   addQuantityBtn.classList.add(
-      "bg-blue-500",
-      "hover:bg-blue-700",
-      "h-8",
-      "w-8",
-      "rounded-full",
-      "text-white",
-      "text-lg",
-      "font-bold",
-      "flex",
-      "justify-center",
-      "items-center",
-      "mx-auto"
+    "bg-blue-500",
+    "hover:bg-blue-700",
+    "h-8",
+    "w-8",
+    "rounded-full",
+    "text-white",
+    "text-lg",
+    "font-bold",
+    "flex",
+    "justify-center",
+    "items-center",
+    "mx-auto"
   );
   addQuantityBtn.addEventListener("click", () => {
     updatedItem = { ...item, quantity: item.quantity + 1 };
@@ -230,12 +253,12 @@ function createAddQuantityButton(item) {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(updatedItem),
     })
-        .then(() => {
-          const li = itemList.querySelector(`li[data-id="${item.id}"]`);
-          const updatedLi = createItemElement(updatedItem);
-          itemList.replaceChild(updatedLi, li);
-        })
-        .catch((error) => console.error(error));
+      .then(() => {
+        const li = itemList.querySelector(`li[data-id="${item.id}"]`);
+        const updatedLi = createItemElement(updatedItem);
+        itemList.replaceChild(updatedLi, li);
+      })
+      .catch((error) => console.error(error));
   });
   return addQuantityBtn;
 }
@@ -250,18 +273,18 @@ function createRemoveQuantityButton(item) {
   const removeQuantityBtn = document.createElement("button");
   removeQuantityBtn.innerText = "-";
   removeQuantityBtn.classList.add(
-      "bg-blue-500",
-      "hover:bg-red-700",
-      "h-8",
-      "w-8",
-      "rounded-full",
-      "text-white",
-      "text-lg",
-      "font-bold",
-      "flex",
-      "justify-center",
-      "items-center",
-      "mx-auto"
+    "bg-blue-500",
+    "hover:bg-red-700",
+    "h-8",
+    "w-8",
+    "rounded-full",
+    "text-white",
+    "text-lg",
+    "font-bold",
+    "flex",
+    "justify-center",
+    "items-center",
+    "mx-auto"
   );
   removeQuantityBtn.addEventListener("click", () => {
     if (item.quantity > 0) {
@@ -271,12 +294,12 @@ function createRemoveQuantityButton(item) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(updatedItem),
       })
-          .then(() => {
-            const li = itemList.querySelector(`li[data-id="${item.id}"]`);
-            const updatedLi = createItemElement(updatedItem);
-            itemList.replaceChild(updatedLi, li);
-          })
-          .catch((error) => console.error(error));
+        .then(() => {
+          const li = itemList.querySelector(`li[data-id="${item.id}"]`);
+          const updatedLi = createItemElement(updatedItem);
+          itemList.replaceChild(updatedLi, li);
+        })
+        .catch((error) => console.error(error));
     }
   });
   return removeQuantityBtn;
@@ -316,47 +339,47 @@ function createItemElement(item) {
 
   const wrapper = document.createElement("div");
   wrapper.classList.add(
-      "bg-gray-800",
-      "text-gray-100",
-      "drop-shadow-md",
-      "h-full",
-      "w-11/12",
-      "md:w-full",
-      "mx-auto",
-      "p-2",
-      "rounded-md",
-      "grid",
-      "grid-cols-1",
-      "gap-2",
-      "items-center"
+    "bg-gray-800",
+    "text-gray-100",
+    "drop-shadow-md",
+    "h-full",
+    "w-11/12",
+    "md:w-full",
+    "mx-auto",
+    "p-2",
+    "rounded-md",
+    "grid",
+    "grid-cols-1",
+    "gap-2",
+    "items-center"
   );
   li.appendChild(wrapper);
 
   const img = document.createElement("img");
   img.src = item.image;
-  img.classList.add("h-32", "w-32", "rounded-lg", "mx-auto","bg-gray-800");
+  img.classList.add("h-32", "w-32", "rounded-lg", "mx-auto", "bg-gray-800");
   wrapper.appendChild(img);
 
   const div = document.createElement("div");
   div.classList.add(
-      "text-center",
-      "text-slate",
-      "text-sm",
-      "grid",
-      "grid-cols-1",
-      "gap-2"
+    "text-center",
+    "text-slate",
+    "text-sm",
+    "grid",
+    "grid-cols-1",
+    "gap-2"
   );
   wrapper.appendChild(div);
 
   const h2 = document.createElement("h2");
   h2.innerText = item.name;
   h2.classList.add(
-      "text-lg",
-      "text-slate",
-      "overflow-hidden",
-      "whitespace-nowrap",
-      "overflow-ellipsis",
-      "hover:whitespace-normal",
+    "text-lg",
+    "text-slate",
+    "overflow-hidden",
+    "whitespace-nowrap",
+    "overflow-ellipsis",
+    "hover:whitespace-normal",
   );
   div.appendChild(h2);
 
@@ -388,13 +411,13 @@ function createItemElement(item) {
   const quantity = document.createElement("span");
   quantity.innerText = item.quantity;
   quantity.classList.add(
-      "text-center",
-      "text-slate",
-      "text-lg",
-      "justify-center",
-      "items-center",
-      "mx-auto",
-      "pt-1"
+    "text-center",
+    "text-slate",
+    "text-lg",
+    "justify-center",
+    "items-center",
+    "mx-auto",
+    "pt-1"
   );
   innerWrapper.appendChild(quantity);
 
@@ -407,15 +430,15 @@ function createItemElement(item) {
 // Load items from server
 function loadItems() {
   fetch("/api/items")
-      .then((response) => response.json())
-      .then((data) => {
-        data.forEach((item) => {
-          const li = createItemElement(item);
-          itemList.appendChild(li);
+    .then((response) => response.json())
+    .then((data) => {
+      data.forEach((item) => {
+        const li = createItemElement(item);
+        itemList.appendChild(li);
 
-        });
-      })
-      .catch((error) => console.error(error));
+      });
+    })
+    .catch((error) => console.error(error));
 
 }
 
@@ -423,7 +446,7 @@ loadItems();
 
 
 document.getElementById("save-item").addEventListener("click", addItem);
-document.getElementById("btn-add").addEventListener("click", function() {isEditingItem = false;});
+document.getElementById("btn-add").addEventListener("click", function () { isEditingItem = false; });
 document.getElementById("btn-add").addEventListener("click", toggleAddForm);
 document.getElementById("btn-add").addEventListener("click", populateEspDropdown);
 //Function to Ad ESPs
@@ -438,16 +461,16 @@ function populateEspDropdown() {
   selectEspDropdownIP.appendChild(addEspOption);
   // Fetch and populate the rest of the options
   fetch("/api/esp")
-      .then((response) => response.json())
-      .then((data) => {
-        data.forEach((esp) => {
-          const option = document.createElement("option");
-          option.value = esp.id;
-          option.textContent = esp.esp_ip;
-          selectEspDropdownIP.appendChild(option);
-        });
-      })
-      .catch((error) => console.error(error));
+    .then((response) => response.json())
+    .then((data) => {
+      data.forEach((esp) => {
+        const option = document.createElement("option");
+        option.value = esp.id;
+        option.textContent = esp.esp_ip;
+        selectEspDropdownIP.appendChild(option);
+      });
+    })
+    .catch((error) => console.error(error));
 }
 function findIndexByIP(ip) {
   const options = selectEspDropdownIP.options;
