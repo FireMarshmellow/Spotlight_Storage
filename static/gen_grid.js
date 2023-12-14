@@ -10,7 +10,7 @@ function generateGrid() {
         return;
     }
 
-    var positionArray = [];
+    let positionArray = [];
 
     // Get the selected ESP ID from the dropdown
     const espId = document.getElementById("ip").value;
@@ -22,7 +22,7 @@ function generateGrid() {
             fetch(`/api/items/${editingItemId}`)
                 .then(response => response.json())
                 .then(data => {
-                    var positionString = data.position;
+                    let positionString = data.position;
                     positionString = positionString.replace('[', '').replace(']', '');
                     positionArray = positionString.split(',').map(Number).filter(num => !isNaN(num));
                 }) :
@@ -33,24 +33,27 @@ function generateGrid() {
             .then(response => response.json())
             .then(data => {
                 // Process ESP data and generate the grid
-                var rows = parseInt(data.rows);
-                var cols = parseInt(data.cols);
-                var startTop = data.start_top === 'top';
-                var startLeft = data.start_left === 'left';
-                var serpentine = data.serpentine_direction === 'horizontal';
-                var gridContainer = document.getElementById('gridContainer') ?? 4;
-                gridContainer.innerHTML = ''; // Clear existing grid
+                const rows = parseInt(data.rows);
+                const cols = parseInt(data.cols);
+                const startTop = data.start_top === 'top';
+                const startLeft = data.start_left === 'left';
+                const serpentine = data.serpentine_direction === 'horizontal';
+                const gridContainer = document.getElementById('gridContainer') ?? 4;
 
+                if(JSON.parse(localStorage.getItem('led_positions'))){
+                    positionArray = JSON.parse(localStorage.getItem('led_positions'))
+                }
+                gridContainer.innerHTML = ''; // Clear existing grid
                 gridContainer.style.gridTemplateColumns = `repeat(${cols}, 30px)`; // Adjust column size
 
                 // Generate checkboxes with alternating patterns
-                for (var row = startTop ? 1 : rows; startTop ? row <= rows : row > 0; startTop ? row++ : row--) {
-                    for (var colt = startLeft ? 0 : cols - 1; startLeft ? colt < cols : colt >= 0; startLeft ? colt++ : colt--) {
+                for (let row = startTop ? 1 : rows; startTop ? row <= rows : row > 0; startTop ? row++ : row--) {
+                    for (let colum = startLeft ? 0 : cols - 1; startLeft ? colum < cols : colum >= 0; startLeft ? colum++ : colum--) {
                         // Calculate LED number based on row and column
-                        var col = colt + 1
-                        var isEvenColumn = col % 2 === 0;
-                        var isEvenRow = row % 2 === 0;
-                        var ledNumber;
+                        const col = colum + 1;
+                        const isEvenColumn = col % 2 === 0;
+                        const isEvenRow = row % 2 === 0;
+                        let ledNumber;
                         if (serpentine) {
                             if (isEvenRow) {
                                 ledNumber = row * cols - (cols - (cols - col)) + 1;
@@ -146,15 +149,23 @@ function submitLights() {
     document.getElementById("generate_pos").innerHTML = "Select LEDS";
 }
 
-function togglegrid() {
-
+function toggleGrid() {
+    const selectedEspIndex = selectEspDropdownIP.selectedIndex;
     const container = document.getElementById("select_led_container");
     const btn = document.getElementById("generate_pos");
+    const checkboxes = document.querySelectorAll('input[name="ledPositions"]:checked');
+    const positions = Array.from(checkboxes).map(cb => parseInt(cb.value, 10));
     if (container.style.display === "block") {
+        if(positions.length >0) {
+            submitLights();
+        }
         container.style.display = "none";
         btn.innerHTML = "Select LEDS";
-        submitLights();
     } else {
+        if (selectedEspIndex < 1) {
+            return;
+        }
+        generateGrid();
         container.style.display = "block";
         btn.innerHTML = "Close Selection";
     }

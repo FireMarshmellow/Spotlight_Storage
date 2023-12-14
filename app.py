@@ -1,11 +1,13 @@
 # Importing necessary modules and packages
 import json
 import re
-from flask import Flask, render_template, jsonify, request, send_from_directory
+from flask import Flask, render_template, jsonify, request, send_from_directory, redirect, url_for, flash
 from requests import Timeout
 import db
 import requests
 import time
+import os
+from werkzeug.utils import secure_filename
 
 # Creating a Flask application instance
 app = Flask(__name__)
@@ -13,9 +15,9 @@ app.config['JSON_SORT_KEYS'] = False
 
 # Default Values
 app.brightness = 1
-app.led_count = 300
 app.delSegments = ""
 app.timeout = 5
+app.config['UPLOAD_FOLDER'] = './images'
 
 
 # Route to Favicon
@@ -28,6 +30,30 @@ def favicon():
 @app.route('/')
 def index():
     return render_template('index.html')
+
+
+@app.route('/images/<name>')
+def download_image(name):
+    return send_from_directory(app.config["UPLOAD_FOLDER"], name)
+
+
+@app.route('/upload', methods=['POST'])
+def upload_file():
+    # check if the post request has the file part
+    if 'file' not in request.files:
+        flash('No file part')
+        return
+    file = request.files['file']
+    # If the user does not select a file, the browser submits an
+    # empty file without a filename.
+    if file.filename == '':
+        flash('No selected file')
+        return
+    if file:
+        filename = secure_filename(file.filename)
+        print(file)
+        file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+        return url_for('download_image', name=filename)
 
 
 @app.route('/api/tags', methods=['GET', 'POST'])
@@ -56,6 +82,7 @@ def get_unique_ips_from_database():
 
     return unique_ips_list
 
+
 def is_valid_url_or_ip(input_str):
     ip_pattern = re.compile(r"\b(?:\d{1,3}\.){3}\d{1,3}\b")  # Simple IP address regex
     url_pattern = re.compile(r"([a-zA-Z0-9-]+)\.([a-zA-Z]{2,})")
@@ -64,6 +91,7 @@ def is_valid_url_or_ip(input_str):
         return True
 
     return bool(url_pattern.match(input_str))
+
 
 def set_global_settings():
     settings = db.read_settings()
@@ -178,7 +206,7 @@ def item(id):
             return jsonify({'error': 'Invalid action'}), 400
 
 
-def send_request(target_ip, data, timeout=0.4):
+def send_request(target_ip, data, timeout=0.2):
     url = f"http://{target_ip}/json/state"
 
     try:
@@ -212,7 +240,7 @@ def light(positions, ip, quantity=1, testing=False):
     if quantity < 1:
         color = [255, 0, 0]
     # print("Recieved positions",positions)
-    positions_list = json.loads(positions)
+    positions_list = sorted(json.loads(positions))
     for i, pos in enumerate(positions_list):
         if pos is None:
             continue  # Skip if pos is None

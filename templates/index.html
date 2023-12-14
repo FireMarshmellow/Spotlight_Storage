@@ -71,25 +71,30 @@
                            placeholder="Enter your name"
                            class="form-input">
                 </div>
-
-                <div class="mb-4">
-                    <label for="link">Link:</label>
-                    <input type="url" id="link" name="link"
-                           placeholder="Enter the link"
-                           class="form-input">
+                <div class="mb-4 flex flex-wrap">
+                    <div class="w-full md:w-2/4 md:pr-2">
+                        <label for="link">Link:</label>
+                        <input type="url" id="link" name="link"
+                               placeholder="Enter the link"
+                               class="form-input">
+                    </div>
+                    <div class="w-full md:w-2/4 md:pl-2">
+                        <label for="quantity">Quantity:</label>
+                        <input type="number" id="quantity" name="quantity" required
+                               placeholder="Enter the quantity"
+                               class="form-input">
+                    </div>
                 </div>
                 <div class="mb-4 flex flex-wrap">
                 <div class="w-full md:w-2/4 md:pr-2">
                     <label for="image">Image:</label>
-                    <input type="url" id="image" name="image" required
+                    <input type="url" id="image" name="image"
                            placeholder="Enter the image URL"
                            class="form-input">
                 </div>
                 <div class="w-full md:w-2/4 md:pl-2">
-                    <label for="quantity">Quantity:</label>
-                    <input type="number" id="quantity" name="quantity" required
-                           placeholder="Enter the quantity"
-                           class="form-input">
+                    <label for="quantity">Image file upload:</label>
+                    <input type="file" class="form-input" id="file" name="file" />
                 </div>
                 </div>
                 <div class="mb-4 flex flex-wrap">
@@ -99,7 +104,7 @@
                 </div>
                 <div class="w-full md:w-2/4 md:pl-2">
                     <label for="generate_pos" >Generate Positions:</label>
-                    <button type="button" id="generate_pos" onclick="togglegrid()" class="flex-1 bg-blue-500 hover:bg-blue-700 common-button w-full">Select LEDS</button>
+                    <button type="button" id="generate_pos" onclick="toggleGrid()" class="flex-1 bg-blue-500 hover:bg-blue-700 common-button w-full">Select LEDS</button>
                 </div>
                 </div>
                 <div id="select_led_container" class="container mx-auto hidden">
@@ -127,6 +132,7 @@
                     <div class="tag-container" id="add_form_tag_container">
                         <div class="tag-container hidden" id="add_form_tag_container_overflow"></div>
                     </div>
+
 
                 </div>
                 <div class="flex mx-auto">
@@ -205,7 +211,7 @@
                class="flex-1 shadow appearance-none search leading-tight focus:outline-none focus:shadow-outline">
 
             <div class="relative ml-1 mr-1">
-                <div id="sort_title" class="flex-1 shadow appearance-none rounded py-1.5 px-3 search leading-tight focus:outline-none focus:shadow-outline">
+                <div id="sort_title" class="flex-1 shadow appearance-none rounded py-1.5 object-fill px-3 search leading-tight focus:outline-none focus:shadow-outline">
                     Sort by: ID <!-- Initial title, replace with the default selected value -->
                 </div>
                 <select id="sort_method" class="absolute top-0 left-0 opacity-0 w-full h-full cursor-pointer search" onchange="sortItems()">
@@ -217,6 +223,8 @@
             </div>
 
             <button class="search rounded px-3 text-center"><span class="material-symbols-outlined icon" id="filter_tag_toggle">filter_list</span></button>
+            <button class="search rounded px-3 text-center ml-1 hidden" id="filter_tag_clear"><span class="material-symbols-outlined icon" >filter_alt_off</span></button>
+
         </div>
         <div class="container mb-4">
         <div class="tag-container" id="filter_tag_container">
@@ -225,7 +233,7 @@
 
         </div>
     <ul id="item-list"
-        class="relative grid sm:grid-cols-1 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 max-w-5xl mx-auto w-11/12 md:5/6 lg:full">
+        class="relative grid sm:grid-cols-1 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-4  max-w-5xl mx-auto w-11/12 md:5/6 lg:full">
     </ul>
 </div>
     <script src="{{ url_for('static', filename='script.js') }}"></script>

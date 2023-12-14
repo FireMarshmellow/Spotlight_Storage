@@ -278,6 +278,7 @@ form{
     background:var(--background-tertiaray) ;
     line-height: 1.25;
 }
+
 .tag-input-container {
     display: flex;
     align-items: center;
@@ -295,4 +296,5 @@ form{
 .search{
     background: var(--background-tertiaray);
     color: var(--text-tertiary);
+    height: 30px;
 }

@@ -4,9 +4,33 @@ const selectEspDropdownIP = document.getElementById("ip");
 const CopyBnt = document.getElementById("copy-item")
 let isEditingItem = false;
 let editingItemId = null; // Track the ID of the item being edited
+
+
+async function uploadImage() {
+  const formData = new FormData(document.getElementById('add-form'))
+  const file = formData.get('file')
+  // returns undefined if no file is selected
+  if (file.name.length === 0) {
+    console.log('no file uploaded')
+    return
+  }
+  const response = await fetch('/upload', { body: formData, method: 'POST' })
+  const imageURL = await response.text()
+  console.log(`uploaded file to ${imageURL}`)
+  return new URL(window.location.href + imageURL)
+}
+
 // Add item to list
-function addItem(event) {
+async function addItem(event) {
   event.preventDefault();
+
+  if(document.getElementById("image").value !== localStorage.getItem('edit_image_path')) { //check whether image has changed and only then load image
+    let localImage = await uploadImage();
+    if (!!localImage) {
+      // set image path to newly uploaded file
+      document.getElementById("image").value = localImage
+    }
+  }
   submitLights();
   const name = document.getElementById("name").value;
   const link = document.getElementById("link").value || "";
@@ -52,7 +76,8 @@ function addItem(event) {
             body: JSON.stringify(item),
           })
               .then((response) => response.json())
-              .then(() => {
+              .then((data) => {
+                item.id = data.id;
                 const li = itemList.querySelector(`li[data-id="${editingItemId}"]`);
                 const updatedLi = createItemElement(item);
                 itemList.replaceChild(updatedLi, li);
@@ -70,51 +95,50 @@ function addItem(event) {
             body: JSON.stringify(item),
           })
               .then((response) => response.json())
-              .then(() => {
-                const li = createItemElement(item);
+              .then((data) => {
+                const li = createItemElement(data);
                 isEditingItem = false;
                 itemList.appendChild(li);
                 form.reset();
                 toggleAddForm();
-                localStorage.removeItem('led_positions');
-                localStorage.removeItem('edit_led_positions');
-                localStorage.removeItem('item_tags');
+                removeLocalStorage();
               })
               .catch((error) => console.error(error));
         }
       })
       .catch((error) => console.error(error));
   // Clear the stored data in the 'led_positions' key
-  localStorage.removeItem('led_positions');
-  localStorage.removeItem('edit_led_positions');
-  localStorage.removeItem('item_tags');
+  removeLocalStorage();
+  loadTags();
 
 }
 
-
+function removeLocalStorage(){
+  localStorage.removeItem('led_positions');
+  localStorage.removeItem('edit_led_positions');
+  localStorage.removeItem('item_tags');
+  localStorage.removeItem('edit_image_path');
+}
 
 
 function toggleAddForm() {
   const btn = document.getElementById("btn-add");
   const container = document.getElementById("form-container");
   document.getElementById("select_led_container").style.display = "none";
-  if (container.style.display === "block" && isEditingItem === false) {
+  if (container.style.display === "block" && !isEditingItem) {
+    loadTags();
     container.style.display = "none";
     btn.innerHTML = "Add item";
     form.reset();
-    loadTags();
     document.getElementById("save-item").innerHTML = "Add";
   } else {
     container.style.display = "block";
     btn.innerHTML = "Close";
-    if(isEditingItem === false){
+    if(!isEditingItem){
       form.reset();
-      loadTags();
-      localStorage.removeItem('led_positions');
-      localStorage.removeItem('edit_led_positions');
-      localStorage.removeItem('item_tags');
+      removeLocalStorage();
       CopyBnt.style.display = "none";
-      resetTagSelection();
+      resetTagSelection(tagContainer);
     }
   }
 }
@@ -216,14 +240,14 @@ function createEditButton(item) {
   });
   editBtn.addEventListener("click", () => {
     isEditingItem = true;
-    loadTags();
+    resetTagSelection(tagContainer);
     document.getElementById("name").value = item.name;
     document.getElementById("link").value = item.link;
     document.getElementById("image").value = item.image;
     document.getElementById("quantity").value = item.quantity;
     localStorage.setItem('led_positions', JSON.stringify(item.position))
     localStorage.setItem('edit_led_positions', JSON.stringify(item.position))
-
+    localStorage.setItem('edit_image_path', JSON.stringify(item.image))
     if(item.tags){
       const cleanedTags = item.tags.replace(/[\[\]'"`\\]/g, '');
       const itemTagsArray = cleanedTags.split(',');
@@ -425,7 +449,7 @@ function createItemElement(item) {
 
   const img = document.createElement("img");
   img.src = item.image;
-  img.classList.add("h-32", "w-32", "rounded-lg", "mx-auto","item-image");
+  img.classList.add( "w-32","h-32","rounded-lg", "mx-auto","item-image");//reactive size: "sm:h-24","md:h-32","lg:h-32","xl:h-48","sm:w-24","md:w-32","lg:w-32", "xl:w-48",
   wrapper.appendChild(img);
 
   const div = document.createElement("div");
