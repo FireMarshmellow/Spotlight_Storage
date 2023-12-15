@@ -21,7 +21,7 @@ def update_database_schema_and_position_format(db_path):
                 cursor.execute("UPDATE items SET position = ? WHERE id = ?", (new_position, item_id))
 
         # Adding new columns to the 'items' table
-        new_columns = ['tages TEXT', 'slot_1 TEXT', 'slot_2 TEXT', 'slot_3 TEXT', 'slot_4 TEXT']
+        new_columns = ['tags TEXT', 'slot_1 TEXT', 'slot_2 TEXT', 'slot_3 TEXT', 'slot_4 TEXT']
         for column in new_columns:
             try:
                 cursor.execute(f'ALTER TABLE items ADD COLUMN {column};')
