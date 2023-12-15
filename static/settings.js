@@ -40,6 +40,20 @@ function addSettings(event) {
         .then((response) => response.json())
         .catch((error) => console.error(error));
 }
+
+function updateTimeDisplay(seconds) {
+    var minutes = Math.floor(seconds / 60);
+    var seconds = seconds % 60;
+
+    var timeString = minutes + "m " + seconds + "s";
+    document.getElementById('time-display').textContent = timeString;
+    document.getElementById('timeout-output').value = seconds;
+}
+function updateBrightnessDisplay(value) {
+    document.getElementById('brightness-display').textContent = value + "%";
+    document.getElementById('brightness-output').value = value;
+}
+
 function loadSettings() {
     // Fetch the settings from the server
     fetch("/api/settings", {
@@ -85,6 +99,13 @@ function toggleLightMode() {
     lightMode = !lightMode;
     addSettings(event);
     activateLightMode();
+
+    var themeText = document.getElementById('theme-text');
+    if (lightMode) {
+        themeText.textContent = 'Dark Mode'; // Text for switching to Dark Mode
+    } else {
+        themeText.textContent = 'Light Mode'; // Text for switching to Light Mode
+    }
 }
 
 function activateLightMode() {

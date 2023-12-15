@@ -30,14 +30,23 @@
 
         </li>
         <li>
-            <label id="brightness-title" for="brightness" class="common-label">Brightness:</label>
-            <input type="range" id="brightness" name="brightness" min="0" max="100" step="1" class="common-input">
-            <output for="brightness" id="brightness-output" class="common-output" >50</output>
+            <label id="brightness-title" for="brightness" class="common-label">
+                Brightness: <span id="brightness-display" class="brightness-display-class">50%</span>
+            </label>
+            <input type="range" id="brightness" name="brightness" min="0" max="100" step="1" class="common-input" oninput="updateBrightnessDisplay(this.value)">
+            <output for="brightness" id="brightness-output" class="common-output" style="display: none;">50</output>
+            
         </li>
         <li>
-            <label id="timeout-title" for="timeout" class="common-label">Timeout in Seconds:</label>
-            <input type="range" id="timeout" name="brightness" min="0" max="200" step="1" class="common-input">
-            <output for="timeout" id="timeout-output" class="common-output">5</output>
+            <label id="timeout-title" for="timeout" class="common-label">Timeout: <span id="time-display" class="time-display-class">0m 0s</span></label>
+            <input type="range" id="timeout" name="brightness" min="0" max="300" step="1" class="common-input" oninput="updateTimeDisplay(this.value)">
+            <output for="timeout" id="timeout-output" class="common-output" style="display: none;">0</output>            
+        </li>
+        <li>
+            <button id="theme-button" class="theme-button" onclick="toggleLightMode()">
+                <span class="material-symbols-outlined text-3xl" id="theme-icon">light_mode</span>
+                <span id="theme-text">Dark Mode</span>
+            </button>
         </li>
         <li>
             <button id="apply-settings" class="bg-blue-500 hover:bg-blue-700 common-button mt-4 mr-4">
@@ -48,11 +57,10 @@
 </div>
 
 <button  id="menu-button" class="menu-button" onclick="toggleSideMenu()"><span class="material-symbols-outlined text-3xl">settings</span></button>
-<button  id="theme-button" class="theme-button" onclick="toggleLightMode()"><span class="material-symbols-outlined text-3xl" id="theme-icon">light_mode</span></button>
 <div class="container mx-auto mt-8">
     <div class="container mx-auto mt-8">
         <div class="absolut top-10 z-10 w-full  py-1">
-            <h1 id="title" class="text-4xl text-center font-bold mb-8">M.I.M.O.S.A V3</h1>
+            <h1 id="title" class="text-4xl text-center font-bold mb-8">M.I.M.O.S.A V4 beta</h1>
         </div>
 
     <div class="flex flex-col items-center my-5 mx-auto">

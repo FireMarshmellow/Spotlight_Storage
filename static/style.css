@@ -50,6 +50,28 @@ h1{
     overflow: auto;
 }
 
+.common-button {
+    background-color: #4CAF50; /* Change to your preferred color */
+    color: white;
+    padding: 10px 15px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px; /* Adjust as needed for spacing between icon and text */
+    transition: background-color 0.3s;
+}
+
+.common-button:hover {
+    background-color: #45a049; /* Darker shade for hover effect */
+}
+
+.material-symbols-outlined {
+    /* Adjust the font size if necessary */
+    font-size: 24px; /* Adjust according to your design */
+}
 
 .grid-cell {
     display: flex;
@@ -62,15 +84,6 @@ h1{
     height: 25px;
 
 
-}
-.theme-button {
-    position: fixed;
-    top: 10px;
-    right: 10px;
-    z-index: 2;
-    padding: 10px;
-    color: var(--text-color);
-    transition-duration: 0.5s;
 }
 .side-menu {
     width: 0;
@@ -138,6 +151,39 @@ h1{
 .container {
     width: 60%;
     height: auto; /* Set to 'auto' to expand vertically based on content */
+}
+
+.theme-button {
+    background-color: #4CAF50; /* Example color */
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 4px;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px; /* Space between the icon and the text */
+    /* Add the common button styles here */
+}
+
+.theme-button:hover {
+    background-color: #45a049; /* Darker shade for hover effect */
+}
+
+.material-symbols-outlined {
+    font-size: 24px; /* Icon size */
+    /* Remove any additional margin or padding if present */
+    margin: 0;
+    padding: 0;
+}
+
+#theme-text {
+    /* Remove any additional margin or padding if present */
+    margin: 0;
+    padding: 0;
+    /* If the text alignment is still off, you may adjust the line height or vertical align */
+    line-height: normal;
+    vertical-align: middle;
 }
 
 .tag-container {
