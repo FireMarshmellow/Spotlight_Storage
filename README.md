@@ -36,6 +36,18 @@ LEDs : https://amzn.to/3VcoaIY
 
 - python 3.6
 
+## docker
+
+```
+version: "3"
+services:
+  mimosa-app:
+    image: mmblack04/mimosa:latest
+    container_name: mimosa
+    ports:
+      - "5000:5000"
+```
+
 ## Development
 
 If you would like to help with development, we have a Trello board for to-dos and feature requests. Please contact us for access.
