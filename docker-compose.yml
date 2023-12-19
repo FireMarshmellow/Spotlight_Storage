@@ -5,3 +5,8 @@ services:
     container_name: mimosa
     ports:
       - "5000:5000"
+    volumes:
+      - mimosa_data:/app
+
+volumes:
+  mimosa_data:
