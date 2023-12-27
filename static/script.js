@@ -418,7 +418,7 @@ function filterItems(e) {
   });
 }
 
-search.addEventListener("input", filterItems);
+//search.addEventListener("input", filterItems);
 
 // Create item element
 function createItemElement(item) {
