@@ -793,58 +793,26 @@ function drawGrid() {
       ctx.setLineDash([boxHeight]);
     }
 
-    if (startX === "Left" && startY === "Top") {
-      offset = boxHeight;
-      startIndicatorX = 0;
+
+
+    if (startY === "Top") {
       startIndicatorY = 0;
-
-      endIndicatorY = rows-1;
-      if (rows % 2){
-        endIndicatorX = columns-1;
-      } else {
-        endIndicatorX = 0;
-      }
-
-
-    } else if (startX === "Right" && startY === "Top") {
-      offset = 0;
-
-      startIndicatorX = columns-1;
-      startIndicatorY = 0;
-
-      endIndicatorY = rows-1;
-      if (rows % 2){
-        endIndicatorX = 0;
-      } else {
-        endIndicatorX = columns-1;
-      }
-
+      endIndicatorY = rows - 1;
+    } else if (startY === "Bottom") {
+      startIndicatorY = rows - 1;
+      endIndicatorY = 0;
     }
-    if (startX === "Left" && startY === "Bottom") {
-      offset = (boxHeight*(rows % 2))+boxHeight;
 
-      startIndicatorY = rows-1;
+    if (startX === "Left") {
+      offset = startY === "Top" ? boxHeight : (boxHeight * (rows % 2)) + boxHeight;
       startIndicatorX = 0;
-
-      endIndicatorY = 0;
-      if (rows % 2){
-        endIndicatorX = columns-1;
-      } else {
-        endIndicatorX = 0;
-      }
-
-    } else if (startX === "Right" && startY === "Bottom") {
-      offset = boxHeight*(rows % 2);
-      startIndicatorY = rows-1;
-      startIndicatorX = columns-1;
-
-      endIndicatorY = 0;
-      if (rows % 2){
-        endIndicatorX = 0;
-      } else {
-        endIndicatorX = columns-1;
-      }
+      endIndicatorX = rows % 2 ? columns - 1 : 0;
+    } else if (startX === "Right") {
+      offset = startY === "Top" ? 0 : boxHeight * (rows % 2);
+      startIndicatorX = columns - 1;
+      endIndicatorX = rows % 2 ? 0 : columns - 1;
     }
+
     for (let i = 0; i <= columns-1; i++) {
       if (i === 0) {
         ctx.lineDashOffset = offset;
