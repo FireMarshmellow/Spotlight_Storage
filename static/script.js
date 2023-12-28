@@ -740,9 +740,13 @@ function drawGrid() {
   const boxWidth = (canvas.width-lineWidth) / columns;
   const boxHeight = boxWidth;
   canvas.height = (boxHeight*rows)+lineWidth;
-  const lineColour = "red";
-  const gridColour = "grey";
+  const lineColour = "#0d6efd";
+  const gridColour = "#6c757d";
   var offset = 0;
+  var startIndicatorX = 0
+  var startIndicatorY = 0
+  var endIndicatorX = 0
+  var endIndicatorY = 0
 
 
   ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -785,16 +789,61 @@ function drawGrid() {
       ctx.stroke();
     }
     // Draw vertical lines
-    ctx.setLineDash([boxHeight]);
+    if (columns > 1) {
+      ctx.setLineDash([boxHeight]);
+    }
+
     if (startX === "Left" && startY === "Top") {
       offset = boxHeight;
+      startIndicatorX = 0;
+      startIndicatorY = 0;
+
+      endIndicatorY = rows-1;
+      if (rows % 2){
+        endIndicatorX = columns-1;
+      } else {
+        endIndicatorX = 0;
+      }
+
+
     } else if (startX === "Right" && startY === "Top") {
       offset = 0;
+
+      startIndicatorX = columns-1;
+      startIndicatorY = 0;
+
+      endIndicatorY = rows-1;
+      if (rows % 2){
+        endIndicatorX = 0;
+      } else {
+        endIndicatorX = columns-1;
+      }
+
     }
     if (startX === "Left" && startY === "Bottom") {
       offset = (boxHeight*(rows % 2))+boxHeight;
+
+      startIndicatorY = rows-1;
+      startIndicatorX = 0;
+
+      endIndicatorY = 0;
+      if (rows % 2){
+        endIndicatorX = columns-1;
+      } else {
+        endIndicatorX = 0;
+      }
+
     } else if (startX === "Right" && startY === "Bottom") {
       offset = boxHeight*(rows % 2);
+      startIndicatorY = rows-1;
+      startIndicatorX = columns-1;
+
+      endIndicatorY = 0;
+      if (rows % 2){
+        endIndicatorX = 0;
+      } else {
+        endIndicatorX = columns-1;
+      }
     }
     for (let i = 0; i <= columns-1; i++) {
       if (i === 0) {
@@ -814,6 +863,37 @@ function drawGrid() {
     }
   } else {
   }
+
+  // Draw circles in the middle of each grid square
+
+  for (let i = 0; i < rows; i++) {
+    for (let j = 0; j < columns; j++) {
+      const circleCenterX = j * boxWidth + boxWidth / 2 + halfLineWidth;
+      const circleCenterY = i * boxHeight + boxHeight / 2 + halfLineWidth;
+      const circleRadius = Math.min(boxWidth, boxHeight) / 15;
+      ctx.beginPath();
+      ctx.arc(circleCenterX, circleCenterY, circleRadius, 0, Math.PI * 2);
+      ctx.fillStyle = '#ffc107';
+      ctx.fill();
+    }
+  }
+  const indicatorCircleRadius = Math.min(boxWidth, boxHeight) / 8;
+
+  const startCircleCenterX = startIndicatorX * boxWidth + boxWidth / 2 + halfLineWidth;
+  const startCircleCenterY = startIndicatorY * boxHeight + boxHeight / 2 + halfLineWidth;
+  console.log(startCircleCenterX + ", " + startCircleCenterY);
+  ctx.beginPath();
+  ctx.arc(startCircleCenterX, startCircleCenterY, indicatorCircleRadius, 0, Math.PI * 2);
+  ctx.fillStyle = '#198754';
+  ctx.fill();
+
+  const endCircleCenterX = endIndicatorX * boxWidth + boxWidth / 2 + halfLineWidth;
+  const endCircleCenterY = endIndicatorY * boxHeight + boxHeight / 2 + halfLineWidth;
+  console.log(endCircleCenterX + ", " + endCircleCenterY);
+  ctx.beginPath();
+  ctx.arc(endCircleCenterX, endCircleCenterY, indicatorCircleRadius, 0, Math.PI * 2);
+  ctx.fillStyle = '#dc3545';
+  ctx.fill();
 
 }
 
