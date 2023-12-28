@@ -830,6 +830,94 @@ function drawGrid() {
 
     }
   } else {
+
+    // Draw vertical lines
+    for (let i = 0; i <= columns-1; i++) {
+      ctx.beginPath();
+      const x = (i * boxWidth + halfLineWidth)+(boxWidth/2); // Add half of the line width
+      ctx.moveTo(x, boxHeight/2);
+      ctx.lineTo(x, canvas.height-(boxHeight/2));
+      ctx.stroke();
+    }
+    // Draw horizontal lines
+    if (rows > 1) {
+      ctx.setLineDash([boxWidth]);
+    }
+
+
+
+    if (startX === "Left" && startY === "Top") {
+      offset = boxWidth;
+      startIndicatorX = 0;
+      startIndicatorY = 0;
+
+      endIndicatorX = columns-1;
+      if (columns % 2){
+        endIndicatorY = rows-1;
+      } else {
+        endIndicatorY = 0;
+      }
+
+
+    } else if (startX === "Right" && startY === "Top") {
+      offset = (boxWidth*(columns % 2))+boxWidth;
+
+      startIndicatorX = columns-1;
+      startIndicatorY = 0;
+
+      endIndicatorX = 0;
+      if (columns % 2){
+        endIndicatorY = rows-1;
+      } else {
+        endIndicatorY = 0;
+      }
+
+    }
+    if (startX === "Left" && startY === "Bottom") {
+      offset = 0;
+
+      startIndicatorY = rows-1;
+      startIndicatorX = 0;
+
+      endIndicatorX = columns-1;
+      if (columns % 2){
+        endIndicatorY = 0;
+      } else {
+        endIndicatorY = rows-1;
+      }
+
+    } else if (startX === "Right" && startY === "Bottom") {
+      offset = boxWidth*(columns % 2);
+      startIndicatorY = rows-1;
+      startIndicatorX = columns-1;
+
+      endIndicatorX = 0;
+      if (columns % 2){
+        endIndicatorY = 0;
+      } else {
+        endIndicatorY = rows-1;
+      }
+    }
+
+    for (let i = 0; i <= rows-1; i++) {
+      if (i === 0) {
+        ctx.lineDashOffset = offset;
+      } else if (i === rows - 1) {
+        ctx.lineDashOffset = offset + boxWidth;
+      }
+
+      if (i === 0|| i === rows - 1) {
+        ctx.beginPath();
+        const y = (i * boxHeight + halfLineWidth) + (boxHeight / 2); // Add half of the line width
+        ctx.moveTo(boxWidth / 2, y);
+        ctx.lineTo(canvas.width - (boxWidth / 2), y);
+        ctx.stroke();
+      }
+
+    }
+
+
+
   }
 
   // Draw circles in the middle of each grid square
