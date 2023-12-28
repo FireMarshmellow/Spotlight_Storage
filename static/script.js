@@ -547,8 +547,8 @@ function createCheckboxGrid() {
   const columns = parseInt(selectedOption.dataset.espColumns);
 
   // Variables to determine the starting position and serpentine direction
-  const startTop = selectedOption.dataset.espStarttop === 'top';
-  const startLeft = selectedOption.dataset.espStartleft === 'left';
+  const startY = selectedOption.dataset.espStartY === 'top';
+  const startX = selectedOption.dataset.espStartX === 'left';
   const serpentine = selectedOption.dataset.espSerpentine === 'horizontal';
 
   checkboxGrid.innerHTML = ""; // Clear previous grid if any
@@ -559,22 +559,22 @@ function createCheckboxGrid() {
 
     let ledNumber = 1; // Start the LED number counter
 
-    for (let i = startTop ? 1 : rows; startTop ? i <= rows : i > 0; startTop ? i++ : i--) {
+    for (let i = startY ? 1 : rows; startY ? i <= rows : i > 0; startY ? i++ : i--) {
       const row = document.createElement("tr");
 
-      for (let j = startLeft ? 1 : columns; startLeft ? j <= columns : j > 0; startLeft ? j++ : j--) {
+      for (let j = startX ? 1 : columns; startX ? j <= columns : j > 0; startX ? j++ : j--) {
         const cell = document.createElement("td");
 
         const checkbox = document.createElement("input");
         checkbox.type = "checkbox";
 
         // Calculate the position based on the specified settings
-        let rowPosition = startTop ? i : rows - i + 1;
-        let colPosition = startLeft ? j : columns - j + 1;
+        let rowPosition = startY ? i : rows - i + 1;
+        let colPosition = startX ? j : columns - j + 1;
 
         // Calculate LED number based on serpentine or normal order
         if (serpentine) {
-          let serpentineCol = startLeft ? colPosition : columns - colPosition + 1;
+          let serpentineCol = startX ? colPosition : columns - colPosition + 1;
           ledNumber = (rowPosition - 1) * columns + serpentineCol;
         } else {
           ledNumber = (rowPosition - 1) * columns + colPosition;
@@ -623,8 +623,8 @@ function populateEspDropdown() {
             option.value = esp.id;
             option.dataset.espRows = esp.rows;
             option.dataset.espColumns = esp.cols;
-            option.dataset.espStarttop = esp.start_top;
-            option.dataset.espStartleft = esp.start_left;
+            option.dataset.espStartY = esp.start_y;
+            option.dataset.espStartX = esp.start_x;
             option.dataset.espSerpentine = esp.serpentine_direction;
             option.textContent = esp.name + " (" + esp.esp_ip + ")";
             selectEspDropdown.appendChild(option);
@@ -707,6 +707,67 @@ document.getElementById('add-item-modal').addEventListener('shown.bs.modal', fun
   inputField.select();
   populateEspDropdown();
 });
+
+
+function drawGrid() {
+
+  const canvasContainer = document.getElementById('canvas-container');
+  const responsiveCanvas = document.getElementById('responsive-canvas');
+
+  // Get the actual pixel width of the canvas container
+  const containerStyle = window.getComputedStyle(canvasContainer);
+  const containerPadding = parseFloat(containerStyle.paddingLeft) + parseFloat(containerStyle.paddingRight);
+  const containerWidth = canvasContainer.clientWidth - containerPadding;
+
+  // Set the width of the responsive canvas to match the container width
+  responsiveCanvas.width = containerWidth;
+
+
+  const rows = parseInt(document.getElementById('add_esp_rows').value);
+  const columns = parseInt(document.getElementById('add_esp_columns').value);
+
+  const canvas = document.getElementById('responsive-canvas');
+
+  const ctx = canvas.getContext('2d');
+
+  const lineWidth = 2;
+  const boxWidth = (canvas.width-lineWidth) / columns;
+  const boxHeight = boxWidth;
+  canvas.height = (boxHeight*rows)+lineWidth;
+  const lineColour = "red";
+  const boxColour = "grey";
+
+
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  ctx.strokeStyle = lineColour;
+  ctx.lineWidth = lineWidth;
+
+  // Adjust for half of the line width to ensure strokes stay within the canvas
+  const halfLineWidth = lineWidth / 2;
+
+  for (let i = 0; i <= rows; i++) {
+    ctx.beginPath();
+    const y = i * boxHeight + halfLineWidth; // Add half of the line width
+    ctx.moveTo(0, y);
+    ctx.lineTo(canvas.width, y);
+    ctx.stroke();
+  }
+
+  for (let j = 0; j <= columns; j++) {
+    ctx.beginPath();
+    const x = j * boxWidth + halfLineWidth; // Add half of the line width
+    ctx.moveTo(x, 0);
+    ctx.lineTo(x, canvas.height);
+    ctx.stroke();
+  }
+}
+
+
+document.getElementById('add_esp_rows').addEventListener('change', drawGrid);
+document.getElementById('add_esp_columns').addEventListener('change', drawGrid);
+document.getElementById('add_esp_startx').addEventListener('change', drawGrid);
+document.getElementById('add_esp_starty').addEventListener('change', drawGrid);
+document.getElementById('add_esp_serpentine').addEventListener('change', drawGrid);
 
 
 

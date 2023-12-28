@@ -11,8 +11,8 @@ function addEsp(event) {
     const esp_ip = document.getElementById("add_esp_ip").value;
     const rows = document.getElementById("add_esp_rows").value;
     const cols = document.getElementById("add_esp_columns").value;
-    const startTop = document.getElementById("add_esp_starttop").value;
-    const startLeft = document.getElementById("add_esp_startleft").value;
+    const startTop = document.getElementById("add_esp_starty").value;
+    const startLeft = document.getElementById("add_esp_startx").value;
     const serpentineDirection = document.getElementById("add_esp_serpentine").value;
 
     const espItem = {
@@ -89,8 +89,8 @@ function populateEspTable() {
                 editButton.dataset.bsEspName = esp.name;
                 editButton.dataset.bsEspRows = esp.rows;
                 editButton.dataset.bsEspColumns = esp.cols;
-                editButton.dataset.bsEspStarttop = esp.start_top;
-                editButton.dataset.bsEspStartleft = esp.start_left;
+                editButton.dataset.bsEspStartY = esp.start_y;
+                editButton.dataset.bsEspStartX = esp.start_x;
                 editButton.dataset.bsEspSerpentinedirection = esp.serpentine_direction;
                 editButton.dataset.bsToggle = "modal";
                 editButton.innerHTML = '<i data-lucide="file-edit" class="text-primary"></i>';
@@ -132,8 +132,8 @@ document.getElementById("add-esp-button").addEventListener('click', () => {
     const esp_ip = document.getElementById("add_esp_ip").value;
     const rows = document.getElementById("add_esp_rows").value;
     const cols = document.getElementById("add_esp_columns").value;
-    const startTop = document.getElementById("add_esp_starttop").value;
-    const startLeft = document.getElementById("add_esp_startleft").value;
+    const startTop = document.getElementById("add_esp_starty").value;
+    const startLeft = document.getElementById("add_esp_startx").value;
     const serpentineDirection = document.getElementById("add_esp_serpentine").value;
 
     // Check for empty fields
@@ -336,8 +336,8 @@ document.getElementById('edit-esp-modal').addEventListener('show.bs.modal', func
     const ipAddress = button.getAttribute('data-bs-esp-ip');
     const espRows = button.getAttribute('data-bs-esp-rows');
     const espColumns = button.getAttribute('data-bs-esp-columns');
-    const espStartTop = button.getAttribute('data-bs-esp-starttop');
-    const espStartLeft = button.getAttribute('data-bs-esp-startleft');
+    const espStartTop = button.getAttribute('data-bs-esp-start-y');
+    const espStartLeft = button.getAttribute('data-bs-esp-start-x');
     const espSerpentineDirection = button.getAttribute('data-bs-esp-serpentinedirection');
 
 
@@ -359,6 +359,7 @@ document.getElementById('add-esp-modal').addEventListener('shown.bs.modal', func
     let inputField = document.getElementById('add_esp_name');
     inputField.focus();
     inputField.select();
+    drawGrid();
 });
 
 document.getElementById('confirmDelete').addEventListener('click', function () {

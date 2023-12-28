@@ -35,8 +35,8 @@ function generateGrid() {
                 // Process ESP data and generate the grid
                 const rows = parseInt(data.rows);
                 const cols = parseInt(data.cols);
-                const startTop = data.start_top === 'top';
-                const startLeft = data.start_left === 'left';
+                const startY = data.start_y === 'top';
+                const startX = data.start_x === 'left';
                 const serpentine = data.serpentine_direction === 'horizontal';
                 const gridContainer = document.getElementById('gridContainer') ?? 4;
 
@@ -47,8 +47,8 @@ function generateGrid() {
                 gridContainer.style.gridTemplateColumns = `repeat(${cols}, 30px)`; // Adjust column size
 
                 // Generate checkboxes with alternating patterns
-                for (let row = startTop ? 1 : rows; startTop ? row <= rows : row > 0; startTop ? row++ : row--) {
-                    for (let colum = startLeft ? 0 : cols - 1; startLeft ? colum < cols : colum >= 0; startLeft ? colum++ : colum--) {
+                for (let row = startY ? 1 : rows; startY ? row <= rows : row > 0; startY ? row++ : row--) {
+                    for (let colum = startX ? 0 : cols - 1; startX ? colum < cols : colum >= 0; startX ? colum++ : colum--) {
                         // Calculate LED number based on row and column
                         const col = colum + 1;
                         const isEvenColumn = col % 2 === 0;
