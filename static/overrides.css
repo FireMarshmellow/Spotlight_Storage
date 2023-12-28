@@ -42,8 +42,9 @@
     opacity: 1; /* Show the rainbow on hover */
     animation-play-state: running; /* Start the animation on hover */
 }
-.btn-rainbow:hover{
-     text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.75);
+
+.btn-rainbow:hover {
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.75);
 }
 
 .btn-rainbow span {
@@ -68,4 +69,8 @@
 
 .icon-n4px .lucide {
     margin-top: -4px;
+}
+
+.or-text {
+    padding-top: 29px;
 }

@@ -158,55 +158,32 @@
                     </div>
 
                     <div class="row">
-                        <div class="col-6 pe-2">
-                            <div class="form-floating mb-3">
-                                <input type="number" class="form-control" id="add_item_image" placeholder="image">
+                        <div class="col-4 pe-2">
+                            <div class="form mb-3">
                                 <label for="add_item_quantity">Item image URL</label>
+                                <input type="test" class="form-control" id="add_item_image" placeholder="https://placehold.co/150x100?text=Hello+World">
+
                             </div>
                         </div>
-                        <div class="col-6 ps-2">
-                            <div class="form-floating mb-3">
-                                <input type="number" class="form-control" id="add_esp_columns" placeholder="4" min="1" value="4" required>
-                                <label for="add_esp_columns">Columns</label>
+                        <div class="col-1 text-center or-text">
+                            <span>or</span>
+                        </div>
+                        <div class="col-7 ps-2">
+                            <div class="form">
+                                <label for="add_item_image_upload">Upload image file</label>
+                                <input type="file" class="form-control" id="add_item_image_upload" name="file">
                             </div>
                         </div>
                     </div>
-
-
-
-
+                    <label for="add_item_esp_select">Select an ESP device</label>
+                    <select class="form-select" id="add_item_esp_select">
+                    </select>
+                    <div id="checkbox-grid"></div>
 
                     <div id="form-container" class="hidden w-full md:w-2/3 lg:w-1/2">
                         <form id="add-form" class="shadow-md rounded px-8 pt-6 pb-8 mb-4">
 
-                            <div class="mb-4 flex flex-wrap">
-                                <div class="w-full md:w-2/4 md:pl-2">
-                                    <label for="quantity">Image file upload:</label>
-                                    <input type="file" class="form-input" id="file" name="file"/>
-                                </div>
-                            </div>
-                            <div class="mb-4 flex flex-wrap">
-                                <div class="w-full md:w-2/4 md:pl-2">
-                                    <label for="generate_pos">Generate Positions:</label>
-                                    <button type="button" id="generate_pos" onclick="toggleGrid()" class="flex-1 bg-blue-500 hover:bg-blue-700 common-button w-full">Select LEDS
-                                    </button>
-                                </div>
-                            </div>
-                            <div id="select_led_container" class="container mx-auto hidden">
-                                <div class="mb-4 flex flex-wrap">
-                                    <div class="w-full md:w-1/4 ">
-                                        <button type="button" id="test_lights" onclick="TestLights()" class="common-button bg-blue-500 hover:bg-blue-700">Test Lights
-                                        </button>
-                                    </div>
-                                    <div class="w-full md:w-1/4 md:pl-2">
-                                        <button type="button" id="clear_grid" onclick="clearAll()" class="common-button bg-blue-500 hover:bg-blue-700 ">Clear All
-                                        </button>
-                                    </div>
-                                </div>
-                                <div class="mb-4">
-                                    <div class="grid-container" id="gridContainer"></div>
-                                </div>
-                            </div>
+
                             <div class="container mb-4">
                                 <label for="tag-input">Tags:</label>
                                 <div class="tag-input-container">
@@ -220,18 +197,14 @@
 
 
                             </div>
-                            <div class="flex mx-auto">
-                                <button type="button" id="save-item" class="flex-1 common-button bg-blue-500 hover:bg-blue-700">Add
-                                </button>
-                                <button type="button" id="copy-item" class="flex-1 common-button bg-purple-500 hover:bg-purple-700 hidden ml-2">Copy
-                                </button>
-                            </div>
                         </form>
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                    <button type="button" class="btn btn-primary">Save changes</button>
+                    <button type="button" class="btn btn-secondary pe-3" data-bs-dismiss="modal">
+                        <span class="icon-n4px"><i data-lucide="x" class="me-2"></i>Cancel</span></button>
+                    <button type="button" class="btn btn-success pe-3" id="add-item-save-button">
+                        <span class="icon-n4px"><i data-lucide="plus" class="me-2"></i>Add</span></button>
                 </div>
             </div>
         </div>
@@ -435,8 +408,7 @@
                     </div>
 
                 </div>
-                <ul id="item-list" class="relative grid sm:grid-cols-1 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-4  max-w-5xl mx-auto w-11/12 md:5/6 lg:full">
-                </ul>
+
             </div>
         </div>
     </div>
@@ -445,7 +417,7 @@
 
 <script src="../static/script.js"></script>
 <script src="../static/esp.js"></script>
-<script src="../static/gen_grid.js"></script>
+
 <script src="../static/settings.js"></script>
 <script src="../static/tags.js"></script>
 <script src="../static/color-modes.js"></script>

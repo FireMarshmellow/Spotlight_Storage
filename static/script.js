@@ -537,33 +537,121 @@ function loadItems() {
 loadItems();
 
 
-document.getElementById("save-item").addEventListener("click", addItem);
-document.getElementById("btn-add").addEventListener("click", function() {isEditingItem = false;});
-document.getElementById("btn-add").addEventListener("click", toggleAddForm);
-document.getElementById("btn-add").addEventListener("click", populateEspDropdown);
-//Function to Ad ESPs
-// Function to add an ESP item
+
+function createCheckboxGrid() {
+  const selectEspDropdown = document.getElementById("add_item_esp_select");
+  const checkboxGrid = document.getElementById("checkbox-grid");
+
+  const selectedOption = selectEspDropdown.options[selectEspDropdown.selectedIndex];
+  const rows = parseInt(selectedOption.dataset.espRows);
+  const columns = parseInt(selectedOption.dataset.espColumns);
+
+  // Variables to determine the starting position and serpentine direction
+  const startTop = selectedOption.dataset.espStarttop === 'top';
+  const startLeft = selectedOption.dataset.espStartleft === 'left';
+  const serpentine = selectedOption.dataset.espSerpentine === 'horizontal';
+
+  checkboxGrid.innerHTML = ""; // Clear previous grid if any
+
+  if (!isNaN(rows) && !isNaN(columns)) {
+    const table = document.createElement("table");
+    table.style.borderCollapse = "collapse"; // Set border collapse for better table appearance
+
+    let ledNumber = 1; // Start the LED number counter
+
+    for (let i = startTop ? 1 : rows; startTop ? i <= rows : i > 0; startTop ? i++ : i--) {
+      const row = document.createElement("tr");
+
+      for (let j = startLeft ? 1 : columns; startLeft ? j <= columns : j > 0; startLeft ? j++ : j--) {
+        const cell = document.createElement("td");
+
+        const checkbox = document.createElement("input");
+        checkbox.type = "checkbox";
+
+        // Calculate the position based on the specified settings
+        let rowPosition = startTop ? i : rows - i + 1;
+        let colPosition = startLeft ? j : columns - j + 1;
+
+        // Calculate LED number based on serpentine or normal order
+        if (serpentine) {
+          let serpentineCol = startLeft ? colPosition : columns - colPosition + 1;
+          ledNumber = (rowPosition - 1) * columns + serpentineCol;
+        } else {
+          ledNumber = (rowPosition - 1) * columns + colPosition;
+        }
+
+        checkbox.id = `led${ledNumber}`;
+
+        const checkboxLabel = document.createElement("label");
+        checkboxLabel.setAttribute("for", `led${ledNumber}`);
+        checkboxLabel.textContent = `led${ledNumber}`;
+
+        cell.appendChild(checkbox);
+        cell.appendChild(checkboxLabel);
+        row.appendChild(cell);
+
+        ledNumber++; // Increment the LED number for uniqueness
+      }
+
+      table.appendChild(row);
+    }
+
+    checkboxGrid.appendChild(table);
+  }
+}
+
+
+
+
+// Event listener for select change
+document.getElementById("add_item_esp_select").addEventListener("change", createCheckboxGrid);
+
+
 
 function populateEspDropdown() {
-  selectEspDropdownIP.innerHTML = "";
-  // Add "Add ESP" option at the first position
-  const addEspOption = document.createElement("option");
-  addEspOption.value = "select";
-  addEspOption.textContent = "Select ESP";
-  selectEspDropdownIP.appendChild(addEspOption);
-  // Fetch and populate the rest of the options
+  const selectEspDropdown = document.getElementById("add_item_esp_select");
+  selectEspDropdown.innerHTML = "";
+
+  // Fetch ESP devices
   fetch("/api/esp")
       .then((response) => response.json())
       .then((data) => {
-        data.forEach((esp) => {
-          const option = document.createElement("option");
-          option.value = esp.id;
-          option.textContent = esp.name ;
-          selectEspDropdownIP.appendChild(option);
-        });
+        if (data.length > 0) {
+          // Devices found: Populate dropdown and select the first one
+          data.forEach((esp, index) => {
+            const option = document.createElement("option");
+            option.value = esp.id;
+            option.dataset.espRows = esp.rows;
+            option.dataset.espColumns = esp.cols;
+            option.dataset.espStarttop = esp.start_top;
+            option.dataset.espStartleft = esp.start_left;
+            option.dataset.espSerpentine = esp.serpentine_direction;
+            option.textContent = esp.name + " (" + esp.esp_ip + ")";
+            selectEspDropdown.appendChild(option);
+
+            if (index === 0) {
+              selectEspDropdown.selectedIndex = index;
+            }
+          });
+        } else {
+          // No devices found: Disable dropdown and display message
+          selectEspDropdown.disabled = true;
+          const messageOption = document.createElement("option");
+          messageOption.textContent = "Please add an ESP device first...";
+          messageOption.disabled = true;
+          selectEspDropdown.appendChild(messageOption);
+        }
+
+        console.log("Dropdown populated:", data); // Logging the output to console
+        createCheckboxGrid();
       })
       .catch((error) => console.error(error));
 }
+
+
+
+
+
 function findIndexByIP(ip) {
   const options = selectEspDropdownIP.options;
   for (let i = 0; i < options.length; i++) {
@@ -611,15 +699,15 @@ function updateSortTitle() {
 
   title.textContent = "Sort by: " + selectedOption.textContent;
 }
-CopyBnt.addEventListener('click', function (){
-  isEditingItem = false;
-  addItem(event);
-})
+
+document.getElementById('add-item-modal').addEventListener('shown.bs.modal', function (event) {
+  console.log("Add item modal: 'shown'")
+  let inputField = document.getElementById('add_item_name');
+  inputField.focus();
+  inputField.select();
+  populateEspDropdown();
+});
 
 
-
-// Define a function to populate the "select_esp" dropdown
-populateEspDropdown();
-updateSortTitle();
 
 
