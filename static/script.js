@@ -725,6 +725,12 @@ function drawGrid() {
 
   const rows = parseInt(document.getElementById('add_esp_rows').value);
   const columns = parseInt(document.getElementById('add_esp_columns').value);
+  const startX = document.getElementById('add_esp_startx').options[document.getElementById('add_esp_startx').selectedIndex].getAttribute("data-startx");
+  const startY = document.getElementById('add_esp_starty').options[document.getElementById('add_esp_starty').selectedIndex].getAttribute("data-starty");
+  const serpentineDirection = document.getElementById('add_esp_serpentine').options[document.getElementById('add_esp_serpentine').selectedIndex].getAttribute("data-serpentine");
+
+
+  console.log ("startX: " + startX + ", " + "startY: " + startY + ", " + "serpentineDirection: " + serpentineDirection)
 
   const canvas = document.getElementById('responsive-canvas');
 
@@ -735,16 +741,20 @@ function drawGrid() {
   const boxHeight = boxWidth;
   canvas.height = (boxHeight*rows)+lineWidth;
   const lineColour = "red";
-  const boxColour = "grey";
+  const gridColour = "grey";
+  var offset = 0;
 
 
   ctx.clearRect(0, 0, canvas.width, canvas.height);
-  ctx.strokeStyle = lineColour;
+
   ctx.lineWidth = lineWidth;
 
-  // Adjust for half of the line width to ensure strokes stay within the canvas
+
   const halfLineWidth = lineWidth / 2;
 
+
+  // Draw grid
+  ctx.strokeStyle = gridColour;
   for (let i = 0; i <= rows; i++) {
     ctx.beginPath();
     const y = i * boxHeight + halfLineWidth; // Add half of the line width
@@ -760,6 +770,51 @@ function drawGrid() {
     ctx.lineTo(x, canvas.height);
     ctx.stroke();
   }
+
+
+
+  // Draw line
+  ctx.strokeStyle = lineColour;
+  if (serpentineDirection === "Horizontal") {
+    // Draw horizontal lines
+    for (let i = 0; i <= rows-1; i++) {
+      ctx.beginPath();
+      const y = (i * boxHeight + halfLineWidth)+(boxHeight/2); // Add half of the line width
+      ctx.moveTo(boxWidth/2, y);
+      ctx.lineTo(canvas.width-(boxWidth/2), y);
+      ctx.stroke();
+    }
+    // Draw vertical lines
+    ctx.setLineDash([boxHeight]);
+    if (startX === "Left" && startY === "Top") {
+      offset = boxHeight;
+    } else if (startX === "Right" && startY === "Top") {
+      offset = 0;
+    }
+    if (startX === "Left" && startY === "Bottom") {
+      offset = (boxHeight*(rows % 2))+boxHeight;
+    } else if (startX === "Right" && startY === "Bottom") {
+      offset = boxHeight*(rows % 2);
+    }
+    for (let i = 0; i <= columns-1; i++) {
+      if (i === 0) {
+        ctx.lineDashOffset = offset;
+      } else if (i === columns - 1) {
+        ctx.lineDashOffset = offset + boxHeight;
+      }
+
+      if (i === 0|| i === columns - 1) {
+        ctx.beginPath();
+        const x = (i * boxWidth + halfLineWidth) + (boxWidth / 2); // Add half of the line width
+        ctx.moveTo(x, boxHeight / 2);
+        ctx.lineTo(x, canvas.height - (boxHeight / 2));
+        ctx.stroke();
+      }
+
+    }
+  } else {
+  }
+
 }
 
 

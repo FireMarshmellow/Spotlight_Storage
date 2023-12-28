@@ -265,34 +265,33 @@
                         <div class="col-4 pe-0">
                             <div class="form-floating mb-3">
                                 <select class="form-select" id="add_esp_startx">
-                                    <option selected>Left</option>
-                                    <option value="1">Right</option>
+                                    <option selected data-startx="Left">Left</option>
+                                    <option value="1" data-startx="Right">Right</option>
                                 </select>
-                                <label for="add_esp_startx">Start X-axis</label>
+                                <label for="add_esp_startx">Start Left</label>
                             </div>
                         </div>
                         <div class="col-4">
                             <div class="form-floating mb-3">
                                 <select class="form-select" id="add_esp_starty">
-                                    <option selected>Top</option>
-                                    <option>Bottom</option>
+                                    <option selected data-starty="Top">Top</option>
+                                    <option data-starty="Bottom">Bottom</option>
                                 </select>
-                                <label for="add_esp_starty">Start Y-axis</label>
+                                <label for="add_esp_starty">Start Top</label>
                             </div>
 
                         </div>
                         <div class="col-4 ps-0">
                             <div class="form-floating mb-3">
                                 <select class="form-select" id="add_esp_serpentine">
-                                    <option selected>Horizontal</option>
-                                    <option value="1">Vertical</option>
+                                    <option selected data-serpentine="Horizontal">Horizontal</option>
+                                    <option value="1" data-serpentine="Vertical">Vertical</option>
                                 </select>
                                 <label for="add_esp_serpentine">Serpentine Direction</label>
                             </div>
                         </div>
-                        <div class="col-8 mx-auto" id="canvas-container"><canvas id="responsive-canvas"></canvas></div>
-
                     </div>
+                    <div class="col-8 mx-auto" id="canvas-container"><canvas id="responsive-canvas"></canvas></div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary pe-3" data-bs-dismiss="modal">
@@ -308,7 +307,7 @@
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h1 class="modal-title fs-5" id="add-esp-modal-label">Edit ESP</h1>
+                    <h1 class="modal-title fs-5" id="edit-esp-modal-label">Edit ESP</h1>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
@@ -316,52 +315,53 @@
                     </div>
                     <div class="form-floating mb-3">
                         <input type="text" class="form-control" id="edit_esp_name" placeholder="Name" required>
-                        <label for="add_esp_name">Name</label>
+                        <label for="edit_esp_name">Name</label>
                     </div>
                     <div class="form-floating mb-3">
                         <input type="text" class="form-control" id="edit_esp_ip" placeholder="IP">
-                        <label for="add_esp_ip">IP address</label>
+                        <label for="edit_esp_ip">IP address</label>
                     </div>
                     <div class="row">
                         <div class="col-6 pe-2">
                             <div class="form-floating mb-3">
                                 <input type="number" class="form-control" id="edit_esp_rows" placeholder="4" min="1" value="4" required>
-                                <label for="add_esp_rows">Rows</label>
+                                <label for="edit_esp_rows">Rows</label>
                             </div>
                         </div>
                         <div class="col-6 ps-2">
                             <div class="form-floating mb-3">
                                 <input type="number" class="form-control" id="edit_esp_columns" placeholder="4" min="1" value="4" required>
-                                <label for="add_esp_columns">Columns</label>
+                                <label for="edit_esp_columns">Columns</label>
                             </div>
                         </div>
                     </div>
                     <div class="row">
                         <div class="col-4 pe-0">
                             <div class="form-floating mb-3">
-                                <select class="form-select" id="edit_esp_starty">
-                                    <option selected>Top</option>
-                                    <option>Bottom</option>
+                                <select class="form-select" id="edit_esp_startx">
+                                    <option selected data-startx="Left">Left</option>
+                                    <option value="1" data-startx="Right">Right</option>
                                 </select>
-                                <label for="add_esp_starty">Start Top</label>
+                                <label for="edit_esp_startx">Start Left</label>
                             </div>
                         </div>
                         <div class="col-4">
                             <div class="form-floating mb-3">
-                                <select class="form-select" id="edit_esp_startx">
-                                    <option selected>Left</option>
-                                    <option value="1">Right</option>
+                                <select class="form-select" id="edit_esp_starty">
+                                    <option selected data-starty="Top">Top</option>
+                                    <option data-starty="Bottom">Bottom</option>
                                 </select>
-                                <label for="add_esp_startx">Start Left</label>
+                                <label for="edit_esp_starty">Start Top</label>
                             </div>
+
                         </div>
                         <div class="col-4 ps-0">
                             <div class="form-floating mb-3">
                                 <select class="form-select" id="edit_esp_serpentine">
-                                    <option selected>Horizontal</option>
-                                    <option value="1">Vertical</option>
+                                    <option selected data-serpentine="Horizontal">Horizontal</option>
+                                    <option value="1" data-serpentine="Vertical">Vertical</option>
                                 </select>
-                                <label for="add_esp_serpentine">Serpentine Direction</label>
+                                <label for="edit_esp_serpentine">Serpentine Direction</label>
                             </div>
                         </div>
                     </div>
