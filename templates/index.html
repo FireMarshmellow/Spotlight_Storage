@@ -20,11 +20,6 @@
         </button>
         <div class="collapse navbar-collapse" id="navbarCollapse">
             <ul class="navbar-nav me-auto mb-2 mb-md-0">
-                <!--<li class="nav-item">
-                    <button type="button" class="btn btn-outline-success me-0 me-md-2 pe-3" data-bs-toggle="modal" data-bs-target="#add-esp-modal">
-                        <span class="icon-n4px"><i data-lucide="plus" class="me-2"></i>Add ESP Device</span>
-                    </button>
-                </li>-->
                 <li class="nav-item">
                     <button type="button" class="btn btn-outline-success pe-3" data-bs-toggle="modal" data-bs-target="#add-item-modal">
                         <span class="icon-n4px"><i data-lucide="plus" class="me-2"></i>Add Item</span>
@@ -115,7 +110,7 @@
                     </table>
                 </div>
                 <div>
-                    <button type="button" class="btn btn-outline-success me-0 me-md-2 pe-3" data-bs-toggle="modal" data-bs-target="#add-esp-modal">
+                    <button type="button" class="btn btn-outline-success me-0 me-md-2 pe-3" data-bs-toggle="modal" data-bs-target="#esp-modal">
                         <span class="icon-n4px"><i data-lucide="plus" class="me-2"></i>Add ESP Device</span>
                     </button>
                 </div>
@@ -229,153 +224,79 @@
         </div>
     </div>
 
-    <div class="modal fade" id="add-esp-modal" tabindex="-1" aria-labelledby="add-esp-modal-label" aria-hidden="true">
+    <div class="modal fade" id="esp-modal" tabindex="-1" aria-labelledby="esp-modal-label" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h1 class="modal-title fs-5" id="add-esp-modal-label">Add ESP</h1>
+                    <h1 class="modal-title fs-5" id="esp-modal-label">Add ESP</h1>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                    <div class="alert alert-danger d-none" id="add-esp-error-alert">Please enter values in the follow empty fields:<br><span id="error-list"></span>
+                    <div class="alert alert-danger d-none" id="esp-error-alert">Please enter values in the follow empty fields:<br><span id="error-list"></span>
                     </div>
                     <div class="form-floating mb-3">
-                        <input type="text" class="form-control" id="add_esp_name" placeholder="Name" required>
-                        <label for="add_esp_name">Name</label>
+                        <input type="text" class="form-control" id="esp_name" placeholder="Name" required>
+                        <label for="esp_name">Name</label>
                     </div>
                     <div class="form-floating mb-3">
-                        <input type="text" class="form-control" id="add_esp_ip" placeholder="IP">
-                        <label for="add_esp_ip">IP address</label>
+                        <input type="text" class="form-control" id="esp_ip" placeholder="IP">
+                        <label for="esp_ip">IP address</label>
                     </div>
                     <div class="row">
                         <div class="col-6 pe-2">
                             <div class="form-floating mb-3">
-                                <input type="number" class="form-control" id="add_esp_rows" placeholder="4" min="1" value="4" required>
-                                <label for="add_esp_rows">Rows</label>
+                                <input type="number" class="form-control" id="esp_rows" placeholder="4" min="1" value="4" required>
+                                <label for="esp_rows">Rows</label>
                             </div>
                         </div>
                         <div class="col-6 ps-2">
                             <div class="form-floating mb-3">
-                                <input type="number" class="form-control" id="add_esp_columns" placeholder="4" min="1" value="4" required>
-                                <label for="add_esp_columns">Columns</label>
+                                <input type="number" class="form-control" id="esp_columns" placeholder="4" min="1" value="4" required>
+                                <label for="esp_columns">Columns</label>
                             </div>
                         </div>
                     </div>
                     <div class="row">
                         <div class="col-4 pe-0">
                             <div class="form-floating mb-3">
-                                <select class="form-select" id="add_esp_startx">
+                                <select class="form-select" id="esp_startx">
                                     <option selected data-startx="Left">Left</option>
                                     <option value="1" data-startx="Right">Right</option>
                                 </select>
-                                <label for="add_esp_startx">Start Left</label>
+                                <label for="esp_startx">Start Left</label>
                             </div>
                         </div>
                         <div class="col-4">
                             <div class="form-floating mb-3">
-                                <select class="form-select" id="add_esp_starty">
+                                <select class="form-select" id="esp_starty">
                                     <option selected data-starty="Top">Top</option>
                                     <option data-starty="Bottom">Bottom</option>
                                 </select>
-                                <label for="add_esp_starty">Start Top</label>
+                                <label for="esp_starty">Start Top</label>
                             </div>
 
                         </div>
                         <div class="col-4 ps-0">
                             <div class="form-floating mb-3">
-                                <select class="form-select" id="add_esp_serpentine">
+                                <select class="form-select" id="esp_serpentine">
                                     <option selected data-serpentine="Horizontal">Horizontal</option>
                                     <option value="1" data-serpentine="Vertical">Vertical</option>
                                 </select>
-                                <label for="add_esp_serpentine">Serpentine Direction</label>
+                                <label for="esp_serpentine">Serpentine Direction</label>
                             </div>
                         </div>
                     </div>
-                    <div class="col-8 mx-auto" id="canvas-container"><canvas id="responsive-canvas"></canvas></div>
+                    <div id="esp-canvas-container" class="col-10 mx-auto"><canvas id="esp-responsive-canvas"></canvas></div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary pe-3" data-bs-dismiss="modal">
                         <span class="icon-n4px"><i data-lucide="x" class="me-2"></i>Cancel</span></button>
-                    <button type="button" class="btn btn-success pe-3" id="add-esp-button">
+                    <button type="button" class="btn btn-success pe-3" id="save-esp-button">
                         <span class="icon-n4px"><i data-lucide="plus" class="me-2"></i>Add</span></button>
                 </div>
             </div>
         </div>
     </div>
-
-    <div class="modal fade" id="edit-esp-modal" tabindex="-1" aria-labelledby="edit-esp-modal-label" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h1 class="modal-title fs-5" id="edit-esp-modal-label">Edit ESP</h1>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <div class="alert alert-danger d-none" id="edit-esp-error-alert">Please enter values in the follow empty fields:<br><span id="error-list"></span>
-                    </div>
-                    <div class="form-floating mb-3">
-                        <input type="text" class="form-control" id="edit_esp_name" placeholder="Name" required>
-                        <label for="edit_esp_name">Name</label>
-                    </div>
-                    <div class="form-floating mb-3">
-                        <input type="text" class="form-control" id="edit_esp_ip" placeholder="IP">
-                        <label for="edit_esp_ip">IP address</label>
-                    </div>
-                    <div class="row">
-                        <div class="col-6 pe-2">
-                            <div class="form-floating mb-3">
-                                <input type="number" class="form-control" id="edit_esp_rows" placeholder="4" min="1" value="4" required>
-                                <label for="edit_esp_rows">Rows</label>
-                            </div>
-                        </div>
-                        <div class="col-6 ps-2">
-                            <div class="form-floating mb-3">
-                                <input type="number" class="form-control" id="edit_esp_columns" placeholder="4" min="1" value="4" required>
-                                <label for="edit_esp_columns">Columns</label>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-4 pe-0">
-                            <div class="form-floating mb-3">
-                                <select class="form-select" id="edit_esp_startx">
-                                    <option selected data-startx="Left">Left</option>
-                                    <option value="1" data-startx="Right">Right</option>
-                                </select>
-                                <label for="edit_esp_startx">Start Left</label>
-                            </div>
-                        </div>
-                        <div class="col-4">
-                            <div class="form-floating mb-3">
-                                <select class="form-select" id="edit_esp_starty">
-                                    <option selected data-starty="Top">Top</option>
-                                    <option data-starty="Bottom">Bottom</option>
-                                </select>
-                                <label for="edit_esp_starty">Start Top</label>
-                            </div>
-
-                        </div>
-                        <div class="col-4 ps-0">
-                            <div class="form-floating mb-3">
-                                <select class="form-select" id="edit_esp_serpentine">
-                                    <option selected data-serpentine="Horizontal">Horizontal</option>
-                                    <option value="1" data-serpentine="Vertical">Vertical</option>
-                                </select>
-                                <label for="edit_esp_serpentine">Serpentine Direction</label>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary pe-3" data-bs-dismiss="modal">
-                        <span class="icon-n4px"><i data-lucide="x" class="me-2"></i>Cancel</span></button>
-                    <button type="button" class="btn btn-success pe-3" id="edit-esp-button">
-                        <span class="icon-n4px"><i data-lucide="save" class="me-2"></i>Save</span></button>
-                </div>
-            </div>
-        </div>
-    </div>
-
 
     <div class="container mx-auto mt-8">
         <div class="container mx-auto mt-8">

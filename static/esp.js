@@ -7,13 +7,13 @@ let editingEspId = null; // Track the ID of the ESP being edited
 
 
 function addEsp(event) {
-    const name = document.getElementById("add_esp_name").value;
-    const esp_ip = document.getElementById("add_esp_ip").value;
-    const rows = document.getElementById("add_esp_rows").value;
-    const cols = document.getElementById("add_esp_columns").value;
-    const startTop = document.getElementById("add_esp_starty").value;
-    const startLeft = document.getElementById("add_esp_startx").value;
-    const serpentineDirection = document.getElementById("add_esp_serpentine").value;
+    const name = document.getElementById("esp_name").value;
+    const esp_ip = document.getElementById("esp_ip").value;
+    const rows = document.getElementById("esp_rows").value;
+    const cols = document.getElementById("esp_columns").value;
+    const startTop = document.getElementById("esp_starty").value;
+    const startLeft = document.getElementById("esp_startx").value;
+    const serpentineDirection = document.getElementById("esp_serpentine").value;
 
     const espItem = {
         name,
@@ -83,14 +83,15 @@ function populateEspTable() {
                 const editButton = document.createElement("button");
                 editButton.type = "button";
                 editButton.classList.add("btn", "btn-link", "me-2", "p-0", "icon-n4px");
-                editButton.dataset.bsTarget = "#edit-esp-modal";
+                editButton.dataset.bsTarget = "#esp-modal";
+                editButton.dataset.bsMode = "edit";
                 editButton.dataset.bsEspId = esp.id;
                 editButton.dataset.bsEspIp = esp.esp_ip;
                 editButton.dataset.bsEspName = esp.name;
                 editButton.dataset.bsEspRows = esp.rows;
                 editButton.dataset.bsEspColumns = esp.cols;
-                editButton.dataset.bsEspStartY = esp.start_y;
-                editButton.dataset.bsEspStartX = esp.start_x;
+                editButton.dataset.bsEspStartY = esp.start_top;
+                editButton.dataset.bsEspStartX = esp.start_left;
                 editButton.dataset.bsEspSerpentinedirection = esp.serpentine_direction;
                 editButton.dataset.bsToggle = "modal";
                 editButton.innerHTML = '<i data-lucide="file-edit" class="text-primary"></i>';
@@ -127,195 +128,107 @@ function populateEspTable() {
         });
 }
 
-document.getElementById("add-esp-button").addEventListener('click', () => {
-    const name = document.getElementById("add_esp_name").value;
-    const esp_ip = document.getElementById("add_esp_ip").value;
-    const rows = document.getElementById("add_esp_rows").value;
-    const cols = document.getElementById("add_esp_columns").value;
-    const startTop = document.getElementById("add_esp_starty").value;
-    const startLeft = document.getElementById("add_esp_startx").value;
-    const serpentineDirection = document.getElementById("add_esp_serpentine").value;
+document.getElementById("save-esp-button").addEventListener('click', () => {
+    const espId = document.getElementById('save-esp-button').getAttribute('data-bs-esp-id');
 
-    // Check for empty fields
+    const name = document.getElementById("esp_name").value;
+    const esp_ip = document.getElementById("esp_ip").value;
+    const rows = document.getElementById("esp_rows").value;
+    const cols = document.getElementById("esp_columns").value;
+    const startTop = document.getElementById("esp_starty").value;
+    const startLeft = document.getElementById("esp_startx").value;
+    const serpentineDirection = document.getElementById("esp_serpentine").value;
+
     const emptyFields = [];
-    if (name.trim() === '') {
-        emptyFields.push('Name');
-    }
-    if (esp_ip.trim() === '') {
-        emptyFields.push('IP Address');
-    }
-
-    // Function to validate IP address
     const isValidIPAddress = (ip) => {
         const ipRegex = /^(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})$/;
         return ipRegex.test(ip) && ip.split('.').every(octet => parseInt(octet, 10) <= 255);
     };
 
-    if (emptyFields.length > 0) {
-        const alert = document.getElementById('add-esp-error-alert');
+    const showAlert = (alertId, message) => {
+        const alert = document.getElementById(alertId);
         alert.classList.remove('d-none');
         const errorList = document.getElementById('error-list');
-        errorList.innerHTML = "The following fields are empty:<br>";
+        errorList.innerHTML = message;
+    };
 
-        const emptyFieldsList = document.createElement('ul');
-        emptyFieldsList.classList.add('mb-0');
-        emptyFields.forEach(field => {
-            const listItem = document.createElement('li');
-            listItem.textContent = field;
-            emptyFieldsList.appendChild(listItem);
-        });
+    const handleEmptyFields = () => {
+        if (name.trim() === '') {
+            emptyFields.push('Name');
+        }
+        if (esp_ip.trim() === '') {
+            emptyFields.push('IP Address');
+        }
 
-        errorList.appendChild(emptyFieldsList);
+        if (emptyFields.length > 0) {
+            showAlert(espId !== null && espId !== '' ? 'edit-esp-error-alert' : 'esp-error-alert',
+                "The following fields are empty:<br>" +
+                emptyFields.map(field => `<li>${field}</li>`).join('')
+            );
+            return true;
+        }
+        return false;
+    };
 
-        return; // Stop execution if fields are empty
-    }
+    if (handleEmptyFields()) return;
 
     if (!isValidIPAddress(esp_ip)) {
-        const alert = document.getElementById('add-esp-error-alert');
-        alert.classList.remove('d-none');
-        const errorList = document.getElementById('error-list');
-        errorList.innerHTML = "IP Address is not valid.";
-
-        return; // Stop execution if IP address is invalid
+        showAlert(espId !== null && espId !== '' ? 'edit-esp-error-alert' : 'esp-error-alert', "IP Address is not valid.");
+        return;
     }
 
-    // Fetch existing data to check for duplicates
-    fetch("/api/esp")
-        .then((response) => response.json())
-        .then((data) => {
-            const existingNames = data.map(esp => esp.name);
-            const existingIPs = data.map(esp => esp.esp_ip);
+    const espItem = {
+        name,
+        esp_ip,
+        rows,
+        cols,
+        startTop,
+        startLeft,
+        serpentineDirection
+    };
 
-            if (existingNames.includes(name) || existingIPs.includes(esp_ip)) {
-                const alert = document.getElementById('add-esp-error-alert');
-                alert.classList.remove('d-none');
-                const errorList = document.getElementById('error-list');
-                errorList.innerHTML = "";
+    const processESPItem = () => {
 
-                if (existingNames.includes(name)) {
-                    errorList.innerHTML += `- Name "${name}" already exists.<br>`;
-                }
+        // TODO Check for existing names and IP addresses when saving the edit of an existing ESP entry
 
-                if (existingIPs.includes(esp_ip)) {
-                    errorList.innerHTML += `- IP Address "${esp_ip}" already exists.`;
-                }
-
-                return; // Stop execution if name or IP exists
-            }
-
-            const espItem = {
-                name,
-                esp_ip,
-                rows,
-                cols,
-                startTop,
-                startLeft,
-                serpentineDirection
-            };
-
-            fetch("/api/esp", {
-                method: "POST",
-                headers: {"Content-Type": "application/json"},
-                body: JSON.stringify(espItem),
-            })
-                .then((response) => response.json())
-                .then((data) => {
-                    console.log("ESP item added:", data);
-                    // If successful, repopulate the table
-                    setTimeout(function () {
-                        populateEspTable();
-                    }, 500);
-                    const new_esp_modal = document.querySelector('#add-esp-modal');
-                    const modal = bootstrap.Modal.getInstance(new_esp_modal);
-                    modal.hide();
-
-                })
-                .catch((error) => console.error(error));
+        fetch(espId !== null && espId !== '' ? `/api/esp/${espId}` : '/api/esp', {
+            method: espId !== null && espId !== '' ? "PUT" : "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(espItem),
         })
-        .catch((error) => console.error(error));
-});
-
-document.getElementById("edit-esp-button").addEventListener('click', () => {
-    const espId = document.getElementById('edit-esp-button').getAttribute('data-bs-esp-id');
-    const name = document.getElementById("edit_esp_name").value;
-    const esp_ip = document.getElementById("edit_esp_ip").value;
-    const rows = document.getElementById("edit_esp_rows").value;
-    const cols = document.getElementById("edit_esp_columns").value;
-    const startTop = document.getElementById("edit_esp_starttop").value;
-    const startLeft = document.getElementById("edit_esp_startleft").value;
-    const serpentineDirection = document.getElementById("edit_esp_serpentine").value;
-
-    // Check for empty fields
-    const emptyFields = [];
-    if (name.trim() === '') {
-        emptyFields.push('Name');
-    }
-    if (esp_ip.trim() === '') {
-        emptyFields.push('IP Address');
-    }
-
-    // Function to validate IP address
-    const isValidIPAddress = (ip) => {
-        const ipRegex = /^(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})$/;
-        return ipRegex.test(ip) && ip.split('.').every(octet => parseInt(octet, 10) <= 255);
+            .then((response) => response.json())
+            .then((data) => {
+                setTimeout(() => {
+                    populateEspTable();
+                }, 500);
+                const new_esp_modal = document.querySelector('#esp-modal');
+                const modal = bootstrap.Modal.getInstance(new_esp_modal);
+                modal.hide();
+            })
+            .catch((error) => console.error(error));
     };
 
-    if (emptyFields.length > 0) {
-        const alert = document.getElementById('edit-esp-error-alert');
-        alert.classList.remove('d-none');
-        const errorList = document.getElementById('error-list');
-        errorList.innerHTML = "The following fields are empty:<br>";
+    if (espId !== null && espId !== '') {
+        processESPItem();
+    } else {
+        fetch("/api/esp")
+            .then((response) => response.json())
+            .then((data) => {
+                const existingNames = data.map(esp => esp.name);
+                const existingIPs = data.map(esp => esp.esp_ip);
 
-        const emptyFieldsList = document.createElement('ul');
-        emptyFieldsList.classList.add('mb-0');
-        emptyFields.forEach(field => {
-            const listItem = document.createElement('li');
-            listItem.textContent = field;
-            emptyFieldsList.appendChild(listItem);
-        });
+                if (existingNames.includes(name) || existingIPs.includes(esp_ip)) {
+                    showAlert('esp-error-alert', (existingNames.includes(name) ? `- Name "${name}" already exists.<br>` : '') +
+                        (existingIPs.includes(esp_ip) ? `- IP Address "${esp_ip}" already exists.` : ''));
+                    return;
+                }
 
-        errorList.appendChild(emptyFieldsList);
-
-        return; // Stop execution if fields are empty
-    }
-
-    if (!isValidIPAddress(esp_ip)) {
-        const alert = document.getElementById('edit-esp-error-alert');
-        alert.classList.remove('d-none');
-        const errorList = document.getElementById('error-list');
-        errorList.innerHTML = "IP Address is not valid.";
-
-        return; // Stop execution if IP address is invalid
-    }
-
-            const espItem = {
-                name,
-                esp_ip,
-                rows,
-                cols,
-                startTop,
-                startLeft,
-                serpentineDirection
-            };
-
-            fetch(`/api/esp/${espId}`, {
-                method: "PUT",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(espItem),
+                processESPItem();
             })
-                .then((response) => response.json())
-                .then((data) => {
-                    setTimeout(function () {
-                        populateEspTable();
-                    }, 500);
-                    const new_esp_modal = document.querySelector('#edit-esp-modal');
-                    const modal = bootstrap.Modal.getInstance(new_esp_modal);
-                    modal.hide();
-                })
-                .catch((error) => console.error(error));
-
-
+            .catch((error) => console.error(error));
+    }
 });
+
 
 
 document.getElementById('esp-delete-modal').addEventListener('show.bs.modal', function (event) {
@@ -330,33 +243,42 @@ document.getElementById('esp-delete-modal').addEventListener('show.bs.modal', fu
     ;
 });
 
-document.getElementById('edit-esp-modal').addEventListener('show.bs.modal', function (event) {
+document.getElementById('esp-modal').addEventListener('show.bs.modal', function (event) {
     const button = event.relatedTarget;
-    const espName = button.getAttribute('data-bs-esp-name');
-    const ipAddress = button.getAttribute('data-bs-esp-ip');
-    const espRows = button.getAttribute('data-bs-esp-rows');
-    const espColumns = button.getAttribute('data-bs-esp-columns');
-    const espStartTop = button.getAttribute('data-bs-esp-start-y');
-    const espStartLeft = button.getAttribute('data-bs-esp-start-x');
-    const espSerpentineDirection = button.getAttribute('data-bs-esp-serpentinedirection');
+    const mode = button.getAttribute('data-bs-mode');
+
+    if (mode == "edit") {
+
+        document.getElementById('esp-modal-label').innerHTML = "Edit ESP";
+        document.getElementById('save-esp-button').innerHTML = "<span class=\"icon-n4px\"><i data-lucide=\"save\" class=\"me-2\"></i>Save</span>";
+        lucide.createIcons();
+
+        const espName = button.getAttribute('data-bs-esp-name');
+        const ipAddress = button.getAttribute('data-bs-esp-ip');
+        const espRows = button.getAttribute('data-bs-esp-rows');
+        const espColumns = button.getAttribute('data-bs-esp-columns');
+        const espStartTop = button.getAttribute('data-bs-esp-start-y');
+        const espStartLeft = button.getAttribute('data-bs-esp-start-x');
+        const espSerpentineDirection = button.getAttribute('data-bs-esp-serpentinedirection');
 
 
-    // Set device name and IP address in the modal
-    document.getElementById('edit_esp_name').value = espName;
-    document.getElementById('edit_esp_ip').value = ipAddress;
-    document.getElementById('edit_esp_rows').value = espRows;
-    document.getElementById('edit_esp_columns').value = espColumns;
-    document.getElementById('edit_esp_starttop').value = espStartTop;
-    document.getElementById('edit_esp_startleft').value = espStartLeft;
-    document.getElementById('edit_esp_serpentine').value = espSerpentineDirection;
+        // Set device name and IP address in the modal
+        document.getElementById('esp_name').value = espName;
+        document.getElementById('esp_ip').value = ipAddress;
+        document.getElementById('esp_rows').value = espRows;
+        document.getElementById('esp_columns').value = espColumns;
+        document.getElementById('esp_starty').value = espStartTop;
+        document.getElementById('esp_startx').value = espStartLeft;
+        document.getElementById('esp_serpentine').value = espSerpentineDirection;
+        document.getElementById('save-esp-button').dataset.bsEspId = button.getAttribute('data-bs-esp-id');
+    } else {
 
+    }
 
-    document.getElementById('edit-esp-button').dataset.bsEspId = button.getAttribute('data-bs-esp-id');
-    ;
 });
 
-document.getElementById('add-esp-modal').addEventListener('shown.bs.modal', function (event) {
-    let inputField = document.getElementById('add_esp_name');
+document.getElementById('esp-modal').addEventListener('shown.bs.modal', function (event) {
+    let inputField = document.getElementById('esp_name');
     inputField.focus();
     inputField.select();
     drawGrid();
