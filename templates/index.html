@@ -6,7 +6,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
-
+    <link href="https://cdn.jsdelivr.net/npm/@yaireo/tagify/dist/tagify.css" rel="stylesheet" type="text/css" />
     <link rel="stylesheet" type="text/css" href="../static/overrides.css" media="screen"/>
     <link rel="stylesheet" type="text/css" href="../static/bootstrap-negative-margins.css" media="screen"/>
 </head>
@@ -21,7 +21,7 @@
         <div class="collapse navbar-collapse" id="navbarCollapse">
             <ul class="navbar-nav me-auto mb-2 mb-md-0">
                 <li class="nav-item">
-                    <button type="button" class="btn btn-outline-success pe-3" data-bs-toggle="modal" data-bs-target="#add-item-modal">
+                    <button type="button" class="btn btn-outline-success pe-3" data-bs-toggle="modal" data-bs-target="#espitem-modal">
                         <span class="icon-n4px"><i data-lucide="plus" class="me-2"></i>Add Item</span>
                     </button>
                 </li>
@@ -130,11 +130,11 @@
         </div>
     </div>
 
-    <div class="modal fade" id="add-item-modal" tabindex="-1" aria-labelledby="add-item-modal-label" aria-hidden="true">
+    <div class="modal fade" id="espitem-modal" tabindex="-1" aria-labelledby="espitem-modal-label" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h1 class="modal-title fs-5" id="add-item-modal-label">Add Item</h1>
+                    <h1 class="modal-title fs-5" id="espitem-modal-label">Add Item</h1>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
@@ -170,35 +170,22 @@
                             </div>
                         </div>
                     </div>
-                    <label for="add_item_esp_select">Select an ESP device</label>
-                    <select class="form-select" id="add_item_esp_select">
-                    </select>
-                    <div id="checkbox-grid"></div>
 
-                    <div id="form-container" class="hidden w-full md:w-2/3 lg:w-1/2">
-                        <form id="add-form" class="shadow-md rounded px-8 pt-6 pb-8 mb-4">
-
-
-                            <div class="container mb-4">
-                                <label for="tag-input">Tags:</label>
-                                <div class="tag-input-container">
-                                    <input id="tag-input" name="tag-input" placeholder="Add Tags" class="form-input mb-4 flex-1"/>
-                                    <i class="material-symbols-outlined form-icon" id="add_form_tag_toggle">filter_list</i>
-                                </div>
-
-                                <div class="tag-container" id="add_form_tag_container">
-                                    <div class="tag-container hidden" id="add_form_tag_container_overflow"></div>
-                                </div>
-
-
-                            </div>
-                        </form>
+                    <div class="form mb-3">
+                        <label for="add_item_url">Tags</label>
+                        <input type="text" class="form-control" id="item_tags">
                     </div>
+
+                    <label for="add_item_esp_select">Select an ESP device</label>
+                    <select class="form-select mb-3" id="add_item_esp_select">
+                    </select>
+                    <div id="checkbox-grid" class="mb-3"></div>
+
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary pe-3" data-bs-dismiss="modal">
                         <span class="icon-n4px"><i data-lucide="x" class="me-2"></i>Cancel</span></button>
-                    <button type="button" class="btn btn-success pe-3" id="add-item-save-button">
+                    <button type="button" class="btn btn-success pe-3" id="save-item-button">
                         <span class="icon-n4px"><i data-lucide="plus" class="me-2"></i>Add</span></button>
                 </div>
             </div>
@@ -286,7 +273,9 @@
                             </div>
                         </div>
                     </div>
-                    <div id="esp-canvas-container" class="col-10 mx-auto"><canvas id="esp-responsive-canvas"></canvas></div>
+                    <div id="esp-canvas-container" class="col-10 mx-auto">
+                        <canvas id="esp-responsive-canvas"></canvas>
+                    </div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary pe-3" data-bs-dismiss="modal">
@@ -338,6 +327,9 @@
     </div>
 </div>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/@yaireo/tagify"></script>
+<script src="https://cdn.jsdelivr.net/npm/@yaireo/tagify/dist/tagify.polyfills.min.js"></script>
+
 
 <script src="../static/script.js"></script>
 <script src="../static/esp.js"></script>
@@ -347,9 +339,13 @@
 <script src="../static/color-modes.js"></script>
 
 
+
 <script src="https://unpkg.com/lucide@latest"></script>
 <script>
     lucide.createIcons();
+</script>
+<script>
+    new Tagify(document.getElementById('item_tags'))
 </script>
 
 </body>

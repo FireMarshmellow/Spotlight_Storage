@@ -74,3 +74,6 @@
 .or-text {
     padding-top: 29px;
 }
+label {
+    margin-bottom: 5px;
+}
