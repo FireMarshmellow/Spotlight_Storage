@@ -340,22 +340,22 @@ function generateItemsGrid() {
                     <h5 class="card-title" data-bs-toggle="tooltip" title="Shop for more">${item.name}</h5>
                 </a>
                 <div class="d-flex justify-content-center align-items-center mb-2">
-                    <button class="btn btn-outline-info me-auto" data-bs-toggle="tooltip" title="Locate">
-                        <span class="icon-n4px"><i data-lucide="radar"></i></span>
+                    <button class="btn btn-outline-info me-auto locate-btn" data-bs-toggle="tooltip" title="Locate" data-item-id="${item.id}">
+                        <span class="icon-n4px"><i data-lucide="lightbulb"></i></span>
                     </button>
-                    <button class="btn btn-outline-primary" data-bs-toggle="tooltip" title="Edit">
+                    <button class="btn btn-outline-primary edit-btn" data-bs-toggle="tooltip" title="Edit">
                         <span class="icon-n4px"><i data-lucide="file-edit"></i></span>
                     </button>
-                    <button class="btn btn-outline-danger ms-auto" data-bs-toggle="tooltip" title="Delete">
+                    <button class="btn btn-outline-danger ms-auto delete-btn" data-bs-toggle="tooltip" title="Delete" data-item-id="${item.id}">
                         <span class="icon-n4px"><i data-lucide="trash"></i></span>
                     </button>
                 </div>
                 <div class="d-flex justify-content-center align-items-center">
-                    <button class="btn btn-outline-danger me-auto" data-bs-toggle="tooltip" title="-1 from stock">
+                    <button class="btn btn-outline-danger me-auto minus-btn" data-bs-toggle="tooltip" title="-1 from stock" data-item-id="${item.id}">
                         <span class="icon-n4px"><i data-lucide="minus"></i></span>
                     </button>
-                    <span id="stockQuantity">${item.quantity}</span>
-                    <button class="btn btn-outline-success ms-auto" data-bs-toggle="tooltip" title="+1 to stock">
+                    <span id="quantity-${item.id}">${item.quantity}</span>
+                    <button class="btn btn-outline-success ms-auto plus-btn" data-bs-toggle="tooltip" title="+1 to stock" data-item-id="${item.id}">
                         <span class="icon-n4px"><i data-lucide="plus"></i></span>
                     </button>
                 </div>
@@ -366,6 +366,64 @@ function generateItemsGrid() {
         itemsContainer.appendChild(col);
     });
     initialiseTooltips();
+
+    const locateButtons = document.querySelectorAll('.locate-btn');
+    locateButtons.forEach((button) => {
+        button.addEventListener('click', () => {
+            const itemId = button.getAttribute('data-item-id');
+            console.log("Locate button '" + itemId + "' pressed.");
+            fetch(`/api/items/${itemId}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: new URLSearchParams({ action: 'locate' }),
+            }).catch((error) => console.error(error));
+        });
+    });
+
+    const minusButtons = document.querySelectorAll('.minus-btn');
+    minusButtons.forEach((button) => {
+        button.addEventListener('click', () => {
+            const itemId = button.getAttribute('data-item-id');
+            console.log("Minus button '" + itemId + "' pressed.");
+            const item = fetchedItems.find((item) => item.id === itemId);
+            if (item && item.quantity > 0) {
+                const updatedItem = { ...item, quantity: item.quantity - 1 };
+                fetch(`/api/items/${itemId}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(updatedItem),
+                })
+                    .then(() => {
+                        const quantityElement = document.getElementById(`quantity-${itemId}`);
+                        if (quantityElement) {
+                            quantityElement.textContent = updatedItem.quantity;
+                        }
+                    })
+                    .catch((error) => console.error(error));
+            }
+        });
+    });
+
+    const plusButtons = document.querySelectorAll('.plus-btn');
+    plusButtons.forEach((button) => {
+        button.addEventListener('click', () => {
+            const itemId = button.getAttribute('data-item-id');
+            console.log("Plus button '" + itemId + "' pressed.");
+            const item = fetchedItems.find((item) => item.id === itemId);
+            if (item) {
+                const updatedItem = { ...item, quantity: item.quantity + 1 };
+                fetch(`/api/items/${itemId}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(updatedItem),
+                })
+                    .then(() => {
+                        // Handle UI update if needed
+                    })
+                    .catch((error) => console.error(error));
+            }
+        });
+    });
 }
 
 
