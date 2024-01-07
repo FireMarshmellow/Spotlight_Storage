@@ -1,3 +1,6 @@
+:root {
+    --bs-border-radius: 0.7rem;
+}
 .btn-rainbow {
     position: relative;
     display: inline-block;
@@ -76,4 +79,12 @@
 }
 label {
     margin-bottom: 5px;
+}
+.card-title-link {
+    color: var(--bs-card-title-color) !important;
+    text-decoration: none;
+}
+
+.card-title-link:hover {
+    text-decoration: underline;
 }

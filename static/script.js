@@ -303,6 +303,131 @@ function drawGrid(mode, rows, columns, startX, startY, serpentineDirection) {
     }
 }
 
+// Define an array to store fetched items
+let fetchedItems = [];
+
+function loadItems() {
+    fetch("/api/items")
+        .then((response) => response.json())
+        .then((data) => {
+            // Store fetched items in the array
+            fetchedItems = data;
+            //generateItemsList();
+            generateItemsGrid();
+        })
+        .catch((error) => console.error(error));
+
+}
+
+function generateItemsGrid() {
+    const itemsContainer = document.getElementById('items-container-grid');
+
+    // Clear previous content in the container if needed
+    itemsContainer.innerHTML = '';
+
+    fetchedItems.forEach((item) => {
+        const col = document.createElement('div');
+        col.classList.add('col-6', 'col-sm-4', 'col-md-3', 'col-lg-2', 'mb-3');
+
+        const template = `
+        <div class="card overflow-hidden position-relative">
+            <div class="overflow-hidden">
+                <img src="${item.image}" class="card-img-top" alt="${item.name}">
+                <div class="position-absolute top-0 end-0 show-on-hover d-none"></div>
+            </div>
+            <div class="card-body p-2">
+                <a href="${item.link}" target="_blank" class="card-title-link">
+                    <h5 class="card-title" data-bs-toggle="tooltip" title="Shop for more">${item.name}</h5>
+                </a>
+                <div class="d-flex justify-content-center align-items-center mb-2">
+                    <button class="btn btn-outline-info me-auto" data-bs-toggle="tooltip" title="Locate">
+                        <span class="icon-n4px"><i data-lucide="radar"></i></span>
+                    </button>
+                    <button class="btn btn-outline-primary" data-bs-toggle="tooltip" title="Edit">
+                        <span class="icon-n4px"><i data-lucide="file-edit"></i></span>
+                    </button>
+                    <button class="btn btn-outline-danger ms-auto" data-bs-toggle="tooltip" title="Delete">
+                        <span class="icon-n4px"><i data-lucide="trash"></i></span>
+                    </button>
+                </div>
+                <div class="d-flex justify-content-center align-items-center">
+                    <button class="btn btn-outline-danger me-auto" data-bs-toggle="tooltip" title="-1 from stock">
+                        <span class="icon-n4px"><i data-lucide="minus"></i></span>
+                    </button>
+                    <span id="stockQuantity">${item.quantity}</span>
+                    <button class="btn btn-outline-success ms-auto" data-bs-toggle="tooltip" title="+1 to stock">
+                        <span class="icon-n4px"><i data-lucide="plus"></i></span>
+                    </button>
+                </div>
+            </div>
+        </div>`;
+
+        col.innerHTML = template;
+        itemsContainer.appendChild(col);
+    });
+    initialiseTooltips();
+}
+
+
+function generateItemsList() {
+    const itemsContainer = document.getElementById('items-container-list');
+
+    // Clear previous content in the container if needed
+    itemsContainer.innerHTML = '';
+
+    // Create table element
+    const table = document.createElement('table');
+    table.classList.add('table', 'table-striped');
+
+    // Create table header
+    const tableHeader = document.createElement('thead');
+    const headerRow = document.createElement('tr');
+    const headerName = document.createElement('th');
+    headerName.textContent = 'Name';
+    const headerLink = document.createElement('th');
+    headerLink.textContent = 'Link';
+    headerRow.appendChild(headerName);
+    headerRow.appendChild(headerLink);
+    tableHeader.appendChild(headerRow);
+    table.appendChild(tableHeader);
+
+    // Create table body
+    const tableBody = document.createElement('tbody');
+    fetchedItems.forEach((item) => {
+        const row = document.createElement('tr');
+
+        // Create table cells for item properties
+        const nameCell = document.createElement('td');
+        nameCell.textContent = item.name;
+
+        const linkCell = document.createElement('td');
+        const link = document.createElement('a');
+        link.href = item.link;
+        link.textContent = 'View Item';
+        linkCell.appendChild(link);
+
+        // Append cells to the row
+        row.appendChild(nameCell);
+        row.appendChild(linkCell);
+
+        // Append the row to the table body
+        tableBody.appendChild(row);
+    });
+
+    // Append table body to the table
+    table.appendChild(tableBody);
+
+    // Append table to the container
+    itemsContainer.appendChild(table);
+}
+
+function initialiseTooltips() {
+    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+    var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+        return new bootstrap.Tooltip(tooltipTriggerEl);
+    });
+}
+
 document.getElementById('esp_rows').addEventListener('change', function () {
     drawGrid("esp");
 });
@@ -318,3 +443,5 @@ document.getElementById('esp_starty').addEventListener('change', function () {
 document.getElementById('esp_serpentine').addEventListener('change', function () {
     drawGrid("esp");
 });
+
+loadItems();
