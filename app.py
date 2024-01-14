@@ -118,6 +118,7 @@ def esps():
     if request.method == 'GET':
         try:
             esps_data = db.read_esp()  # Fetch ESP data from the database
+            print(esps_data)  # Log the data for debugging
             return jsonify(esps_data), 200
         except Exception as e:
             print(f"Error fetching ESP data: {e}")  # Log the error for debugging
@@ -322,18 +323,6 @@ def turn_led_party():
                 {"stop": 0}, {"stop": 0}, {"stop": 0}, {"stop": 0}, {"stop": 0}, {"stop": 0}, {"stop": 0}, {"stop": 0},
                 {"stop": 0}]}
             send_request(ip, party_data)
-        return jsonify()
-
-
-@app.route('/led/brightness', methods=['GET'])
-def apply_brightness():
-    set_global_settings()
-    if request.method == 'GET':
-        ips = get_unique_ips_from_database()
-
-        for ip in ips:
-            brightness_data = {"on": True, "bri": round(255 * app.brightness), "transition": 5}
-            send_request(ip, brightness_data)
         return jsonify()
 
 

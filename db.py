@@ -1,46 +1,70 @@
 import json
+import os
 import sqlite3
 from collections import Counter
 
-# Defining the path of the SQLite database file
-DATABASE = 'data.db'
-DATABASE_ESP = 'esp.db'
-DATABASE_SETTING = 'settings.db'
-DATABASE_TAG = 'tags.db'
+# Define the path for the combined database
+COMBINED_DATABASE = 'combined_data.db'
 
 
-# Function to connect to the database
-def get_db():
-    conn = sqlite3.connect(DATABASE)
-    conn.row_factory = sqlite3.Row
+def create_combined_db():
+    # Connect to the combined database
+    conn_combined = sqlite3.connect(COMBINED_DATABASE)
+    conn_combined.row_factory = sqlite3.Row
 
-    # Create the items table if it does not exist
-    conn.execute('''
-        CREATE TABLE IF NOT EXISTS items (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            name TEXT NOT NULL,
-            link TEXT NOT NULL,
-            image TEXT,
-            position TEXT,
-            quantity INTEGER,
-            ip TEXT,
-            tags TEXT 
-        )
-    ''')
-    conn.commit()
-    return conn
+    # Create items table in the combined database
+    conn_combined.execute('''
+            CREATE TABLE IF NOT EXISTS items (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                name TEXT,
+                link TEXT,
+                image TEXT,
+                position TEXT,
+                quantity INTEGER,
+                ip TEXT,
+                tags TEXT 
+            )
+        ''')
+
+    # Create esp table in the combined database
+    conn_combined.execute('''
+            CREATE TABLE IF NOT EXISTS esp (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                name TEXT,
+                esp_ip TEXT,
+                rows INTEGER,
+                cols INTEGER,
+                start_top TEXT,
+                start_left TEXT,
+                serpentine_direction TEXT
+            )
+        ''')
+
+    # Create settings table in the combined database
+    conn_combined.execute('''
+            CREATE TABLE IF NOT EXISTS settings (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                brightness INTEGER,
+                timeout INTEGER,
+                lightMode BOOLEAN
+            )
+        ''')
+
+    # Commit the changes
+    conn_combined.commit()
+    return conn_combined
 
 
 # Function to read the data from the database
 def read_items():
-    conn = get_db()
+    conn = create_combined_db()
     items = conn.execute('SELECT * FROM items').fetchall()
     conn.close()
     return [dict(item) for item in items]
 
 
 def write_item(item):
-    conn = get_db()
+    conn = create_combined_db()
     cursor = conn.cursor()
     cursor.execute('INSERT INTO items (name, link, image, position, quantity, ip, tags) VALUES (?, ?, ?, ?, ?, ?, ?)',
                    [item['name'], item['link'], item['image'], item['position'], item['quantity'], item['ip'],
@@ -53,7 +77,7 @@ def write_item(item):
 
 # Function to update data in the database
 def update_item(id, data):
-    conn = get_db()
+    conn = create_combined_db()
     try:
         conn.execute(
             'UPDATE items SET name = ?, link = ?, image = ?, position = ?, quantity = ?, ip = ?, tags = ? WHERE id = ?',
@@ -68,39 +92,17 @@ def update_item(id, data):
 
 
 def get_item(id):
-    conn = get_db()
+    conn = create_combined_db()
     item = conn.execute('SELECT * FROM items WHERE id = ?', [id]).fetchone()
     conn.close()
     return dict(item) if item else None
 
 
 def delete_item(id):
-    conn = get_db()
+    conn = create_combined_db()
     conn.execute('DELETE FROM items WHERE id = ?', [id])
     conn.commit()
     conn.close()
-
-
-# Function to write data to the database
-
-def get_espdb():
-    conn = sqlite3.connect(DATABASE_ESP)
-    conn.row_factory = sqlite3.Row
-    # Modify the ESP table to include new columns and arrays
-    conn.execute('''
-        CREATE TABLE IF NOT EXISTS esp (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            name TEXT,
-            esp_ip TEXT,
-            rows INTEGER,
-            cols INTEGER,
-            start_top TEXT,
-            start_left TEXT,
-            serpentine_direction TEXT
-        )
-    ''')
-    conn.commit()
-    return conn
 
 
 # Function to write ESP settings to the database
@@ -110,7 +112,7 @@ def write_esp_settings(esp_settings):
         print("Missing required fields in esp_settings")
         return None
 
-    conn = get_espdb()
+    conn = create_combined_db()
     try:
         cursor = conn.cursor()
         cursor.execute(
@@ -139,7 +141,7 @@ def write_esp_settings(esp_settings):
 # Function to update ESP settings in the database
 # Function to update ESP settings in the database
 def update_esp_settings(id, esp_settings):
-    conn = get_espdb()
+    conn = create_combined_db()
     try:
         conn.execute(
             'UPDATE esp SET name = ?, esp_ip = ?, rows = ?, cols = ?, start_top = ?, start_left = ?, serpentine_direction = ? WHERE id = ?',
@@ -163,7 +165,7 @@ def update_esp_settings(id, esp_settings):
 
 # Function to get ESP settings from the database by ID
 def get_esp_settings(id):
-    conn = get_espdb()
+    conn = create_combined_db()
     esp_settings = conn.execute('SELECT * FROM esp WHERE id = ?', [id]).fetchone()
     conn.close()
     if esp_settings:
@@ -174,14 +176,15 @@ def get_esp_settings(id):
 
 
 def read_esp():
-    conn = get_espdb()
+    conn = create_combined_db()
     esps = conn.execute('SELECT * FROM esp').fetchall()
     conn.close()
     return [dict(esp) for esp in esps]
 
+
 # Function to delete ESP settings from the database by ID
 def delete_esp_settings(id):
-    conn = get_espdb()
+    conn = create_combined_db()
     try:
         conn.execute('DELETE FROM esp WHERE id = ?', [id])
         conn.commit()
@@ -192,7 +195,7 @@ def delete_esp_settings(id):
 
 
 def get_esp_settings_by_ip(id):
-    conn = get_espdb()  # Get a database connection
+    conn = create_combined_db()  # Get a database connection
     try:
         cursor = conn.cursor()
         cursor.execute('SELECT * FROM esp WHERE id = ?', (id,))
@@ -212,33 +215,18 @@ def get_esp_settings_by_ip(id):
 
     finally:
         conn.close()
+
+
 def get_ip_by_name(esp_name):
-    conn = get_espdb()
+    conn = create_combined_db()
     esp = conn.execute('SELECT esp_ip FROM esp WHERE name = ?', (esp_name,)).fetchone()
     conn.close()
     return esp['esp_ip'] if esp else None
 
 
-def get_settingsdb():
-    conn = sqlite3.connect(DATABASE_SETTING)
-    conn.row_factory = sqlite3.Row
-    # Create the settings table if it does not exist
-    conn.execute('''
-        CREATE TABLE IF NOT EXISTS settings (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            brightness INTEGER,
-            timeout INTEGER,
-            lightMode BOOLEAN
-        )
-    ''')
-
-    conn.commit()
-    return conn
-
-
 # Function to read settings from the database
 def read_settings():
-    conn = get_settingsdb()
+    conn = create_combined_db()
     settings = conn.execute('SELECT * FROM settings').fetchone()
     conn.close()
     if settings is None:
@@ -250,7 +238,7 @@ def read_settings():
 # Function to update settings in the database
 def update_settings(settings):
     try:
-        conn = get_settingsdb()
+        conn = create_combined_db()
         cursor = conn.cursor()
         cursor.execute('DELETE FROM settings')  # Clear existing settings
         cursor.execute('INSERT INTO settings (brightness, timeout, lightMode) VALUES (?,?,?)',
@@ -263,7 +251,7 @@ def update_settings(settings):
 
 
 def get_all_tags():
-    conn = get_db()
+    conn = create_combined_db()
     cursor = conn.cursor()
 
     try:
@@ -281,3 +269,106 @@ def get_all_tags():
     finally:
         conn.close()
 
+
+# Migration only needed if you are coming from an older version.
+
+DATABASE = 'data.db'
+DATABASE_ESP = 'esp.db'
+DATABASE_SETTING = 'settings.db'
+
+
+def get_db_connection(database_name):
+    """Function to get a database connection."""
+    conn = sqlite3.connect(database_name)
+    conn.row_factory = sqlite3.Row
+    return conn
+
+
+def migrate_items():
+    """Migrate items from data.db to combined_data.db."""
+    conn_data = get_db_connection(DATABASE)
+    items = conn_data.execute('SELECT * FROM items').fetchall()
+
+    conn_combined = sqlite3.connect(COMBINED_DATABASE)
+    for item in items:
+        conn_combined.execute(
+            'INSERT INTO items (name, link, image, position, quantity, ip, tags) VALUES (?, ?, ?, ?, ?, ?, ?)',
+            [item['name'], item['link'], item['image'], item['position'], item['quantity'], item['ip'], item['tags']]
+        )
+
+    conn_combined.commit()
+    conn_data.close()
+    conn_combined.close()
+
+
+def migrate_esp_settings():
+    """Migrate ESP settings from esp.db to combined_data.db."""
+    conn_esp = get_db_connection(DATABASE_ESP)
+    esp_settings_list = conn_esp.execute('SELECT * FROM esp').fetchall()
+
+    conn_combined = sqlite3.connect(COMBINED_DATABASE)
+    for esp_settings in esp_settings_list:
+        conn_combined.execute(
+            'INSERT INTO esp (name, esp_ip, rows, cols, start_top, start_left, serpentine_direction) VALUES (?, ?, ?, ?, ?, ?, ?)',
+            [esp_settings['name'], esp_settings['esp_ip'], esp_settings['rows'], esp_settings['cols'],
+             esp_settings['start_top'], esp_settings['start_left'], esp_settings['serpentine_direction']]
+        )
+
+    conn_combined.commit()
+    conn_esp.close()
+    conn_combined.close()
+
+
+def migrate_settings():
+    """Migrate general settings from settings.db to combined_data.db."""
+    conn_settings = get_db_connection(DATABASE_SETTING)
+    settings = conn_settings.execute('SELECT * FROM settings').fetchone()
+
+    conn_combined = sqlite3.connect(COMBINED_DATABASE)
+    conn_combined.execute(
+        'INSERT INTO settings (brightness, timeout, lightMode) VALUES (?, ?, ?)',
+        [settings['brightness'], settings['timeout'], settings['lightMode']]
+    )
+
+    conn_combined.commit()
+    conn_settings.close()
+    conn_combined.close()
+
+
+def is_database_empty(database_name, table_name):
+    """Check if a table in a database is empty."""
+    conn = get_db_connection(database_name)
+    cursor = conn.cursor()
+    cursor.execute(f'SELECT COUNT(*) FROM {table_name}')
+    count = cursor.fetchone()[0]
+    conn.close()
+    return count == 0
+
+
+def should_perform_migration():
+    """Check if migration should be performed."""
+    # Check if any of the individual databases exists
+    if os.path.exists(DATABASE) or os.path.exists(DATABASE_ESP) or os.path.exists(DATABASE_SETTING):
+        # Check if the combined database is not empty
+        if (not is_database_empty(COMBINED_DATABASE, 'items')
+                or not is_database_empty(COMBINED_DATABASE,  'esp')
+                or not is_database_empty(COMBINED_DATABASE, 'settings')):
+            return True
+    return False
+
+
+def perform_migration():
+    """Perform migration."""
+    create_combined_db()
+    if should_perform_migration():
+        migrate_items()  # Migrate items
+        migrate_esp_settings()  # Migrate ESP settings
+        migrate_settings()  # Migrate general settings
+        print("Migration successful.")
+
+    else:
+        print("Migration is not required.")
+
+
+# Perform migration
+perform_migration()

@@ -1,81 +1,56 @@
-const AddTagIcon = document.getElementById('add_form_tag_toggle');
+const addTagIcon  = document.getElementById('add_form_tag_toggle');
 const filterIcon = document.getElementById('filter_tag_toggle');
-const clearfilter = document.getElementById('filter_tag_clear');
+const clearFilter = document.getElementById('filter_tag_clear');
 const tagContainer = document.getElementById('add_form_tag_container');
 const tagContainerOverflow = document.getElementById('add_form_tag_container_overflow');
-const FilterTagContainerOverflow = document.getElementById('filter_tag_container_overflow');
-const FilterTagContainer = document.getElementById('filter_tag_container');
+const filterTagContainerOverflow = document.getElementById('filter_tag_container_overflow');
+const filterTagContainer = document.getElementById('filter_tag_container');
 const input = document.getElementById('tag-input');
-
- const maxSelTags = 10
- const OverflowSizeTags = 6
+const maxSelectedTags  = 10
+const overflowSizeTags  = 6
 let tags = [];
 
-tagContainer.addEventListener('click', (event) => {
-    const tagElement = event.target.closest('.tag');
-    if (tagElement) {
-        let selectedTags = applyTagFilter(tagContainer);
 
-        if(selectedTags.length <=maxSelTags || tagElement.classList.contains('selected')){
-        // Toggle the 'selected' class for the clicked tag
-         tagElement.classList.toggle('selected');
-         selectedTags= applyTagFilter(tagContainer);
-        localStorage.setItem('item_tags', JSON.stringify(selectedTags));
-        }
-        else{
-            alert("Maximum of selected tags reached.");
-        }
-    }
-});
-FilterTagContainer.addEventListener('click', (event) => {
-    localStorage.removeItem('item_tags');
-    const tagElement = event.target;
 
-    if (tagElement.classList.contains('tag')) {
-        // Toggle the 'selected' class for the clicked tag
-        tagElement.classList.toggle('selected');
-        const filter = applyTagFilter(FilterTagContainer);
-        const items = Array.from(itemList.children);
-        FilterItemsbyTags(items,filter);
-    }
-});
 function resetTagSelection(container) {
     const allTags = container.querySelectorAll('.tag');
     allTags.forEach((tag) => {
         tag.classList.remove('selected');
     });
-    applyTagFilter(container)
+    updateTagSelection(container)
 }
-function PopulateTagSelection(itemTagsArray){
+
+function loadTagSelection(itemTagsArray){
 
     const allTags = Array.from(tagContainer.getElementsByClassName('tag'));
     allTags.forEach(tagElement => {
-            const tag = tagElement.innerHTML;
-            // Check if the tag is in itemTagsArray
-            if (itemTagsArray.includes(tag)) {
-                tagElement.classList.add('selected');
-                const selectedTags = applyTagFilter(tagContainer);
-                if(selectedTags.length>=OverflowSizeTags){
-                    const computedStyle = window.getComputedStyle(tagContainerOverflow);
-                    if (computedStyle.display === "none") {
-                        tagContainerOverflow.classList.toggle('hidden');
-                        AddTagIcon.innerHTML = 'filter_list_off';
-                    }
-
+        const tag = tagElement.innerHTML;
+        // Check if the tag is in itemTagsArray
+        if (itemTagsArray.includes(tag)) {
+            tagElement.classList.add('selected');
+            const selectedTags = updateTagSelection(tagContainer);
+            if(selectedTags.length>=overflowSizeTags ){
+                const computedStyle = window.getComputedStyle(tagContainerOverflow);
+                if (computedStyle.display === "none") {
+                    tagContainerOverflow.classList.toggle('hidden');
+                    addTagIcon .innerHTML = 'filter_list_off';
                 }
 
             }
+
+        }
     });
 }
-// Updated applyTagFilter to log immediately after tag click
-function applyTagFilter(container) {
+
+
+function updateTagSelection(container) {
     const allTags = Array.from(container.getElementsByClassName('tag'));
     const selectedTags = [];
     let tag = "";
     // Iterate through all tags
     allTags.forEach(tagElement => {
         if(container === tagContainer){
-        tag = tagElement.innerHTML;}else{
+            tag = tagElement.innerHTML;}else{
             tag = tagElement.querySelector('span').getAttribute('data-item')
         }
         // Check if the tag is selected
@@ -88,11 +63,11 @@ function applyTagFilter(container) {
         }
     });
 
-    if(selectedTags.length > 0 && container === FilterTagContainer){
-        clearfilter.style.display = "block";
-    }if(selectedTags.length <= 0 && container === FilterTagContainer)
+    if(selectedTags.length > 0 && container === filterTagContainer){
+        clearFilter.style.display = "block";
+    }if(selectedTags.length <= 0 && container === filterTagContainer)
     {
-        clearfilter.style.display = "none";
+        clearFilter.style.display = "none";
     }
     localStorage.removeItem('item_tags');
     localStorage.setItem('item_tags', JSON.stringify(selectedTags));
@@ -100,7 +75,8 @@ function applyTagFilter(container) {
 
 
 }
-function FilterItemsbyTags(items, filter){
+
+function filterItemsByTags(items, filter){
     Array.from(items).forEach((item) => {
         const itemTags = item.dataset.tags;
         const cleanedTags = itemTags.replace(/[\[\]'"`]/g, ''); // Remove square brackets, single quotes, double quotes, and backticks
@@ -123,19 +99,20 @@ function FilterItemsbyTags(items, filter){
         }
     });
 }
-function loadTags() {
+
+function fetchDataAndLoadTags() {
     // Fetch the settings from the server
     fetch("/api/tags")
         .then((response) => response.json())
         .then((TagData) => {
             // Check if the tags have changed
-            if (!tagsEqual(TagData)) {
+            if (!areTagsEqual(TagData)) {
                 // Reset tags and local storage
-                resetTags();
+                removeAllTags();
                 localStorage.removeItem('item_tags');
                 // Create and display new tags
                 TagData.forEach(({ tag, count }) => {
-                    createTag(tag, count);
+                    createAndAppendTag(tag, count);
                     tags.push(tag);
                 });
             }
@@ -143,8 +120,9 @@ function loadTags() {
         .catch((error) => console.error(error));
 }
 
+
 // Function to check if the tags are equal
-function tagsEqual(newTags) {
+function areTagsEqual(newTags) {
     // Check if lengths are different
     if (tags.length !== newTags.length) {
         return false;
@@ -161,7 +139,8 @@ function tagsEqual(newTags) {
     return true;
 }
 
-function createTag(tag, count){
+
+function createAndAppendTag(tag, count){
     const FilterTag = document.createElement('div');
     FilterTag.classList.add('tag');
     FilterTag.innerHTML = tag;
@@ -174,16 +153,16 @@ function createTag(tag, count){
     TagCount.classList.add("text-stone-900")
     TagCount.style.marginLeft = '10px';
     FilterTag.appendChild(TagCount);
-    if(tags.length >= OverflowSizeTags+1) {
-        FilterTagContainerOverflow.appendChild(FilterTag);
+    if(tags.length >= overflowSizeTags +1) {
+        filterTagContainerOverflow.appendChild(FilterTag);
         tagContainerOverflow.appendChild(div);
 
     }else{
-        FilterTagContainer.appendChild(FilterTag);
+        filterTagContainer.appendChild(FilterTag);
         tagContainer.appendChild(div);}
 
-    if (FilterTagContainerOverflow.childElementCount > 0) {
-        FilterTagContainer.appendChild(FilterTagContainerOverflow);
+    if (filterTagContainerOverflow.childElementCount > 0) {
+        filterTagContainer.appendChild(filterTagContainerOverflow);
     }
     if (tagContainerOverflow.childElementCount >0) {
         tagContainer.appendChild(tagContainerOverflow);
@@ -191,54 +170,95 @@ function createTag(tag, count){
 
 
 }
-function resetTags(){
+
+function removeAllTags(){
     document.querySelectorAll('.tag').forEach(function (tag)
     {
         tag.parentElement.removeChild(tag);
     })
     tags = [];
 }
+
+tagContainer.addEventListener('click', (event) => {
+    const tagElement = event.target.closest('.tag');
+    if (tagElement) {
+        let selectedTags = updateTagSelection(tagContainer);
+
+        if(selectedTags.length <=maxSelectedTags  || tagElement.classList.contains('selected')){
+            // Toggle the 'selected' class for the clicked tag
+            tagElement.classList.toggle('selected');
+            selectedTags= updateTagSelection(tagContainer);
+            localStorage.setItem('item_tags', JSON.stringify(selectedTags));
+        }
+        else{
+            alert("Maximum of selected tags reached.");
+        }
+    }
+});
+
+filterTagContainer.addEventListener('click', (event) => {
+    localStorage.removeItem('item_tags');
+    const tagElement = event.target;
+
+    if (tagElement.classList.contains('tag')) {
+        // Toggle the 'selected' class for the clicked tag
+        tagElement.classList.toggle('selected');
+        const filter = updateTagSelection(filterTagContainer);
+        const items = Array.from(itemList.children);
+        filterItemsByTags(items,filter);
+    }
+});
+
+
 input.addEventListener('keyup', function (e){
     if (e.key === 'Enter' && input.value !=='') {
         const computedStyle = window.getComputedStyle(tagContainerOverflow);
-        if (computedStyle.display === "none" && tags.length >= OverflowSizeTags) {
+        if (computedStyle.display === "none" && tags.length >= overflowSizeTags ) {
             // Toggle the visibility of the tag container
             tagContainerOverflow.classList.toggle('hidden');
         }
         const newTag = input.value;
         tags.push(newTag);
-        createTag(newTag, 1);
+        createAndAppendTag(newTag, 1);
+        const newTagElement = tagContainer.querySelector('.tag:last-child'); // Assuming this selects the newly created tag
+        newTagElement.classList.toggle('selected');
+        const selectedTags = updateTagSelection(tagContainer);
+        localStorage.setItem('item_tags', JSON.stringify(selectedTags));
         input.value = '';
     }
 })
-loadTags();
-AddTagIcon.addEventListener('click', function () {
+
+
+fetchDataAndLoadTags();
+
+
+addTagIcon .addEventListener('click', function () {
     const computedStyle = window.getComputedStyle(tagContainerOverflow);
     if (computedStyle.display === "none") {
         tagContainerOverflow.classList.toggle('hidden');
-        AddTagIcon.innerHTML = 'filter_list_off';
+        addTagIcon .innerHTML = 'filter_list_off';
     }
     else{
         tagContainerOverflow.classList.toggle('hidden');
-        AddTagIcon.innerHTML ='filter_list';
+        addTagIcon .innerHTML ='filter_list';
     }
 });
 
 filterIcon.addEventListener('click', function () {
-    const computedStyle = window.getComputedStyle(FilterTagContainerOverflow);
+    const computedStyle = window.getComputedStyle(filterTagContainerOverflow);
     if (computedStyle.display === "none") {
-        FilterTagContainerOverflow.classList.toggle('hidden');
+        filterTagContainerOverflow.classList.toggle('hidden');
         filterIcon.innerHTML = 'filter_list_off';
     }
     else{
-        FilterTagContainerOverflow.classList.toggle('hidden');
+        filterTagContainerOverflow.classList.toggle('hidden');
         filterIcon.innerHTML ='filter_list';
     }
 });
 
-clearfilter.addEventListener('click', function (){
-    resetTagSelection(FilterTagContainer)
-    const filter = applyTagFilter(FilterTagContainer);
+clearFilter.addEventListener('click', function (){
+    resetTagSelection(filterTagContainer)
+    const filter = updateTagSelection(filterTagContainer);
     const items = Array.from(itemList.children);
-    FilterItemsbyTags(items,filter);
+    filterItemsByTags(items,filter);
 })
