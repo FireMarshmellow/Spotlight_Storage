@@ -223,9 +223,12 @@ function drawGrid(mode, rows, columns, startX, startY, serpentineDirection) {
 
             isEventListened = true;
         }
+        if (isEditingItem) {
+            redrawGrid(rows, columns, "item", startX, startY, serpentineDirection);
+        }
 
+        }
 
-    }
 }
 function handleCellClick(event, rows, columns, startX, startY, serpentineDirection, mode) {
         console.log("Canvas clicked");
@@ -245,21 +248,17 @@ function handleCellClick(event, rows, columns, startX, startY, serpentineDirecti
             column: clickedColumn
         }; // Store clicked cell info
         const ledNumber = calculateLedNumber(clickedRow, clickedColumn, startX, startY, serpentineDirection, rows, columns);
-        console.log("clickedCell:", clickedCell);
-        console.log("ledNumber:", ledNumber);
         // Find if the clicked cell is already in the clickedCells array
-        let cellIndex = selectedCells.findIndex(cell => cell.row === clickedRow && cell.column === clickedColumn);
+        let cellIndex = clickedCells.indexOf(ledNumber);
         console.log(cellIndex);
         // If the clicked cell is not in the array, add it; otherwise, remove it
         if (cellIndex === -1) {
             clickedCells.push(ledNumber);
-            selectedCells.push(clickedCell);
         } else {
             clickedCells.splice(cellIndex, 1);
-            selectedCells.splice(cellIndex, 1);
         }
         console.log(clickedCells);
-        redrawGrid(rows, columns, "item")
+        redrawGrid(rows, columns, "item",  startX, startY, serpentineDirection)
 }
 function calculateLedNumber(row, column, startX, startY, serpentineDirection, rows, columns) {
         if (startX === "right") {
@@ -283,7 +282,8 @@ function calculateLedNumber(row, column, startX, startY, serpentineDirection, ro
             return isEvenColumn ? column * rows - (rows - (rows - row)) : column * rows - (rows - row) + 1;
         }
 }
-function redrawGrid(rows, columns, mode) {
+
+function redrawGrid(rows, columns, mode,  startX, startY, serpentineDirection) {
     let canvas = document.getElementById(mode + '-responsive-canvas');
     let ctx = canvas.getContext('2d');
     let lineWidth = 2;
@@ -293,8 +293,8 @@ function redrawGrid(rows, columns, mode) {
         // Loop through rows and columns of the grid
         for (let i = 0; i < rows; i++) {
             for (let j = 0; j < columns; j++) {
-                // Check if the current cell is clicked (present in clickedCells)
-                let isClicked = selectedCells.some(cell => cell.row === i && cell.column === j);
+                let cellNumber = calculateLedNumber(i, j, startX, startY, serpentineDirection, rows, columns);
+                let isClicked = clickedCells.includes(cellNumber);
                 // Calculate the center and radius of the circle to be drawn for each cell
                 let circleCenterX = j * boxWidth + boxWidth / 2 + halfLineWidth;
                 let circleCenterY = i * boxWidth + boxWidth / 2 + halfLineWidth;

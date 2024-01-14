@@ -1,79 +1,26 @@
-const addTagIcon  = document.getElementById('add_form_tag_toggle');
-const filterIcon = document.getElementById('filter_tag_toggle');
-const clearFilter = document.getElementById('filter_tag_clear');
-const tagContainer = document.getElementById('add_form_tag_container');
-const tagContainerOverflow = document.getElementById('add_form_tag_container_overflow');
-const filterTagContainerOverflow = document.getElementById('filter_tag_container_overflow');
-const filterTagContainer = document.getElementById('filter_tag_container');
-const input = document.getElementById('tag-input');
+const input = document.getElementById('item_tags');
 const maxSelectedTags  = 10
-const overflowSizeTags  = 6
+const sortTagsDropdown = document.getElementById('sort_tags');
 let tags = [];
 
+const tagify = new Tagify(input, {
+    whitelist: [],
+    dropdown: {
+        enabled: 0
+    },
+    duplicates: true, // Allow duplicate tags
+    maxTags: maxSelectedTags // Set a maximum limit for tags (adjust as needed)
+});
 
+tagify.on('add', onTagAdded);
 
-function resetTagSelection(container) {
-    const allTags = container.querySelectorAll('.tag');
-    allTags.forEach((tag) => {
-        tag.classList.remove('selected');
-    });
-    updateTagSelection(container)
-}
+function onTagAdded(e) {
 
-function loadTagSelection(itemTagsArray){
-
-    const allTags = Array.from(tagContainer.getElementsByClassName('tag'));
-    allTags.forEach(tagElement => {
-        const tag = tagElement.innerHTML;
-        // Check if the tag is in itemTagsArray
-        if (itemTagsArray.includes(tag)) {
-            tagElement.classList.add('selected');
-            const selectedTags = updateTagSelection(tagContainer);
-            if(selectedTags.length>=overflowSizeTags ){
-                const computedStyle = window.getComputedStyle(tagContainerOverflow);
-                if (computedStyle.display === "none") {
-                    tagContainerOverflow.classList.toggle('hidden');
-                    addTagIcon .innerHTML = 'filter_list_off';
-                }
-
-            }
-
-        }
-    });
-}
-
-
-function updateTagSelection(container) {
-    const allTags = Array.from(container.getElementsByClassName('tag'));
-    const selectedTags = [];
-    let tag = "";
-    // Iterate through all tags
-    allTags.forEach(tagElement => {
-        if(container === tagContainer){
-            tag = tagElement.innerHTML;}else{
-            tag = tagElement.querySelector('span').getAttribute('data-item')
-        }
-        // Check if the tag is selected
-        if (tagElement.classList.contains('selected')) {
-            selectedTags.push(tag);
-
-            tagElement.style.backgroundColor = '#006e11'; // Dark blue background color for selected tags
-        } else {
-            tagElement.style.backgroundColor = ''; // Reset background color for unselected tags
-        }
-    });
-
-    if(selectedTags.length > 0 && container === filterTagContainer){
-        clearFilter.style.display = "block";
-    }if(selectedTags.length <= 0 && container === filterTagContainer)
-    {
-        clearFilter.style.display = "none";
-    }
+    const tagsArray = tagify.value.map(tagData => tagData.value);
     localStorage.removeItem('item_tags');
-    localStorage.setItem('item_tags', JSON.stringify(selectedTags));
-    return selectedTags
-
-
+    // Save the tags to localStorage
+    localStorage.setItem('item_tags', JSON.stringify(tagsArray));
+    console.log(localStorage.getItem('item_tags'));
 }
 
 function filterItemsByTags(items, filter){
@@ -112,13 +59,21 @@ function fetchDataAndLoadTags() {
                 localStorage.removeItem('item_tags');
                 // Create and display new tags
                 TagData.forEach(({ tag, count }) => {
-                    createAndAppendTag(tag, count);
                     tags.push(tag);
                 });
+                populateSortTagsMenu(TagData);
+                tagify.settings.whitelist = tags.map(tag => ({ value: tag }));
+                tagify.dropdown.show.call(tagify, input);
             }
         })
         .catch((error) => console.error(error));
 }
+
+function loadTagsIntoTagify() {
+    const tagObjects = tags.map(tag => ({ value: tag }));
+    tagify.loadOriginalValues(tagObjects);
+}
+
 
 
 // Function to check if the tags are equal
@@ -139,126 +94,66 @@ function areTagsEqual(newTags) {
     return true;
 }
 
-
-function createAndAppendTag(tag, count){
-    const FilterTag = document.createElement('div');
-    FilterTag.classList.add('tag');
-    FilterTag.innerHTML = tag;
-    const div = document.createElement('div');
-    div.classList.add('tag');
-    div.innerHTML = tag;
-    const TagCount = document.createElement('span');
-    TagCount.setAttribute('data-item', tag);
-    TagCount.innerHTML = count;
-    TagCount.classList.add("text-stone-900")
-    TagCount.style.marginLeft = '10px';
-    FilterTag.appendChild(TagCount);
-    if(tags.length >= overflowSizeTags +1) {
-        filterTagContainerOverflow.appendChild(FilterTag);
-        tagContainerOverflow.appendChild(div);
-
-    }else{
-        filterTagContainer.appendChild(FilterTag);
-        tagContainer.appendChild(div);}
-
-    if (filterTagContainerOverflow.childElementCount > 0) {
-        filterTagContainer.appendChild(filterTagContainerOverflow);
-    }
-    if (tagContainerOverflow.childElementCount >0) {
-        tagContainer.appendChild(tagContainerOverflow);
-    }
-
-
-}
-
 function removeAllTags(){
-    document.querySelectorAll('.tag').forEach(function (tag)
-    {
-        tag.parentElement.removeChild(tag);
-    })
     tags = [];
 }
 
-tagContainer.addEventListener('click', (event) => {
-    const tagElement = event.target.closest('.tag');
-    if (tagElement) {
-        let selectedTags = updateTagSelection(tagContainer);
+function sortItemsByTag(filter) {
+    const itemsContainer = document.getElementById('items-container-grid');
+    const items = Array.from(itemsContainer.children);
 
-        if(selectedTags.length <=maxSelectedTags  || tagElement.classList.contains('selected')){
-            // Toggle the 'selected' class for the clicked tag
-            tagElement.classList.toggle('selected');
-            selectedTags= updateTagSelection(tagContainer);
-            localStorage.setItem('item_tags', JSON.stringify(selectedTags));
+    Array.from(items).forEach((item) => {
+        const itemTags = item.dataset.tags;
+        const cleanedTags = itemTags.replace(/[\[\]'"`]/g, ''); // Remove square brackets, single quotes, double quotes, and backticks
+        const itemTagsArray = cleanedTags.split(',');
+        let shouldDisplay = true;
+        const searchTextLower = filter.toLowerCase();
+        shouldDisplay = itemTagsArray.some(itemTag => itemTag.toLowerCase().includes(searchTextLower));
+        if (shouldDisplay) {
+            item.style.display = "flex";
+        } else {
+            item.style.display = "none";
         }
-        else{
-            alert("Maximum of selected tags reached.");
-        }
-    }
+    });
+
+}
+function populateSortTagsMenu(tagDataArray) {
+    const sortTagsMenu = document.getElementById('sort_tags');
+
+    // Clear existing menu items
+    sortTagsMenu.innerHTML = '';
+    const listItem = document.createElement('li');
+    const anchor = document.createElement('a');
+    anchor.classList.add('dropdown-item');
+    anchor.href = '#';
+    anchor.innerText = "Clear Tags";
+    anchor.onclick = function () {
+        // Handle the click event for sorting by tag
+        sortItemsByTag("");
+    };
+    listItem.appendChild(anchor);
+    sortTagsMenu.appendChild(listItem);
+    // Create and append menu items for each tag
+    tagDataArray.forEach(({ tag }) => {
+        const listItem = document.createElement('li');
+        const anchor = document.createElement('a');
+        anchor.classList.add('dropdown-item');
+        anchor.href = '#';
+        anchor.innerText = tag;
+        anchor.onclick = function () {
+            // Handle the click event for sorting by tag
+            sortItemsByTag(tag);
+        };
+
+        listItem.appendChild(anchor);
+        sortTagsMenu.appendChild(listItem);
+    });
+}
+
+
+sortTagsDropdown.addEventListener('change', function() {
+    const selectedOptions = Array.from(this.selectedOptions).map(option => option.value);
+    // Call your sort function with the selected options
+    sortItemsByTag(selectedOptions);
 });
-
-filterTagContainer.addEventListener('click', (event) => {
-    localStorage.removeItem('item_tags');
-    const tagElement = event.target;
-
-    if (tagElement.classList.contains('tag')) {
-        // Toggle the 'selected' class for the clicked tag
-        tagElement.classList.toggle('selected');
-        const filter = updateTagSelection(filterTagContainer);
-        const items = Array.from(itemList.children);
-        filterItemsByTags(items,filter);
-    }
-});
-
-
-input.addEventListener('keyup', function (e){
-    if (e.key === 'Enter' && input.value !=='') {
-        const computedStyle = window.getComputedStyle(tagContainerOverflow);
-        if (computedStyle.display === "none" && tags.length >= overflowSizeTags ) {
-            // Toggle the visibility of the tag container
-            tagContainerOverflow.classList.toggle('hidden');
-        }
-        const newTag = input.value;
-        tags.push(newTag);
-        createAndAppendTag(newTag, 1);
-        const newTagElement = tagContainer.querySelector('.tag:last-child'); // Assuming this selects the newly created tag
-        newTagElement.classList.toggle('selected');
-        const selectedTags = updateTagSelection(tagContainer);
-        localStorage.setItem('item_tags', JSON.stringify(selectedTags));
-        input.value = '';
-    }
-})
-
-
 fetchDataAndLoadTags();
-
-
-addTagIcon .addEventListener('click', function () {
-    const computedStyle = window.getComputedStyle(tagContainerOverflow);
-    if (computedStyle.display === "none") {
-        tagContainerOverflow.classList.toggle('hidden');
-        addTagIcon .innerHTML = 'filter_list_off';
-    }
-    else{
-        tagContainerOverflow.classList.toggle('hidden');
-        addTagIcon .innerHTML ='filter_list';
-    }
-});
-
-filterIcon.addEventListener('click', function () {
-    const computedStyle = window.getComputedStyle(filterTagContainerOverflow);
-    if (computedStyle.display === "none") {
-        filterTagContainerOverflow.classList.toggle('hidden');
-        filterIcon.innerHTML = 'filter_list_off';
-    }
-    else{
-        filterTagContainerOverflow.classList.toggle('hidden');
-        filterIcon.innerHTML ='filter_list';
-    }
-});
-
-clearFilter.addEventListener('click', function (){
-    resetTagSelection(filterTagContainer)
-    const filter = updateTagSelection(filterTagContainer);
-    const items = Array.from(itemList.children);
-    filterItemsByTags(items,filter);
-})

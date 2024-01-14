@@ -59,7 +59,7 @@
                 <button class="btn btn-outline-secondary my-2 my-md-0 me-0 me-md-2 dropdown-toggle icon-n4px" type="button" data-bs-toggle="dropdown" aria-expanded="false">
                     <i data-lucide="filter"></i>
                 </button>
-                <ul class="dropdown-menu dropdown-menu-end">
+                <ul class="dropdown-menu dropdown-menu-end" id="sort_tags">
 
                 </ul>
             </div>
@@ -307,6 +307,7 @@
 <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
 <script src="../static/script.js"></script>
 <script src="../static/esp.js"></script>
+<script src="../static/tags.js"></script>
 <script src="../static/settings.js"></script>
 <script src="../static/gen_grid.js"></script>
 <script src="../static/color-modes.js"></script>
@@ -315,10 +316,6 @@
 <script>
     lucide.createIcons();
 </script>
-<script>
-    new Tagify(document.getElementById('item_tags'))
-</script>
-
 </body>
 
 </html>

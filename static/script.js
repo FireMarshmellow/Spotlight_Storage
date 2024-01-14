@@ -266,16 +266,19 @@ function createItem(item) {
         document.getElementById("item_url").value = item.link;
         document.getElementById("item_image").value = item.image;
         document.getElementById("item_quantity").value = item.quantity;
-        localStorage.setItem('led_positions', JSON.stringify(item.position))
-
-        console.log('LED data:', JSON.parse(localStorage.getItem('led_positions')));
-
+       localStorage.setItem('led_positions', JSON.stringify(item.position))
+        let positions = JSON.parse(localStorage.getItem('led_positions'))
+        positions = positions.replace('[', '').replace(']', '');
+        positions = positions.split(',').map(Number).filter(num => !isNaN(num));
+        clickedCells = positions;
         localStorage.setItem('edit_led_positions', JSON.stringify(item.position))
         localStorage.setItem('edit_image_path', JSON.stringify(item.image))
         if(item.tags){
             const cleanedTags = item.tags.replace(/[\[\]'"`\\]/g, '');
             const itemTagsArray = cleanedTags.split(',');
             localStorage.setItem('item_tags', JSON.stringify(itemTagsArray))
+            tags = itemTagsArray;
+            loadTagsIntoTagify()
 
         }
         const selectedValue = item.ip; // The IP to select
