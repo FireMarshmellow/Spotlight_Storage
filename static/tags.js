@@ -2,7 +2,7 @@ const input = document.getElementById('item_tags');
 const maxSelectedTags  = 10
 const sortTagsDropdown = document.getElementById('sort_tags');
 let tags = [];
-
+let filterTags = []
 const tagify = new Tagify(input, {
     whitelist: [],
     dropdown: {
@@ -12,39 +12,13 @@ const tagify = new Tagify(input, {
     maxTags: maxSelectedTags // Set a maximum limit for tags (adjust as needed)
 });
 
-tagify.on('add', onTagAdded);
+tagify.on('add', SubmitTags);
 
-function onTagAdded(e) {
-
+function SubmitTags() {
     const tagsArray = tagify.value.map(tagData => tagData.value);
     localStorage.removeItem('item_tags');
     // Save the tags to localStorage
     localStorage.setItem('item_tags', JSON.stringify(tagsArray));
-    console.log(localStorage.getItem('item_tags'));
-}
-
-function filterItemsByTags(items, filter){
-    Array.from(items).forEach((item) => {
-        const itemTags = item.dataset.tags;
-        const cleanedTags = itemTags.replace(/[\[\]'"`]/g, ''); // Remove square brackets, single quotes, double quotes, and backticks
-        const itemTagsArray = cleanedTags.split(',');
-        let shouldDisplay = true;
-        if (filter.length > 0) {
-            // Check if all filters are present in itemTagsArray
-            filter.forEach(searchText => {
-                const searchTextLower = searchText.toLowerCase();
-
-                if (!itemTagsArray.some(itemTag => itemTag.toLowerCase().includes(searchTextLower))) {
-                    shouldDisplay = false;
-                }
-            });
-        }
-        if (shouldDisplay) {
-            item.style.display = "flex";
-        } else {
-            item.style.display = "none";
-        }
-    });
 }
 
 function fetchDataAndLoadTags() {
@@ -60,6 +34,7 @@ function fetchDataAndLoadTags() {
                 // Create and display new tags
                 TagData.forEach(({ tag, count }) => {
                     tags.push(tag);
+
                 });
                 populateSortTagsMenu(TagData);
                 tagify.settings.whitelist = tags.map(tag => ({ value: tag }));
@@ -101,14 +76,32 @@ function removeAllTags(){
 function sortItemsByTag(filter) {
     const itemsContainer = document.getElementById('items-container-grid');
     const items = Array.from(itemsContainer.children);
-
+    if(filter === ""){
+        filterTags = [];
+    }else{
+        if (!filterTags.includes(filter)){
+            filterTags.push(filter);
+        }
+        else{
+            filterTags.splice(filterTags.indexOf(filter), 1);
+        }
+    }
+    toggleSelectedClass();
     Array.from(items).forEach((item) => {
         const itemTags = item.dataset.tags;
         const cleanedTags = itemTags.replace(/[\[\]'"`]/g, ''); // Remove square brackets, single quotes, double quotes, and backticks
         const itemTagsArray = cleanedTags.split(',');
         let shouldDisplay = true;
-        const searchTextLower = filter.toLowerCase();
-        shouldDisplay = itemTagsArray.some(itemTag => itemTag.toLowerCase().includes(searchTextLower));
+        if (filterTags.length > 0) {
+            // Check if all filters are present in itemTagsArray
+            filterTags.forEach(searchText => {
+                const searchTextLower = searchText.toLowerCase();
+
+                if (!itemTagsArray.some(itemTag => itemTag.toLowerCase().includes(searchTextLower))) {
+                    shouldDisplay = false;
+                }
+            });
+        }
         if (shouldDisplay) {
             item.style.display = "flex";
         } else {
@@ -117,43 +110,62 @@ function sortItemsByTag(filter) {
     });
 
 }
+function createSortMenuItem(text, onClickHandler) {
+    const listItem = document.createElement('li');
+    const anchor = document.createElement('a');
+    const div = document.createElement('div');
+    anchor.classList.add('dropdown-item');
+    anchor.href = '#';
+    if (text === "Clear Tags") {
+        anchor.innerHTML = '<span class="icon-n4px"><i data-lucide="x" class="me-2"></i>Clear Tags</span>';
+    } else {
+        anchor.innerText = text;
+    }
+    div.classList.add('dropdown-divider');
+    anchor.onclick = onClickHandler;
+    listItem.appendChild(anchor);
+    if( text === "Clear Tags") {
+        listItem.appendChild(div);
+    }
+    return listItem;
+}
+
 function populateSortTagsMenu(tagDataArray) {
     const sortTagsMenu = document.getElementById('sort_tags');
 
     // Clear existing menu items
     sortTagsMenu.innerHTML = '';
-    const listItem = document.createElement('li');
-    const anchor = document.createElement('a');
-    anchor.classList.add('dropdown-item');
-    anchor.href = '#';
-    anchor.innerText = "Clear Tags";
-    anchor.onclick = function () {
-        // Handle the click event for sorting by tag
-        sortItemsByTag("");
-    };
-    listItem.appendChild(anchor);
-    sortTagsMenu.appendChild(listItem);
+
+    // Add "Clear Tags" menu item
+    sortTagsMenu.appendChild(createSortMenuItem("Clear Tags", () => sortItemsByTag("")));
+
     // Create and append menu items for each tag
     tagDataArray.forEach(({ tag }) => {
-        const listItem = document.createElement('li');
-        const anchor = document.createElement('a');
-        anchor.classList.add('dropdown-item');
-        anchor.href = '#';
-        anchor.innerText = tag;
-        anchor.onclick = function () {
-            // Handle the click event for sorting by tag
-            sortItemsByTag(tag);
-        };
-
-        listItem.appendChild(anchor);
-        sortTagsMenu.appendChild(listItem);
+        sortTagsMenu.appendChild(createSortMenuItem(tag, () => sortItemsByTag(tag)));
     });
 }
 
 
-sortTagsDropdown.addEventListener('change', function() {
-    const selectedOptions = Array.from(this.selectedOptions).map(option => option.value);
-    // Call your sort function with the selected options
-    sortItemsByTag(selectedOptions);
-});
+
+// Function to toggle a class on selected options
+function toggleSelectedClass() {
+    // Get all list items under sortTagsDropdown
+    const listItems = Array.from(sortTagsDropdown.querySelectorAll('li'));
+    // Remove the class from all options
+    listItems.forEach(li => {
+        li.classList.remove('selected-option');
+
+        // Check if the anchor text is in the filterTags array
+        const anchorText = li.querySelector('a').innerText.trim();
+        if (filterTags.includes(anchorText)) {
+            li.classList.add('selected-option');
+        }
+    });
+}
+
+
 fetchDataAndLoadTags();
+
+
+
+

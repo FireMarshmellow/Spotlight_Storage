@@ -104,7 +104,6 @@ document.getElementById("save-esp-button").addEventListener('click', () => {
         startLeft,
         serpentineDirection
     };
-    console.log(espItem, "ESP Item");
     const processESPItem = () => {
         // TODO Check for existing names and IP addresses when saving the edit of an existing ESP entry
         fetch(espId !== null && espId !== '' ? `/api/esp/${espId}` : '/api/esp', {

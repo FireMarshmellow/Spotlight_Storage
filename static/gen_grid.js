@@ -2,7 +2,6 @@ let clickedCells = [];
 let selectedCells = []
 let isEventListened = false;
 function drawGrid(mode, rows, columns, startX, startY, serpentineDirection) {
-    console.log("Draw grid running in mode: \"" + mode + "\"")
     // Convert string values to lowercase
     if (typeof startX === 'string') {
         startX = startX.toLowerCase();
@@ -207,7 +206,6 @@ function drawGrid(mode, rows, columns, startX, startY, serpentineDirection) {
     ctx.fill();
     let endCircleCenterX = endIndicatorX * boxWidth + boxWidth / 2 + halfLineWidth;
     let endCircleCenterY = endIndicatorY * boxWidth + boxWidth / 2 + halfLineWidth;
-    console.log(endCircleCenterX + ", " + endCircleCenterY);
     ctx.beginPath();
     ctx.arc(endCircleCenterX, endCircleCenterY, indicatorCircleRadius, 0, Math.PI * 2);
     ctx.fillStyle = '#dc3545';
@@ -231,7 +229,6 @@ function drawGrid(mode, rows, columns, startX, startY, serpentineDirection) {
 
 }
 function handleCellClick(event, rows, columns, startX, startY, serpentineDirection, mode) {
-        console.log("Canvas clicked");
         let canvas = document.getElementById(mode + '-responsive-canvas');
         let lineWidth = 2;
         let boxWidth = (canvas.width - lineWidth) / columns;
@@ -250,14 +247,12 @@ function handleCellClick(event, rows, columns, startX, startY, serpentineDirecti
         const ledNumber = calculateLedNumber(clickedRow, clickedColumn, startX, startY, serpentineDirection, rows, columns);
         // Find if the clicked cell is already in the clickedCells array
         let cellIndex = clickedCells.indexOf(ledNumber);
-        console.log(cellIndex);
         // If the clicked cell is not in the array, add it; otherwise, remove it
         if (cellIndex === -1) {
             clickedCells.push(ledNumber);
         } else {
             clickedCells.splice(cellIndex, 1);
         }
-        console.log(clickedCells);
         redrawGrid(rows, columns, "item",  startX, startY, serpentineDirection)
 }
 function calculateLedNumber(row, column, startX, startY, serpentineDirection, rows, columns) {
@@ -319,7 +314,6 @@ function TestLights() {
     const ip = selectedEsp.dataset.espIp;
     const data = {};
     data[ip] = clickedCells;
-    console.log(data);
     fetch('/test_lights', {
         method: 'POST',
         headers: {
@@ -328,10 +322,7 @@ function TestLights() {
         body: JSON.stringify(data),
     })
         .then(response => response.json())
-        .then(data => {
-            console.log('Success:', data);
-            // Removed alert for success message
-        })
+        .then()
         .catch((error) => {
             console.error('Error:', error);
         });
@@ -358,7 +349,6 @@ function submitLights() {
 
     // Save LED positions to localStorage
     savedData = savedData.concat(clickedCells);
-    console.log("savedData LEDS:", savedData); // Get the selected value from the dropdown
     // Save updated data back to localStorage
     localStorage.setItem('led_positions', JSON.stringify(savedData));
 }

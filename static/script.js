@@ -2,11 +2,10 @@ const selectEspDropdown = document.getElementById("item_esp_select");
 let fetchedItems = []; // Define an array to store fetched items
 let isEditingItem = false;
 let editingItemId = null; // Track the ID of the item being edited
-const item_modal = document.getElementById("item-modal");
+let editingItemIP = null; // Track the ID of the item being edited
 async function uploadImage() {
     const formData = new FormData();
     const fileInput = document.getElementById("item_image_upload");
-
     // Append the file input to the formData
     formData.append('file', fileInput.files[0]);
 
@@ -15,11 +14,9 @@ async function uploadImage() {
         console.log('no file uploaded');
         return null;
     }
-
     try {
         const response = await fetch('/upload', { body: formData, method: 'POST' });
         const imageURL = await response.text();
-        console.log(`uploaded file to ${imageURL}`);
         return new URL(window.location.href + imageURL);
     } catch (error) {
         console.error('Error uploading file:', error);
@@ -39,20 +36,14 @@ async function addItem(event) {
         }
     }
     submitLights();
-
+    SubmitTags();
     const name = document.getElementById("item_name").value;
     const link = document.getElementById("item_url").value || "";
     const image = document.getElementById("item_image").value;
     let position = localStorage.getItem('led_positions');
     const quantity = document.getElementById("item_quantity").value;
-    const selectedEspDropdown = document.getElementById("item_esp_select"); // Get the selected ESP dropdown
     const tags = localStorage.getItem('item_tags');
-    const selectedEspValue = selectedEspDropdown.value;
-    if (selectedEspValue === "select") {
-        // Check if the user has not selected anything
-        alert("Please select an ESP.");
-        return;
-    }
+    const selectedEspValue = selectEspDropdown.value;
     if (position === "[]") {
         // Check if the user has not selected anything
         if(!isEditingItem){alert("Please select an LEDS to light up.");
@@ -76,7 +67,6 @@ async function addItem(event) {
                 ip,
                 tags,
             };
-            console.log('item', item);
             if (isEditingItem) {
                 // We are editing, so send a PUT request to update the existing item
                 fetch(`/api/items/${editingItemId}`, {
@@ -87,11 +77,10 @@ async function addItem(event) {
                     .then((response) => response.json())
                     .then((data) => {
                         item.id = data.id;
-                        const col =  document.getElementById('items-container-grid').querySelector(`li[data-id="${editingItemId}"]`);
+                        const col =  document.getElementById('items-container-grid').querySelector(`div[data-id="${editingItemId}"]`);
                         const updatedCol = createItem(item);
                         document.getElementById('items-container-grid').replaceChild(updatedCol, col);
                         isEditingItem = false; // Reset the editing flag
-                        document.getElementById("btn-add").innerHTML = "Add item"; // Change the button text back to "Add item"
                     })
                     .catch((error) => console.error(error));
             } else {
@@ -106,7 +95,6 @@ async function addItem(event) {
                         const col = createItem(data);
                         isEditingItem = false;
                         document.getElementById('items-container-grid').appendChild(col);
-                        removeLocalStorage();
                     })
                     .catch((error) => console.error(error));
             }
@@ -122,17 +110,15 @@ function removeLocalStorage(){
     localStorage.removeItem('edit_led_positions');
     localStorage.removeItem('item_tags');
     localStorage.removeItem('edit_image_path');
-
-
 }
 function populateEspDropdown() {
-
+    let index = 0;
     selectEspDropdown.innerHTML = "";
     // Fetch ESP devices
     fetch("/api/esp").then((response) => response.json()).then((data) => {
         if (data.length > 0) {
             // Devices found: Populate dropdown and select the first one
-            data.forEach((esp, index) => {
+            data.forEach((esp) => {
                 const option = document.createElement("option");
                 option.value = esp.id;
                 option.dataset.espRows = esp.rows;
@@ -141,12 +127,17 @@ function populateEspDropdown() {
                 option.dataset.espStartX = esp.start_left;
                 option.dataset.espSerpentine = esp.serpentine_direction;
                 option.dataset.espIp = esp.esp_ip;
+                option.dataset.espName = esp.name;
                 option.textContent = esp.name + " (" + esp.esp_ip + ")";
                 selectEspDropdown.appendChild(option);
-                if (index === 0) {
-                    selectEspDropdown.selectedIndex = index;
-                }
+
             });
+
+            if (isEditingItem) {
+                index = findIndexByIP(editingItemIP);
+            }
+            selectEspDropdown.selectedIndex = index;
+
         } else {
             // No devices found: Disable dropdown and display message
             selectEspDropdown.disabled = true;
@@ -156,20 +147,20 @@ function populateEspDropdown() {
             selectEspDropdown.appendChild(messageOption);
         }
         console.log("Dropdown populated:", data); // Logging the output to console
-        let rows = document.getElementById('item_esp_select').options[0].getAttribute("data-esp-rows");
-        let columns = document.getElementById('item_esp_select').options[0].getAttribute("data-esp-columns");
-        let startX = document.getElementById('item_esp_select').options[0].getAttribute("data-esp-start-x");
-        let startY = document.getElementById('item_esp_select').options[0].getAttribute("data-esp-start-y");
-        let serpentineDirection = document.getElementById('item_esp_select').options[0].getAttribute("data-esp-serpentine");
+        let rows = document.getElementById('item_esp_select').options[index].getAttribute("data-esp-rows");
+        let columns = document.getElementById('item_esp_select').options[index].getAttribute("data-esp-columns");
+        let startX = document.getElementById('item_esp_select').options[index].getAttribute("data-esp-start-x");
+        let startY = document.getElementById('item_esp_select').options[index].getAttribute("data-esp-start-y");
+        let serpentineDirection = document.getElementById('item_esp_select').options[index].getAttribute("data-esp-serpentine");
         drawGrid("item", rows, columns, startX, startY, serpentineDirection);
     }).catch((error) => console.error(error));
 }
 
 document.getElementById('item-modal').addEventListener('shown.bs.modal', function (event) {
-    console.log("Add item modal: 'shown'")
     let inputField = document.getElementById('item_name');
     inputField.focus();
     inputField.select();
+
     populateEspDropdown();
 });
 document.getElementById('item_esp_select').addEventListener('change', function () {
@@ -259,20 +250,37 @@ function createItem(item) {
             body: new URLSearchParams({ action: "locate" }),
         }).catch((error) => console.error(error));
     });
+    col.querySelector('.delete-btn').addEventListener('click', () => {
+        const response = confirm(`Are you sure you want to delete ${item.name}?`);
+        const id = item.id;
+        const itemsContainer = document.getElementById('items-container-grid');
+        if (response) {
+            // Delete item from database
+            fetch(`/api/items/${id}`, { method: "DELETE" })
+                .then(() => {
+                    const col = itemsContainer.querySelector(`div[data-id="${id}"]`);
+                    col.parentNode.removeChild(col);
+                })
+                .catch((error) => console.error(error));
+        }
+    });
     col.querySelector('.edit-btn').addEventListener('click', () => {
         isEditingItem = true;
         removeLocalStorage();
+        $("#item-modal").modal("show");
         document.getElementById("item_name").value = item.name;
         document.getElementById("item_url").value = item.link;
         document.getElementById("item_image").value = item.image;
         document.getElementById("item_quantity").value = item.quantity;
-       localStorage.setItem('led_positions', JSON.stringify(item.position))
+
+        localStorage.setItem('led_positions', JSON.stringify(item.position))
         let positions = JSON.parse(localStorage.getItem('led_positions'))
         positions = positions.replace('[', '').replace(']', '');
         positions = positions.split(',').map(Number).filter(num => !isNaN(num));
         clickedCells = positions;
         localStorage.setItem('edit_led_positions', JSON.stringify(item.position))
         localStorage.setItem('edit_image_path', JSON.stringify(item.image))
+
         if(item.tags){
             const cleanedTags = item.tags.replace(/[\[\]'"`\\]/g, '');
             const itemTagsArray = cleanedTags.split(',');
@@ -281,10 +289,9 @@ function createItem(item) {
             loadTagsIntoTagify()
 
         }
-        const selectedValue = item.ip; // The IP to select
-        selectEspDropdown.selectedIndex = findIndexByIP(selectedValue);
         editingItemId = item.id;
-        $("#item-modal").modal("show");
+        editingItemIP = item.ip;
+
     });
 
     return col;
@@ -330,67 +337,18 @@ function generateItemsGrid() {
     initialiseTooltips();
 }
 function findIndexByIP(ip) {
-    const options = selectEspDropdown.options;
+    const options = Array.from(selectEspDropdown.options);
     for (let i = 0; i < options.length; i++) {
-        const optionValue = options[i].textContent.trim(); // Trim whitespace from option value
-        if (optionValue.toLowerCase() === ip.trim().toLowerCase()) { // Case-insensitive comparison
-            return i; // Return the index when the IP matches the selected option value.
+        const optionIp = options[i].dataset.espIp.trim().toLowerCase();
+        const optionName = options[i].dataset.espName.trim().toLowerCase();
+        if (optionIp === ip.trim().toLowerCase() || optionName === ip.trim().toLowerCase()) {
+            return i; // Return the index when either the IP or the name matches the selected option value.
         }
     }
-    return 0; // Return 0 if no match is found.
+    return 0; // Return -1 if no match is found.
 }
 
-function generateItemsList() {
-    const itemsContainer = document.getElementById('items-container-list');
 
-    // Clear previous content in the container if needed
-    itemsContainer.innerHTML = '';
-
-    // Create table element
-    const table = document.createElement('table');
-    table.classList.add('table', 'table-striped');
-
-    // Create table header
-    const tableHeader = document.createElement('thead');
-    const headerRow = document.createElement('tr');
-    const headerName = document.createElement('th');
-    headerName.textContent = 'Name';
-    const headerLink = document.createElement('th');
-    headerLink.textContent = 'Link';
-    headerRow.appendChild(headerName);
-    headerRow.appendChild(headerLink);
-    tableHeader.appendChild(headerRow);
-    table.appendChild(tableHeader);
-
-    // Create table body
-    const tableBody = document.createElement('tbody');
-    fetchedItems.forEach((item) => {
-        const row = document.createElement('tr');
-
-        // Create table cells for item properties
-        const nameCell = document.createElement('td');
-        nameCell.textContent = item.name;
-
-        const linkCell = document.createElement('td');
-        const link = document.createElement('a');
-        link.href = item.link;
-        link.textContent = 'View Item';
-        linkCell.appendChild(link);
-
-        // Append cells to the row
-        row.appendChild(nameCell);
-        row.appendChild(linkCell);
-
-        // Append the row to the table body
-        tableBody.appendChild(row);
-    });
-
-    // Append table body to the table
-    table.appendChild(tableBody);
-
-    // Append table to the container
-    itemsContainer.appendChild(table);
-}
 
 function initialiseTooltips() {
     const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));

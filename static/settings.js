@@ -22,9 +22,11 @@ function addSettings(event) {
     //event.preventDefault();
     const brightness = document.getElementById("settings_brightness").value;
     const timeout = document.getElementById("settings_timeout").value;
-
+    if (lightMode === undefined){
+        lightMode = "light"
+    }
     const settings = {brightness, timeout, lightMode};
-
+    console.log(settings);
     // Save the settings in the database using fetch
     fetch("/api/settings", {
         method: "POST",

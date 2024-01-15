@@ -46,7 +46,7 @@ def create_combined_db():
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 brightness INTEGER,
                 timeout INTEGER,
-                lightMode BOOLEAN
+                lightMode TEXT DEFAULT 'light'
             )
         ''')
 
@@ -291,9 +291,15 @@ def migrate_items():
 
     conn_combined = sqlite3.connect(COMBINED_DATABASE)
     for item in items:
+        # Extract only the first 7 columns plus the 'tags' column
+        columns_to_insert = [
+            item['name'], item['link'], item['image'],
+            item['position'], item['quantity'], item['ip'], item['tags']
+        ]
+
         conn_combined.execute(
             'INSERT INTO items (name, link, image, position, quantity, ip, tags) VALUES (?, ?, ?, ?, ?, ?, ?)',
-            [item['name'], item['link'], item['image'], item['position'], item['quantity'], item['ip'], item['tags']]
+            columns_to_insert
         )
 
     conn_combined.commit()
@@ -305,7 +311,6 @@ def migrate_esp_settings():
     """Migrate ESP settings from esp.db to combined_data.db."""
     conn_esp = get_db_connection(DATABASE_ESP)
     esp_settings_list = conn_esp.execute('SELECT * FROM esp').fetchall()
-
     conn_combined = sqlite3.connect(COMBINED_DATABASE)
     for esp_settings in esp_settings_list:
         conn_combined.execute(
@@ -342,32 +347,34 @@ def is_database_empty(database_name, table_name):
     cursor.execute(f'SELECT COUNT(*) FROM {table_name}')
     count = cursor.fetchone()[0]
     conn.close()
-    return count == 0
+    return count
 
 
-def should_perform_migration():
-    """Check if migration should be performed."""
-    # Check if any of the individual databases exists
-    if os.path.exists(DATABASE) or os.path.exists(DATABASE_ESP) or os.path.exists(DATABASE_SETTING):
-        # Check if the combined database is not empty
-        if (not is_database_empty(COMBINED_DATABASE, 'items')
-                or not is_database_empty(COMBINED_DATABASE,  'esp')
-                or not is_database_empty(COMBINED_DATABASE, 'settings')):
-            return True
+def should_perform_migration(database_path, table_name):
+    """Check if migration should be performed for a specific database and table."""
+
+    # Check if the individual database exists
+    if os.path.exists(database_path):
+        # Check if the combined database is not empty for the specified table
+        return not is_database_empty(COMBINED_DATABASE, table_name)
     return False
 
 
 def perform_migration():
     """Perform migration."""
     create_combined_db()
-    if should_perform_migration():
-        migrate_items()  # Migrate items
-        migrate_esp_settings()  # Migrate ESP settings
-        migrate_settings()  # Migrate general settings
-        print("Migration successful.")
-
-    else:
-        print("Migration is not required.")
+    # Check and migrate items
+    if should_perform_migration(DATABASE, 'items'):
+        migrate_items()
+        print("Items migration successful.")
+    # Check and migrate ESP settings
+    if should_perform_migration(DATABASE_ESP, 'esp'):
+        migrate_esp_settings()
+        print("ESP settings migration successful.")
+    # Check and migrate general settings
+    if should_perform_migration(DATABASE_SETTING, 'settings'):
+        migrate_settings()
+        print("General settings migration successful.")
 
 
 # Perform migration

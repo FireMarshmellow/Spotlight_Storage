@@ -73,3 +73,20 @@ label {
 .card-title-link:hover {
     text-decoration: underline;
 }
+
+ul.dropdown-menu li.selected-option {
+    background-color: rgb(37 99 235) /* Change this to the desired background color */
+}
+
+.tagify__dropdown {
+    background-color: #f8f9fa; /* Set the background color to match Bootstrap theme */
+}
+
+.tagify__dropdown__item {
+    padding: 8px 10px; /* Adjust padding as needed */
+    color: #495057; /* Set text color to match Bootstrap theme */
+}
+
+.tagify__dropdown__item:hover {
+    background-color: #e9ecef; /* Set hover background color to match Bootstrap theme */
+}
