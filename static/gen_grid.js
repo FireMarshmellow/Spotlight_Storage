@@ -199,7 +199,6 @@ function drawGrid(mode, rows, columns, startX, startY, serpentineDirection) {
     let indicatorCircleRadius = Math.min(boxWidth, boxWidth) / 8;
     let startCircleCenterX = startIndicatorX * boxWidth + boxWidth / 2 + halfLineWidth;
     let startCircleCenterY = startIndicatorY * boxWidth + boxWidth / 2 + halfLineWidth;
-    console.log(startCircleCenterX + ", " + startCircleCenterY);
     ctx.beginPath();
     ctx.arc(startCircleCenterX, startCircleCenterY, indicatorCircleRadius, 0, Math.PI * 2);
     ctx.fillStyle = '#198754';
@@ -296,7 +295,7 @@ function redrawGrid(rows, columns, mode,  startX, startY, serpentineDirection) {
                 let circleRadius = Math.min(boxWidth, boxWidth) / 15;
                 ctx.beginPath();
                 ctx.arc(circleCenterX, circleCenterY, circleRadius, 0, Math.PI * 2);
-                ctx.fillStyle = isClicked ? '#17a2b8' : '#ffc107';
+                ctx.fillStyle = isClicked ? '#ff0000' : '#ffc107';
                 ctx.fill();
             }
         }

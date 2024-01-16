@@ -28,83 +28,84 @@ async function uploadImage() {
 async function addItem(event) {
     event.preventDefault();
 
-    if(document.getElementById("item_image").value !== localStorage.getItem('edit_image_path')) { //check whether image has changed and only then load image
+    if (document.getElementById("item_image").value !== localStorage.getItem('edit_image_path')) {
         let localImage = await uploadImage();
         if (!!localImage) {
-            // set image path to newly uploaded file
-            document.getElementById("item_image").value = localImage
+            document.getElementById("item_image").value = localImage;
         }
     }
+
     submitLights();
     SubmitTags();
+
     const name = document.getElementById("item_name").value;
     const link = document.getElementById("item_url").value || "";
     const image = document.getElementById("item_image").value;
     let position = localStorage.getItem('led_positions');
     const quantity = document.getElementById("item_quantity").value;
     const tags = localStorage.getItem('item_tags');
-    const selectedEspValue = selectEspDropdown.value;
+    const selectedEspOption = selectEspDropdown.options[selectEspDropdown.selectedIndex];
+
     if (position === "[]") {
-        // Check if the user has not selected anything
-        if(!isEditingItem){alert("Please select an LEDS to light up.");
-            return;}
-        else{
+        if (!isEditingItem) {
+            alert("Please select an LED to light up.");
+            return;
+        } else {
             position = localStorage.getItem('edit_led_positions');
-            position = JSON.parse(position); // Convert the string to an array
+            position = JSON.parse(position);
         }
     }
-    // Fetch the IP associated with the selected ESP
-    fetch(`/api/esp/${selectedEspValue}`)
-        .then((response) => response.json())
-        .then((espData) => {
-            const ip = espData.name;
-            const item = {
-                name,
-                link,
-                image,
-                position,
-                quantity,
-                ip,
-                tags,
-            };
-            if (isEditingItem) {
-                // We are editing, so send a PUT request to update the existing item
-                fetch(`/api/items/${editingItemId}`, {
-                    method: "PUT",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify(item),
-                })
-                    .then((response) => response.json())
-                    .then((data) => {
-                        item.id = data.id;
-                        const col =  document.getElementById('items-container-grid').querySelector(`div[data-id="${editingItemId}"]`);
-                        const updatedCol = createItem(item);
-                        document.getElementById('items-container-grid').replaceChild(updatedCol, col);
-                        isEditingItem = false; // Reset the editing flag
-                    })
-                    .catch((error) => console.error(error));
-            } else {
-                // Add the item with the correct IP
-                fetch("/api/items", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify(item),
-                })
-                    .then((response) => response.json())
-                    .then((data) => {
-                        const col = createItem(data);
-                        isEditingItem = false;
-                        document.getElementById('items-container-grid').appendChild(col);
-                    })
-                    .catch((error) => console.error(error));
-            }
+
+    const ip = selectedEspOption.dataset.espIp;
+    const item = {
+        name,
+        link,
+        image,
+        position,
+        quantity,
+        ip,
+        tags,
+    };
+
+    if (isEditingItem) {
+        fetch(`/api/items/${editingItemId}`, {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(item),
         })
-        .catch((error) => console.error(error));
-    // Clear the stored data in the 'led_positions' key
+            .then((response) => response.json())
+            .then((data) => {
+                item.id = data.id;
+                const col = document.getElementById('items-container-grid').querySelector(`div[data-id="${editingItemId}"]`);
+                const updatedCol = createItem(item);
+                document.getElementById('items-container-grid').replaceChild(updatedCol, col);
+                lucide.createIcons();
+                fetchDataAndLoadTags();
+
+            })
+            .catch((error) => console.error(error));
+    } else {
+        fetch("/api/items", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(item),
+        })
+            .then((response) => response.json())
+            .then((data) => {
+                const col = createItem(data);
+                document.getElementById('items-container-grid').appendChild(col);
+                lucide.createIcons();
+                fetchDataAndLoadTags();
+            })
+            .catch((error) => console.error(error));
+    }
+    isEditingItem = false;
     removeLocalStorage();
     resetModal();
 
 }
+
+
 function removeLocalStorage(){
     localStorage.removeItem('led_positions');
     localStorage.removeItem('edit_led_positions');
@@ -146,7 +147,6 @@ function populateEspDropdown() {
             messageOption.disabled = true;
             selectEspDropdown.appendChild(messageOption);
         }
-        console.log("Dropdown populated:", data); // Logging the output to console
         let rows = document.getElementById('item_esp_select').options[index].getAttribute("data-esp-rows");
         let columns = document.getElementById('item_esp_select').options[index].getAttribute("data-esp-columns");
         let startX = document.getElementById('item_esp_select').options[index].getAttribute("data-esp-start-x");
