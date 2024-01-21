@@ -74,9 +74,6 @@ label {
     text-decoration: underline;
 }
 
-ul.dropdown-menu li.selected-option {
-    background-color: rgb(37 99 235) /* Change this to the desired background color */
-}
 
 .tagify__dropdown {
     background-color: #f8f9fa; /* Set the background color to match Bootstrap theme */

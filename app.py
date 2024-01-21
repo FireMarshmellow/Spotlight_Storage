@@ -18,7 +18,7 @@ app.brightness = 1
 app.delSegments = ""
 app.timeout = 5
 app.config['UPLOAD_FOLDER'] = './images'
-
+app.previous_positions = []
 
 # Route to Favicon
 @app.route('/favicon.ico')
@@ -230,36 +230,63 @@ def send_request(target_ip, data, timeout=0.2):
 
 # Function to control lights
 def light(positions, ip, quantity=1, testing=False):
+    # Turn off existing segments if they exist
     if app.delSegments:
         off_data = {"on": False, "bri": 0, "transition": 0, "mainseg": 0, "seg": app.delSegments}
         send_request(ip, off_data)
+
+    # Set global settings
     set_global_settings()
-    print(app.timeout, "timeout")
+
+    # Initialize default segments
     segments = [{"id": 1, "start": 0, "stop": 1000, "col": [0, 0, 0]}]
     delSegments = [{"id": 1, "start": 0, "stop": 0, "col": [0, 0, 0]}]
-    color = [0, 255, 0]
-    if quantity < 1:
-        color = [255, 0, 0]
-    # print("Recieved positions",positions)
+
+    # Set color based on quantity
+    color = [0, 255, 0] if quantity >= 1 else [255, 0, 0]
+
+    # Parse and sort positions
     positions_list = sorted(json.loads(positions))
-    for i, pos in enumerate(positions_list):
-        if pos is None:
-            continue  # Skip if pos is None
-        start_num = int(pos) - 1
-        stop_num = int(pos)
-        segments.append({"id": i + 2, "start": start_num, "stop": stop_num, "col": [color, [0, 0, 0], [0, 0, 0]]})
-        delSegments.append({"id": i + 2, "start": start_num, "stop": 0, "col": [255, 255, 255]})
-    on_data = {"on": True, "bri": 255 * app.brightness, "transition": 0, "mainseg": 0, "seg": segments}
-    send_request(ip, on_data)
+
+    # Check if positions have changed
+    if app.previous_positions != positions:
+        # Create segments based on positions
+        for i, pos in enumerate(positions_list):
+            if pos is None:
+                continue  # Skip if pos is None
+            start_num = int(pos) - 1
+            stop_num = int(pos)
+            segments.append({"id": i + 2, "start": start_num, "stop": stop_num, "col": [color, [0, 0, 0], [0, 0, 0]]})
+            delSegments.append({"id": i + 2, "start": start_num, "stop": 0, "col": [255, 255, 255]})
+
+        # Turn on the new segments
+        on_data = {"on": True, "bri": 255 * app.brightness, "transition": 0, "mainseg": 0, "seg": segments}
+        send_request(ip, on_data)
+        app.previous_positions = positions
+    else:
+        # Turn off existing segments and reset previous_positions if positions haven't changed
+        off_data = { "bri": 255 * app.brightness, "transition": 5, "mainseg": 0, "seg": delSegments}
+        send_request(ip, off_data)
+        app.previous_positions = []
+        app.timeout = 0
+
+    # If timeout is set, sleep and then turn off the segments
     if app.timeout != 0 and not testing:
         time.sleep(app.timeout)
-        off_data = {"on": True, "bri": 255 * app.brightness, "transition": 5, "mainseg": 0, "seg": delSegments}
+        off_data = {"bri": 255 * app.brightness, "transition": 5, "mainseg": 0, "seg": delSegments}
         send_request(ip, off_data)
+
+    # For testing, sleep for at least 3 seconds and then turn off the segments
     if testing:
+        app.previous_positions = []
         time.sleep(app.timeout + 3)
-        off_data = {"on": True, "bri": 255 * app.brightness, "transition": 5, "mainseg": 0, "seg": delSegments}
+        off_data = { "bri": 255 * app.brightness, "transition": 5, "mainseg": 0, "seg": delSegments}
         send_request(ip, off_data)
+
+    # Update global delSegments and previous_positions
     app.delSegments = delSegments
+    app.previous_positions = []
+
 
 
 @app.route('/test_lights', methods=['POST'])
@@ -286,10 +313,7 @@ def turn_led_on():
             on_data = {"on": True, "bri": 255 * app.brightness, "transition": 0, "mainseg": 0, "seg": [
                 {"id": 0, "grp": 1, "spc": 0, "of": 0, "on": True, "frz": False, "bri": 255, "cct": 127, "set": 0,
                  "col": [[255 * app.brightness, 255 * app.brightness, 255 * app.brightness], [0, 0, 0], [0, 0, 0]],
-                 "fx": 0, "sx": 128, "ix": 128, "pal": 0, "c1": 128, "c2": 128, "c3": 16, "sel": True, "rev": False,
-                 "mi": False, "o1": False, "o2": False, "o3": False, "si": 0, "m12": 0}, {"stop": 0}, {"stop": 0},
-                {"stop": 0}, {"stop": 0}, {"stop": 0}, {"stop": 0}, {"stop": 0}, {"stop": 0}, {"stop": 0}, {"stop": 0},
-                {"stop": 0}, {"stop": 0}, {"stop": 0}, {"stop": 0}, {"stop": 0}]}
+                 "fx": 0, "sx": 128, "ix": 128, "pal": 0, "c1": 128, "c2": 128, "c3": 16}]}
             send_request(ip, on_data)
         return jsonify({'success': True})
 
@@ -318,10 +342,7 @@ def turn_led_party():
             party_data = {"on": True, "bri": round(255 * app.brightness), "transition": 5, "mainseg": 0, "seg": [
                 {"id": 0, "grp": 1, "spc": 0, "of": 0, "on": True, "frz": False, "bri": 255, "cct": 127, "set": 0,
                  "col": [[255, 255, 255], [0, 0, 0], [0, 0, 0]], "fx": 9, "sx": 128, "ix": 128, "pal": 0, "c1": 128,
-                 "c2": 128, "c3": 16, "sel": True, "rev": False, "mi": False, "o1": False, "o2": False, "o3": False,
-                 "si": 0, "m12": 0}, {"stop": 0}, {"stop": 0}, {"stop": 0}, {"stop": 0}, {"stop": 0}, {"stop": 0},
-                {"stop": 0}, {"stop": 0}, {"stop": 0}, {"stop": 0}, {"stop": 0}, {"stop": 0}, {"stop": 0}, {"stop": 0},
-                {"stop": 0}]}
+                 "c2": 128, "c3": 16}]}
             send_request(ip, party_data)
         return jsonify()
 

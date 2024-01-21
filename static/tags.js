@@ -32,7 +32,7 @@ function fetchDataAndLoadTags() {
                 removeAllTags();
                 localStorage.removeItem('item_tags');
                 // Create and display new tags
-                TagData.forEach(({ tag, count }) => {
+                TagData.forEach(({ tag }) => {
                     tags.push(tag);
 
                 });
@@ -110,16 +110,18 @@ function sortItemsByTag(filter) {
     });
 
 }
-function createSortMenuItem(text, onClickHandler) {
+function createSortMenuItem(text, onClickHandler, count) {
     const listItem = document.createElement('li');
     const anchor = document.createElement('a');
     const div = document.createElement('div');
+    anchor.dataset.filter = text;
     anchor.classList.add('dropdown-item');
     anchor.href = '#';
     if (text === "Clear Tags") {
         anchor.innerHTML = '<span class="icon-n4px"><i data-lucide="x" class="me-2"></i>Clear Tags</span>';
+        anchor.classList.add('disabled')
     } else {
-        anchor.innerText = text;
+        anchor.innerHTML = `${text} <span class="tag-count" style="color: #888;">(${count})</span>`;
     }
     div.classList.add('dropdown-divider');
     anchor.onclick = onClickHandler;
@@ -135,13 +137,12 @@ function populateSortTagsMenu(tagDataArray) {
 
     // Clear existing menu items
     sortTagsMenu.innerHTML = '';
-
     // Add "Clear Tags" menu item
     sortTagsMenu.appendChild(createSortMenuItem("Clear Tags", () => sortItemsByTag("")));
 
     // Create and append menu items for each tag
-    tagDataArray.forEach(({ tag }) => {
-        sortTagsMenu.appendChild(createSortMenuItem(tag, () => sortItemsByTag(tag)));
+    tagDataArray.forEach(({ tag, count }) => {
+        sortTagsMenu.appendChild(createSortMenuItem(tag, () => sortItemsByTag(tag), count));
     });
 }
 
@@ -149,22 +150,35 @@ function populateSortTagsMenu(tagDataArray) {
 
 // Function to toggle a class on selected options
 function toggleSelectedClass() {
+
     // Get all list items under sortTagsDropdown
     const listItems = Array.from(sortTagsDropdown.querySelectorAll('li'));
-    // Remove the class from all options
-    listItems.forEach(li => {
-        li.classList.remove('selected-option');
 
-        // Check if the anchor text is in the filterTags array
-        const anchorText = li.querySelector('a').innerText.trim();
-        if (filterTags.includes(anchorText)) {
-            li.classList.add('selected-option');
+    // Remove the "active" class from all options
+    listItems.forEach(li => {
+        const anchor = li.querySelector('a');
+        anchor.classList.remove('active');
+    });
+
+    // Find the tags whose text is in the filterTags array and add the "active" class
+    listItems.forEach(li => {
+        const anchor = li.querySelector('a');
+        const anchorText = anchor.getAttribute('data-filter');
+
+        if (filterTags.includes(anchorText) && anchorText !== "Clear Tags") {
+            anchor.classList.add('active');
+        }
+        if (anchorText === "Clear Tags") {
+            const shouldDisable = filterTags.length === 0;
+            anchor.classList.toggle('disabled', shouldDisable);
         }
     });
+
 }
 
 
 fetchDataAndLoadTags();
+
 
 
 

@@ -14,7 +14,7 @@
 
 <nav class="navbar navbar-expand-md navbar-dark fixed-top bg-dark border-bottom border-light">
     <div class="container-fluid">
-        <a class="navbar-brand scroll-to-top" href="#">M.I.M.O.S.A V4 beta</a>
+        <a class="navbar-brand scroll-to-top" href="#">M.I.M.O.S.A V4</a>
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
         </button>
@@ -43,7 +43,7 @@
                     </div>
                 </div>
             </div>
-            <div class="dropdown">
+            <div class="dropdown" data-bs-toggle="tooltip" title="Sorting methods">
                 <button class="btn btn-outline-secondary my-2 my-md-0 me-0 me-md-2 dropdown-toggle icon-n4px" type="button" data-bs-toggle="dropdown" aria-expanded="false">
                     <i data-lucide="arrow-down-up"></i>
                 </button>
@@ -56,19 +56,17 @@
                 </ul>
             </div>
             <div class="dropdown">
-                <button class="btn btn-outline-secondary my-2 my-md-0 me-0 me-md-2 dropdown-toggle icon-n4px" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                <button class="btn btn-outline-secondary my-2 my-md-0 me-0 me-md-2 dropdown-toggle icon-n4px" type="button" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false">
                     <i data-lucide="filter"></i>
                 </button>
                 <ul class="dropdown-menu dropdown-menu-end" id="sort_tags">
-
-
-
                 </ul>
             </div>
 
             <button class="btn btn-outline-secondary my-2 my-md-0 icon-n4px" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasSettings" aria-controls="offcanvasExample">
                 <i data-lucide="settings"></i>
             </button>
+
 
 
         </div>
@@ -316,7 +314,7 @@
 
 
 <script>
-    lucide.createIcons();
+        lucide.createIcons();
 </script>
 </body>
 

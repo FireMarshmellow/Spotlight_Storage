@@ -169,7 +169,6 @@ def get_esp_settings(id):
     esp_settings = conn.execute('SELECT * FROM esp WHERE id = ?', [id]).fetchone()
     conn.close()
     if esp_settings:
-        print(esp_settings)
         return dict(esp_settings)
     else:
         return None  # Return None if no matching settings are found
@@ -206,7 +205,6 @@ def get_esp_settings_by_ip(id):
 
         # Convert the row to a dictionary
         esp_settings = {col[0]: row[idx] for idx, col in enumerate(cursor.description)}
-        print(esp_settings)
         return esp_settings
 
     except Exception as e:
