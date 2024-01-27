@@ -1,6 +1,7 @@
 const selectEspDropdown = document.getElementById("item_esp_select");
 let fetchedItems = []; // Define an array to store fetched items
 let isEditingItem = false;
+let isCopyingItem = false;
 let editingItemId = null; // Track the ID of the item being edited
 let editingItemIP = null; // Track the ID of the item being edited
 async function uploadImage() {
@@ -72,9 +73,10 @@ async function addItem(event) {
     event.preventDefault();
     const imageUrl = document.getElementById("item_image").value.trim();
     const imageFileInput = document.getElementById("item_image_upload");
-    const editImageURL = localStorage.getItem('edit_image_path').replace(/"/g, '').trim();
-
-
+    let editImageURL = ""
+    if(isEditingItem) {
+         editImageURL = localStorage.getItem('edit_image_path').replace(/"/g, '').trim();
+    }
     if (imageFileInput.files.length === 0 && imageUrl !== editImageURL) {
         const downloadedImage = await downloadImage(imageUrl);
         console.log('Downloading image', downloadedImage);
@@ -180,6 +182,7 @@ async function addItem(event) {
 
     // Reset editing flag, remove local storage, and reset the modal
     isEditingItem = false;
+    isCopyingItem = false;
     removeLocalStorage();
     resetModal();
 }
@@ -240,7 +243,6 @@ document.getElementById('item-modal').addEventListener('shown.bs.modal', functio
     let inputField = document.getElementById('item_name');
     inputField.focus();
     inputField.select();
-
     populateEspDropdown();
 });
 document.getElementById('item_esp_select').addEventListener('change', function () {
@@ -279,6 +281,9 @@ function createItem(item) {
     col.dataset.name = item.name;
     col.dataset.quantity = parseInt(item.quantity, 10);  // Store as numbers
     col.dataset.ip = item.ip;
+    item.position = item.position.replace('[', '').replace(']', '');
+    item.position = item.position.split(',').map(Number).filter(num => !isNaN(num));
+    col.dataset.position = item.position;
     col.dataset.tags = item.tags;
 
     // Set inner HTML for the created column
@@ -298,17 +303,21 @@ function createItem(item) {
                 </a>
 
                 <!-- Buttons for locating, editing, and deleting the item -->
-                <div class="d-flex justify-content-center align-items-center mb-2">
-                    <button class="btn btn-outline-info me-auto locate-btn" data-bs-toggle="tooltip" title="Locate" data-item-id="${item.id}">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <button class="btn btn-outline-info locate-btn" data-bs-toggle="tooltip" title="Locate" data-item-id="${item.id}">
                         <span class="icon-n4px"><i data-lucide="lightbulb"></i></span>
                     </button>
                     <button class="btn btn-outline-primary edit-btn" data-bs-toggle="tooltip" title="Edit">
                         <span class="icon-n4px"><i data-lucide="file-edit"></i></span>
                     </button>
-                    <button class="btn btn-outline-danger ms-auto delete-btn" data-bs-toggle="tooltip" title="Delete" data-item-id="${item.id}">
+                    <button class="btn btn-outline-secondary copy-btn" data-bs-toggle="tooltip" title="Copy Item">
+                        <span class="icon-n4px"><i data-lucide="copy"></i></span>
+                    </button>
+                    <button class="btn btn-outline-danger delete-btn" data-bs-toggle="tooltip" title="Delete" data-item-id="${item.id}">
                         <span class="icon-n4px"><i data-lucide="trash"></i></span>
                     </button>
                 </div>
+
 
                 <!-- Quantity control buttons -->
                 <div class="d-flex justify-content-center align-items-center">
@@ -362,11 +371,34 @@ function createItem(item) {
                     if (deleteTooltip) {
                         deleteTooltip.hide();
                     }
+                    fetchDataAndLoadTags();
                 })
                 .catch((error) => console.error(error));
         }
     });
 
+    col.querySelector('.copy-btn').addEventListener('click', () => {
+        isCopyingItem = true;
+        removeLocalStorage();
+        $("#item-modal").modal("show");
+        document.getElementById("item_name").value = item.name;
+        document.getElementById("item_url").value = item.link;
+        document.getElementById("item_image").value = item.image;
+        document.getElementById("item_quantity").value = item.quantity;
+        // Set LED positions for editing
+        localStorage.setItem('led_positions', JSON.stringify(item.position))
+        clickedCells = JSON.parse(localStorage.getItem('led_positions'));
+        localStorage.setItem('edit_led_positions', JSON.stringify(item.position))
+        localStorage.setItem('edit_image_path', JSON.stringify(item.image))
+        // Set item tags for editing
+        if (item.tags) {
+            const cleanedTags = item.tags.replace(/[\[\]'"`\\]/g, '');
+            const itemTagsArray = cleanedTags.split(',');
+            localStorage.setItem('item_tags', JSON.stringify(itemTagsArray))
+            tags = itemTagsArray;
+            loadTagsIntoTagify()
+        }
+    });
     col.querySelector('.edit-btn').addEventListener('click', () => {
         // Set flag for editing, remove local storage, and show the item modal
         isEditingItem = true;
@@ -379,10 +411,7 @@ function createItem(item) {
 
         // Set LED positions for editing
         localStorage.setItem('led_positions', JSON.stringify(item.position))
-        let positions = JSON.parse(localStorage.getItem('led_positions'))
-        positions = positions.replace('[', '').replace(']', '');
-        positions = positions.split(',').map(Number).filter(num => !isNaN(num));
-        clickedCells = positions;
+        clickedCells = JSON.parse(localStorage.getItem('led_positions'));
         localStorage.setItem('edit_led_positions', JSON.stringify(item.position))
         localStorage.setItem('edit_image_path', JSON.stringify(item.image))
 
@@ -477,6 +506,8 @@ function resetModal() {
     const new_item_modal = document.querySelector('#item-modal');
     const modal = bootstrap.Modal.getInstance(new_item_modal);
     modal.hide();
+    isEditingItem = false;
+    isCopyingItem = false;
 
 }
 
@@ -485,13 +516,18 @@ function sortItems(sortMethod) {
     // Get the list of items
     const items = Array.from(itemsContainer.children);
     // Sort the items based on the selected sorting method
+
     const sortedItems = items.sort((a, b) => {
-        const itemA = a.dataset[sortMethod];
-        const itemB = b.dataset[sortMethod];
-        if (sortMethod === 'quantity') {
+        let itemA = a.dataset[sortMethod];
+        let itemB = b.dataset[sortMethod];
+        if (sortMethod === 'quantity' || sortMethod === 'id') {
             // Convert values to numbers for numeric comparison
             return parseInt(itemA, 10) - parseInt(itemB, 10);
-        } else {
+        }
+        if (sortMethod === 'position') {
+            return itemA[0] - itemB[0];
+        }
+        else {
             // For other fields, use string comparison
             return itemA.localeCompare(itemB);
         }

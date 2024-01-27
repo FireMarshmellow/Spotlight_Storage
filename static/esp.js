@@ -1,3 +1,4 @@
+// Function to populate the ESP table with data fetched from the server
 function populateEspTable() {
     const espTable = document.getElementById("esp_table");
     // Display loading state
@@ -168,7 +169,6 @@ document.getElementById('esp-modal').addEventListener('show.bs.modal', function 
         document.getElementById('esp_startx').value = espStartLeft;
         document.getElementById('esp_serpentine').value = espSerpentineDirection;
         document.getElementById('save-esp-button').dataset.bsEspId = button.getAttribute('data-bs-esp-id');
-    } else {
     }
 });
 document.getElementById('esp-modal').addEventListener('shown.bs.modal', function (event) {
@@ -210,4 +210,29 @@ document.getElementById('esp_starty').addEventListener('change', function () {
 });
 document.getElementById('esp_serpentine').addEventListener('change', function () {
     drawGrid("esp");
+});
+document.getElementById('esp-modal').addEventListener('hidden.bs.modal', function () {
+
+    document.getElementById('esp-modal-label').innerHTML = "Add ESP"; // Set the modal label back to its initial state
+    document.getElementById('save-esp-button').innerHTML = "<span class=\"icon-n4px\"><i data-lucide=\"save\" class=\"me-2\"></i>Save</span>";
+    lucide.createIcons();
+
+    // Clear input fields
+    document.getElementById('esp_name').value = "";
+    document.getElementById('esp_ip').value = "";
+    document.getElementById('esp_rows').value = 4;
+    document.getElementById('esp_columns').value = 4;
+    document.getElementById('esp_starty').value = "Top";
+    document.getElementById('esp_startx').value = "Left";
+    document.getElementById('esp_serpentine').value = "Horizontal";
+
+    // Clear any existing data attributes
+    document.getElementById('save-esp-button').removeAttribute('data-bs-esp-id');
+    document.getElementById('save-esp-button').removeAttribute('data-bs-esp-ip');
+    document.getElementById('save-esp-button').removeAttribute('data-bs-esp-name');
+    document.getElementById('save-esp-button').removeAttribute('data-bs-esp-rows');
+    document.getElementById('save-esp-button').removeAttribute('data-bs-esp-columns');
+    document.getElementById('save-esp-button').removeAttribute('data-bs-esp-start-y');
+    document.getElementById('save-esp-button').removeAttribute('data-bs-esp-start-x');
+    document.getElementById('save-esp-button').removeAttribute('data-bs-esp-serpentinedirection');
 });

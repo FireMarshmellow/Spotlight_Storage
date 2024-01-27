@@ -20,6 +20,7 @@ app.timeout = 5
 app.config['UPLOAD_FOLDER'] = './images'
 app.previous_positions = []
 
+
 # Route to Favicon
 @app.route('/favicon.ico')
 def favicon():
@@ -51,7 +52,7 @@ def upload_file():
         return
     if file:
         filename = secure_filename(file.filename)
-        print(file)
+
         file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
         return url_for('download_image', name=filename)
 
@@ -118,7 +119,6 @@ def esps():
     if request.method == 'GET':
         try:
             esps_data = db.read_esp()  # Fetch ESP data from the database
-            print(esps_data)  # Log the data for debugging
             return jsonify(esps_data), 200
         except Exception as e:
             print(f"Error fetching ESP data: {e}")  # Log the error for debugging
@@ -156,7 +156,6 @@ def handle_esp(id):
     elif request.method == 'PUT':
         esp_data = request.get_json()
         db.update_esp_settings(id, esp_data)
-        print(f"saved data of {esp_data}")
         return jsonify({'success': True})
 
     elif request.method == 'DELETE':
@@ -246,16 +245,16 @@ def light(positions, ip, quantity=1, testing=False):
     color = [0, 255, 0] if quantity >= 1 else [255, 0, 0]
 
     # Parse and sort positions
-    positions_list = sorted(json.loads(positions))
-
+    positions_list = PositionOptimization(sorted(json.loads(positions)))
+    print(positions_list)
     # Check if positions have changed
     if app.previous_positions != positions:
         # Create segments based on positions
-        for i, pos in enumerate(positions_list):
-            if pos is None:
+        for i, (start, end) in enumerate(positions_list):
+            if start is None or end is None:
                 continue  # Skip if pos is None
-            start_num = int(pos) - 1
-            stop_num = int(pos)
+            start_num = int(start-1)
+            stop_num = int(end)
             segments.append({"id": i + 2, "start": start_num, "stop": stop_num, "col": [color, [0, 0, 0], [0, 0, 0]]})
             delSegments.append({"id": i + 2, "start": start_num, "stop": 0, "col": [255, 255, 255]})
 
@@ -265,7 +264,7 @@ def light(positions, ip, quantity=1, testing=False):
         app.previous_positions = positions
     else:
         # Turn off existing segments and reset previous_positions if positions haven't changed
-        off_data = { "bri": 255 * app.brightness, "transition": 5, "mainseg": 0, "seg": delSegments}
+        off_data = {"bri": 255 * app.brightness, "transition": 5, "mainseg": 0, "seg": delSegments}
         send_request(ip, off_data)
         app.previous_positions = []
         app.timeout = 0
@@ -280,12 +279,32 @@ def light(positions, ip, quantity=1, testing=False):
     if testing:
         app.previous_positions = []
         time.sleep(app.timeout + 3)
-        off_data = { "bri": 255 * app.brightness, "transition": 5, "mainseg": 0, "seg": delSegments}
+        off_data = {"bri": 255 * app.brightness, "transition": 5, "mainseg": 0, "seg": delSegments}
         send_request(ip, off_data)
 
     # Update global delSegments and previous_positions
     app.delSegments = delSegments
     app.previous_positions = []
+
+
+def PositionOptimization(positions):
+    segments = []
+    start = positions[0]
+    end = positions[0]
+    for i in range(1, len(positions)):
+        # Check if the current position is consecutive to the previous one
+        if positions[i] == positions[i - 1] + 1:
+            end = positions[i]
+        else:
+            # If the current segment is a single position, extend it
+            if start == end:
+                end += 1
+            segments .append((start, end))
+            start = positions[i]
+            end = positions[i]
+    # Append the last segment
+    segments .append((start, end))
+    return segments
 
 
 
@@ -294,7 +313,6 @@ def test_lights():
     set_global_settings()
     lights_list = request.get_json()
     testing = True
-    # print("Received lights list:", lights_list)  # Debugging print statement
     for ip, positions in lights_list.items():
         # Validate positions list
         if not positions or not all(isinstance(pos, int) for pos in positions):

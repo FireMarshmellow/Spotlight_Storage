@@ -15,6 +15,8 @@ function drawGrid(mode, rows, columns, startX, startY, serpentineDirection) {
 
     const canvasContainer = document.getElementById(mode + '-canvas-container');
     const responsiveCanvas = document.getElementById(mode + '-responsive-canvas');
+    const theme = localStorage.getItem('theme')
+
     // Get the actual pixel width of the canvas container
     let containerStyle = window.getComputedStyle(canvasContainer);
     let containerPadding = parseFloat(containerStyle.paddingLeft) + parseFloat(containerStyle.paddingRight);
@@ -36,13 +38,20 @@ function drawGrid(mode, rows, columns, startX, startY, serpentineDirection) {
     }
     columns = parseInt(columns);
     rows = parseInt(rows);
-    console.log("startX: " + startX + ", " + "startY: " + startY + ", " + "serpentineDirection: " + serpentineDirection)
+    //console.log("startX: " + startX + ", " + "startY: " + startY + ", " + "serpentineDirection: " + serpentineDirection)
     let canvas = document.getElementById(mode + '-responsive-canvas');
     let ctx = canvas.getContext('2d');
     let lineWidth = 2;
-    let boxWidth = (canvas.width - lineWidth) / columns;
+    let boxSize = (canvas.width - lineWidth) / columns;
 
-    canvas.height = (boxWidth * rows) + lineWidth;
+    //Overflow detection if canvas is too small for amount of columns
+    if (boxSize <= 60) {
+        boxSize = 60;
+        canvas.width = (boxSize * columns) + lineWidth;
+        canvasContainer.style.overflowX = 'scroll';
+
+    }
+    canvas.height = (boxSize * rows) + lineWidth;
     let lineColour = "#0d6efd";
     let gridColour = "#6c757d";
     let offset = 0;
@@ -57,14 +66,14 @@ function drawGrid(mode, rows, columns, startX, startY, serpentineDirection) {
     ctx.strokeStyle = gridColour;
     for (let i = 0; i <= rows; i++) {
         ctx.beginPath();
-        let y = i * boxWidth + halfLineWidth; // Add half of the line width
+        let y = i * boxSize + halfLineWidth; // Add half of the line width
         ctx.moveTo(0, y);
         ctx.lineTo(canvas.width, y);
         ctx.stroke();
     }
     for (let j = 0; j <= columns; j++) {
         ctx.beginPath();
-        let x = j * boxWidth + halfLineWidth; // Add half of the line width
+        let x = j * boxSize + halfLineWidth; // Add half of the line width
         ctx.moveTo(x, 0);
         ctx.lineTo(x, canvas.height);
         ctx.stroke();
@@ -75,14 +84,14 @@ function drawGrid(mode, rows, columns, startX, startY, serpentineDirection) {
         // Draw horizontal lines
         for (let i = 0; i <= rows - 1; i++) {
             ctx.beginPath();
-            const y = (i * boxWidth + halfLineWidth) + (boxWidth / 2); // Add half of the line width
-            ctx.moveTo(boxWidth / 2, y);
-            ctx.lineTo(canvas.width - (boxWidth / 2), y);
+            const y = (i * boxSize + halfLineWidth) + (boxSize / 2); // Add half of the line width
+            ctx.moveTo(boxSize / 2, y);
+            ctx.lineTo(canvas.width - (boxSize / 2), y);
             ctx.stroke();
         }
         // Draw vertical lines
         if (columns > 1) {
-            ctx.setLineDash([boxWidth]);
+            ctx.setLineDash([boxSize]);
         }
         if (startY === "top") {
             startIndicatorY = 0;
@@ -92,11 +101,11 @@ function drawGrid(mode, rows, columns, startX, startY, serpentineDirection) {
             endIndicatorY = 0;
         }
         if (startX === "left") {
-            offset = startY === "top" ? boxWidth : (boxWidth * (rows % 2)) + boxWidth;
+            offset = startY === "top" ? boxSize : (boxSize * (rows % 2)) + boxSize;
             startIndicatorX = 0;
             endIndicatorX = rows % 2 ? columns - 1 : 0;
         } else if (startX === "right") {
-            offset = startY === "top" ? 0 : boxWidth * (rows % 2);
+            offset = startY === "top" ? 0 : boxSize * (rows % 2);
             startIndicatorX = columns - 1;
             endIndicatorX = rows % 2 ? 0 : columns - 1;
         }
@@ -104,13 +113,13 @@ function drawGrid(mode, rows, columns, startX, startY, serpentineDirection) {
             if (i === 0) {
                 ctx.lineDashOffset = offset;
             } else if (i === columns - 1) {
-                ctx.lineDashOffset = offset + boxWidth;
+                ctx.lineDashOffset = offset + boxSize;
             }
             if (i === 0 || i === columns - 1) {
                 ctx.beginPath();
-                let x = (i * boxWidth + halfLineWidth) + (boxWidth / 2); // Add half of the line width
-                ctx.moveTo(x, boxWidth / 2);
-                ctx.lineTo(x, canvas.height - (boxWidth / 2));
+                let x = (i * boxSize + halfLineWidth) + (boxSize / 2); // Add half of the line width
+                ctx.moveTo(x, boxSize / 2);
+                ctx.lineTo(x, canvas.height - (boxSize / 2));
                 ctx.stroke();
             }
         }
@@ -118,17 +127,17 @@ function drawGrid(mode, rows, columns, startX, startY, serpentineDirection) {
         // Draw vertical lines
         for (let i = 0; i <= columns - 1; i++) {
             ctx.beginPath();
-            let x = (i * boxWidth + halfLineWidth) + (boxWidth / 2); // Add half of the line width
-            ctx.moveTo(x, boxWidth / 2);
-            ctx.lineTo(x, canvas.height - (boxWidth / 2));
+            let x = (i * boxSize + halfLineWidth) + (boxSize / 2); // Add half of the line width
+            ctx.moveTo(x, boxSize / 2);
+            ctx.lineTo(x, canvas.height - (boxSize / 2));
             ctx.stroke();
         }
         // Draw horizontal lines
         if (rows > 1) {
-            ctx.setLineDash([boxWidth]);
+            ctx.setLineDash([boxSize]);
         }
         if (startX === "left" && startY === "top") {
-            offset = boxWidth;
+            offset = boxSize;
             startIndicatorX = 0;
             startIndicatorY = 0;
             endIndicatorX = columns - 1;
@@ -138,7 +147,7 @@ function drawGrid(mode, rows, columns, startX, startY, serpentineDirection) {
                 endIndicatorY = 0;
             }
         } else if (startX === "right" && startY === "top") {
-            offset = (boxWidth * (columns % 2)) + boxWidth;
+            offset = (boxSize * (columns % 2)) + boxSize;
             startIndicatorX = columns - 1;
             startIndicatorY = 0;
             endIndicatorX = 0;
@@ -159,7 +168,7 @@ function drawGrid(mode, rows, columns, startX, startY, serpentineDirection) {
                 endIndicatorY = rows - 1;
             }
         } else if (startX === "right" && startY === "bottom") {
-            offset = boxWidth * (columns % 2);
+            offset = boxSize * (columns % 2);
             startIndicatorY = rows - 1;
             startIndicatorX = columns - 1;
             endIndicatorX = 0;
@@ -173,38 +182,52 @@ function drawGrid(mode, rows, columns, startX, startY, serpentineDirection) {
             if (i === 0) {
                 ctx.lineDashOffset = offset;
             } else if (i === rows - 1) {
-                ctx.lineDashOffset = offset + boxWidth;
+                ctx.lineDashOffset = offset + boxSize;
             }
             if (i === 0 || i === rows - 1) {
                 ctx.beginPath();
-                let y = (i * boxWidth + halfLineWidth) + (boxWidth / 2); // Add half of the line width
-                ctx.moveTo(boxWidth / 2, y);
-                ctx.lineTo(canvas.width - (boxWidth / 2), y);
+                let y = (i * boxSize + halfLineWidth) + (boxSize / 2); // Add half of the line width
+                ctx.moveTo(boxSize / 2, y);
+                ctx.lineTo(canvas.width - (boxSize / 2), y);
                 ctx.stroke();
             }
         }
     }
+
     // Draw circles in the middle of each grid square
     for (let i = 0; i < rows; i++) {
         for (let j = 0; j < columns; j++) {
-            let circleCenterX = j * boxWidth + boxWidth / 2 + halfLineWidth;
-            let circleCenterY = i * boxWidth + boxWidth / 2 + halfLineWidth;
-            let circleRadius = Math.min(boxWidth, boxWidth) / 15;
+            let circleCenterX = j * boxSize + boxSize / 2 + halfLineWidth;
+            let circleCenterY = i * boxSize + boxSize / 2 + halfLineWidth;
+            let circleRadius = Math.min(boxSize, boxSize) / 15;
             ctx.beginPath();
             ctx.arc(circleCenterX, circleCenterY, circleRadius, 0, Math.PI * 2);
             ctx.fillStyle = '#ffc107';
             ctx.fill();
+
+            // Draw the cell number
+
+            if (theme === 'dark') {
+                ctx.fillStyle = 'white'; // Set text color for dark theme
+            } else {
+                ctx.fillStyle = 'black'; // Set text color for light theme or other themes
+            }
+            ctx.font = `${boxSize / 5}px Arial`;
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            const cellNumber = calculateLedNumber(i, j, startX, startY, serpentineDirection, rows, columns);
+            ctx.fillText(cellNumber.toString(), circleCenterX + boxSize/5, circleCenterY - boxSize/5);
         }
     }
-    let indicatorCircleRadius = Math.min(boxWidth, boxWidth) / 8;
-    let startCircleCenterX = startIndicatorX * boxWidth + boxWidth / 2 + halfLineWidth;
-    let startCircleCenterY = startIndicatorY * boxWidth + boxWidth / 2 + halfLineWidth;
+    let indicatorCircleRadius = Math.min(boxSize, boxSize) / 8;
+    let startCircleCenterX = startIndicatorX * boxSize + boxSize / 2 + halfLineWidth;
+    let startCircleCenterY = startIndicatorY * boxSize + boxSize / 2 + halfLineWidth;
     ctx.beginPath();
     ctx.arc(startCircleCenterX, startCircleCenterY, indicatorCircleRadius, 0, Math.PI * 2);
     ctx.fillStyle = '#198754';
     ctx.fill();
-    let endCircleCenterX = endIndicatorX * boxWidth + boxWidth / 2 + halfLineWidth;
-    let endCircleCenterY = endIndicatorY * boxWidth + boxWidth / 2 + halfLineWidth;
+    let endCircleCenterX = endIndicatorX * boxSize + boxSize / 2 + halfLineWidth;
+    let endCircleCenterY = endIndicatorY * boxSize + boxSize / 2 + halfLineWidth;
     ctx.beginPath();
     ctx.arc(endCircleCenterX, endCircleCenterY, indicatorCircleRadius, 0, Math.PI * 2);
     ctx.fillStyle = '#dc3545';
@@ -220,7 +243,7 @@ function drawGrid(mode, rows, columns, startX, startY, serpentineDirection) {
 
             isEventListened = true;
         }
-        if (isEditingItem) {
+        if (isEditingItem  || isCopyingItem) {
             redrawGrid(rows, columns, "item", startX, startY, serpentineDirection);
         }
 
@@ -277,29 +300,49 @@ function calculateLedNumber(row, column, startX, startY, serpentineDirection, ro
         }
 }
 
-function redrawGrid(rows, columns, mode,  startX, startY, serpentineDirection) {
+function redrawGrid(rows, columns, mode, startX, startY, serpentineDirection) {
     let canvas = document.getElementById(mode + '-responsive-canvas');
     let ctx = canvas.getContext('2d');
     let lineWidth = 2;
-    let boxWidth = (canvas.width - lineWidth) / columns;
+    let boxSize = (canvas.width - lineWidth) / columns;
     ctx.lineWidth = lineWidth;
     let halfLineWidth = lineWidth / 2;
-        // Loop through rows and columns of the grid
-        for (let i = 0; i < rows; i++) {
-            for (let j = 0; j < columns; j++) {
-                let cellNumber = calculateLedNumber(i, j, startX, startY, serpentineDirection, rows, columns);
-                let isClicked = clickedCells.includes(cellNumber);
-                // Calculate the center and radius of the circle to be drawn for each cell
-                let circleCenterX = j * boxWidth + boxWidth / 2 + halfLineWidth;
-                let circleCenterY = i * boxWidth + boxWidth / 2 + halfLineWidth;
-                let circleRadius = Math.min(boxWidth, boxWidth) / 15;
-                ctx.beginPath();
+
+    // Loop through rows and columns of the grid
+    for (let i = 0; i < rows; i++) {
+        for (let j = 0; j < columns; j++) {
+            let cellNumber = calculateLedNumber(i, j, startX, startY, serpentineDirection, rows, columns);
+            let isClicked = clickedCells.includes(cellNumber);
+            // Check if the current cell is the start or end point
+            let isStartPoint = cellNumber === 1
+            let isEndPoint = cellNumber === rows*columns;
+
+            // Calculate the center and radius of the circle to be drawn for each cell
+            let circleCenterX = j * boxSize + boxSize / 2 + halfLineWidth;
+            let circleCenterY = i * boxSize + boxSize / 2 + halfLineWidth;
+            let circleRadius = Math.min(boxSize, boxSize) / 15;
+            let indicatorCircleRadius = Math.min(boxSize, boxSize) / 8;
+
+            // Draw the cell with the number
+            ctx.beginPath();
+
+            // Change color based on the state
+            if (isStartPoint && !isClicked) {
+                ctx.arc(circleCenterX, circleCenterY, indicatorCircleRadius, 0, Math.PI * 2);
+                ctx.fillStyle = '#198754'; // Change color for start point
+            } else if (isEndPoint && !isClicked) {
+                ctx.arc(circleCenterX, circleCenterY, indicatorCircleRadius, 0, Math.PI * 2);
+                ctx.fillStyle = '#dc3545'; // Change color for end point
+            } else {
                 ctx.arc(circleCenterX, circleCenterY, circleRadius, 0, Math.PI * 2);
-                ctx.fillStyle = isClicked ? '#ff0000' : '#ffc107';
-                ctx.fill();
+                ctx.fillStyle = isClicked ? '#003ef8' : '#ffc107';
             }
+            ctx.fill();
+
         }
+    }
 }
+
 
 
 function TestLights() {
@@ -337,8 +380,13 @@ function clearAll() {
     localStorage.removeItem('led_positions');
     const rows = document.getElementById('item_esp_select').options[0].getAttribute("data-esp-rows");
     const columns = document.getElementById('item_esp_select').options[0].getAttribute("data-esp-columns");
-
-    redrawGrid(rows, columns, "item");
+    let startX = document.getElementById('item_esp_select').options[0].getAttribute("data-esp-start-x");
+    const startY = document.getElementById('item_esp_select').options[0].getAttribute("data-esp-start-y").toLowerCase();
+    let serpentineDirection = document.getElementById('item_esp_select').options[0].getAttribute("data-esp-serpentine");
+    startX = (startX === "1") ? "right" : (startX === "0") ? "left" : startX;
+    serpentineDirection = (serpentineDirection === "1") ? "vertical" : (serpentineDirection === "0") ? "horizontal" : serpentineDirection;
+    console.log(serpentineDirection,startY,startX)
+    redrawGrid(rows, columns, "item", startX, startY, serpentineDirection);
 }
 
 function submitLights() {
@@ -347,7 +395,7 @@ function submitLights() {
     let savedData = JSON.parse(localStorage.getItem('led_positions')) || [];
 
     // Save LED positions to localStorage
-    savedData = savedData.concat(clickedCells);
+    savedData = savedData.concat(clickedCells.sort());
     // Save updated data back to localStorage
     localStorage.setItem('led_positions', JSON.stringify(savedData));
 }
