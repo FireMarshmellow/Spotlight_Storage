@@ -1,6 +1,7 @@
 let clickedCells = [];
 let selectedCells = []
 let isEventListened = false;
+let canvas;
 function drawGrid(mode, rows, columns, startX, startY, serpentineDirection) {
     // Convert string values to lowercase
     if (typeof startX === 'string') {
@@ -38,8 +39,9 @@ function drawGrid(mode, rows, columns, startX, startY, serpentineDirection) {
     }
     columns = parseInt(columns);
     rows = parseInt(rows);
+
     //console.log("startX: " + startX + ", " + "startY: " + startY + ", " + "serpentineDirection: " + serpentineDirection)
-    let canvas = document.getElementById(mode + '-responsive-canvas');
+    canvas = document.getElementById(mode + '-responsive-canvas');
     let ctx = canvas.getContext('2d');
     let lineWidth = 2;
     let boxSize = (canvas.width - lineWidth) / columns;
@@ -233,39 +235,47 @@ function drawGrid(mode, rows, columns, startX, startY, serpentineDirection) {
     ctx.fillStyle = '#dc3545';
     ctx.fill();
 
-
     if (mode === "item") {
-        canvas.removeEventListener('click', handleCellClick);
         if (!isEventListened) {
+
             canvas.addEventListener('click', function (event) {
-                handleCellClick(event, rows, columns, startX, startY, serpentineDirection, mode);
+                handleCellClick(event, mode);
             });
 
             isEventListened = true;
         }
-        if (isEditingItem  || isCopyingItem) {
+        if (isEditingItem || isCopyingItem) {
             redrawGrid(rows, columns, "item", startX, startY, serpentineDirection);
         }
-
-        }
+    }
 
 }
-function handleCellClick(event, rows, columns, startX, startY, serpentineDirection, mode) {
-        let canvas = document.getElementById(mode + '-responsive-canvas');
+function handleCellClick(event, mode) {
+    const selectEspDropdown = document.getElementById('item_esp_select');
+    const rows = parseInt(selectEspDropdown.options[selectEspDropdown.selectedIndex].getAttribute("data-esp-rows"));
+    const columns = parseInt(selectEspDropdown.options[selectEspDropdown.selectedIndex].getAttribute("data-esp-columns"));
+    let startX = selectEspDropdown.options[selectEspDropdown.selectedIndex].getAttribute("data-esp-start-x").toLowerCase();
+    const startY = selectEspDropdown.options[selectEspDropdown.selectedIndex].getAttribute("data-esp-start-y").toLowerCase();
+    let serpentineDirection = selectEspDropdown.options[selectEspDropdown.selectedIndex].getAttribute("data-esp-serpentine").toLowerCase();
+    startX = (startX === "1") ? "right" : (startX === "0") ? "left" : startX;
+    serpentineDirection = (serpentineDirection === "1") ? "vertical" : (serpentineDirection === "0") ? "horizontal" : serpentineDirection;
+        canvas = document.getElementById(mode + '-responsive-canvas');
+        const canvasContainer = document.getElementById(mode + '-canvas-container');
         let lineWidth = 2;
-        let boxWidth = (canvas.width - lineWidth) / columns;
+        let boxSize = (canvas.width - lineWidth) / columns;
+        if(boxSize <= 60) {
+            boxSize = 60;
+
+        }
         // Get the size and position of the canvas
         let rect = canvas.getBoundingClientRect();
+        let offset = Math.abs(Math.abs(rect.left) - canvasContainer.scrollLeft) ;
         // Calculate the x and y coordinates of the click relative to the canvas
-        let x = event.clientX - rect.left;
+        let x = event.clientX - offset + canvasContainer.scrollLeft;
         let y = event.clientY - rect.top;
         // Calculate which row and column was clicked based on the click coordinates
-        let clickedRow = Math.floor(y / boxWidth);
-        let clickedColumn = Math.floor(x / boxWidth);
-        let clickedCell = {
-            row: clickedRow,
-            column: clickedColumn
-        }; // Store clicked cell info
+        let clickedRow = Math.floor(y / boxSize);
+        let clickedColumn = Math.floor(x / boxSize);
         const ledNumber = calculateLedNumber(clickedRow, clickedColumn, startX, startY, serpentineDirection, rows, columns);
         // Find if the clicked cell is already in the clickedCells array
         let cellIndex = clickedCells.indexOf(ledNumber);
@@ -301,13 +311,18 @@ function calculateLedNumber(row, column, startX, startY, serpentineDirection, ro
 }
 
 function redrawGrid(rows, columns, mode, startX, startY, serpentineDirection) {
-    let canvas = document.getElementById(mode + '-responsive-canvas');
+     canvas = document.getElementById(mode + '-responsive-canvas');
+
     let ctx = canvas.getContext('2d');
     let lineWidth = 2;
     let boxSize = (canvas.width - lineWidth) / columns;
+    if(boxSize <= 60) {
+        boxSize = 60;
+    }
     ctx.lineWidth = lineWidth;
     let halfLineWidth = lineWidth / 2;
-
+    let circleRadius = Math.min(boxSize, boxSize) / 15;
+    let indicatorCircleRadius = Math.min(boxSize, boxSize) / 8;
     // Loop through rows and columns of the grid
     for (let i = 0; i < rows; i++) {
         for (let j = 0; j < columns; j++) {
@@ -315,13 +330,11 @@ function redrawGrid(rows, columns, mode, startX, startY, serpentineDirection) {
             let isClicked = clickedCells.includes(cellNumber);
             // Check if the current cell is the start or end point
             let isStartPoint = cellNumber === 1
-            let isEndPoint = cellNumber === rows*columns;
-
+            let isEndPoint = cellNumber === rows*columns ;
             // Calculate the center and radius of the circle to be drawn for each cell
             let circleCenterX = j * boxSize + boxSize / 2 + halfLineWidth;
             let circleCenterY = i * boxSize + boxSize / 2 + halfLineWidth;
-            let circleRadius = Math.min(boxSize, boxSize) / 15;
-            let indicatorCircleRadius = Math.min(boxSize, boxSize) / 8;
+
 
             // Draw the cell with the number
             ctx.beginPath();
@@ -372,21 +385,19 @@ function TestLights() {
 
 
 function clearAll() {
-    let canvas = document.getElementById("item" + '-responsive-canvas');
-    canvas.removeEventListener('click', handleCellClick);
     clickedCells.length = 0;
     selectedCells.length = 0;
     // Clear the stored data in the 'led_positions' key
     localStorage.removeItem('led_positions');
-    const rows = document.getElementById('item_esp_select').options[0].getAttribute("data-esp-rows");
-    const columns = document.getElementById('item_esp_select').options[0].getAttribute("data-esp-columns");
-    let startX = document.getElementById('item_esp_select').options[0].getAttribute("data-esp-start-x");
-    const startY = document.getElementById('item_esp_select').options[0].getAttribute("data-esp-start-y").toLowerCase();
-    let serpentineDirection = document.getElementById('item_esp_select').options[0].getAttribute("data-esp-serpentine");
+    const selectEspDropdown = document.getElementById('item_esp_select');
+    const rows = selectEspDropdown.options[selectEspDropdown.selectedIndex].getAttribute("data-esp-rows");
+    const columns = selectEspDropdown.options[selectEspDropdown.selectedIndex].getAttribute("data-esp-columns");
+    let startX = selectEspDropdown.options[selectEspDropdown.selectedIndex].getAttribute("data-esp-start-x").toLowerCase();
+    const startY = selectEspDropdown.options[selectEspDropdown.selectedIndex].getAttribute("data-esp-start-y").toLowerCase();
+    let serpentineDirection = selectEspDropdown.options[selectEspDropdown.selectedIndex].getAttribute("data-esp-serpentine").toLowerCase();
     startX = (startX === "1") ? "right" : (startX === "0") ? "left" : startX;
     serpentineDirection = (serpentineDirection === "1") ? "vertical" : (serpentineDirection === "0") ? "horizontal" : serpentineDirection;
-    console.log(serpentineDirection,startY,startX)
-    redrawGrid(rows, columns, "item", startX, startY, serpentineDirection);
+    redrawGrid(parseInt(rows), parseInt(columns), "item", startX, startY, serpentineDirection);
 }
 
 function submitLights() {
