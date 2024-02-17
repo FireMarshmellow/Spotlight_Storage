@@ -296,9 +296,6 @@ def PositionOptimization(positions):
         if positions[i] == positions[i - 1] + 1:
             end = positions[i]
         else:
-            # If the current segment is a single position, extend it
-            if start == end:
-                end += 1
             segments .append((start, end))
             start = positions[i]
             end = positions[i]

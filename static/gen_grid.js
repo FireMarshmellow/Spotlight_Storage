@@ -54,6 +54,7 @@ function drawGrid(mode, rows, columns, startX, startY, serpentineDirection) {
 
     }
     canvas.height = (boxSize * rows) + lineWidth;
+   
     let lineColour = "#0d6efd";
     let gridColour = "#6c757d";
     let offset = 0;
@@ -269,9 +270,9 @@ function handleCellClick(event, mode) {
         }
         // Get the size and position of the canvas
         let rect = canvas.getBoundingClientRect();
-        let offset = Math.abs(Math.abs(rect.left) - canvasContainer.scrollLeft) ;
+        let offsetX = Math.abs(Math.abs(rect.left) - canvasContainer.scrollLeft) ;
         // Calculate the x and y coordinates of the click relative to the canvas
-        let x = event.clientX - offset + canvasContainer.scrollLeft;
+        let x = event.clientX - offsetX + canvasContainer.scrollLeft;
         let y = event.clientY - rect.top;
         // Calculate which row and column was clicked based on the click coordinates
         let clickedRow = Math.floor(y / boxSize);
