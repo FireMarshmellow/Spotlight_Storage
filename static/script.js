@@ -239,7 +239,7 @@ function populateEspDropdown() {
     }).catch((error) => console.error(error));
 }
 
-document.getElementById('item-modal').addEventListener('shown.bs.modal', function (event) {
+document.getElementById('item-modal').addEventListener('shown.bs.modal', function () {
     let inputField = document.getElementById('item_name');
     inputField.focus();
     inputField.select();
@@ -285,13 +285,12 @@ function createItem(item) {
     item.position = item.position.split(',').map(Number).filter(num => !isNaN(num));
     col.dataset.position = item.position;
     col.dataset.tags = item.tags;
-
     // Set inner HTML for the created column
     col.innerHTML = `
         <div class="card overflow-hidden position-relative">
             <!-- Image container with tooltip -->
             <div class="overflow-hidden">
-                <img src="${item.image}" class="card-img-top"  alt="${item.name}"> <!-- Inline style added -->
+                <img src="${item.image}" class="card-img-top" style="height: 15rem" alt="${item.name}"> 
                 <div class="position-absolute top-0 end-0 show-on-hover d-none"></div>
             </div>
 
@@ -489,7 +488,7 @@ function findIndexByIP(ip) {
 
 function initialiseTooltips() {
     const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
-    const tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+    tooltipTriggerList.map(function (tooltipTriggerEl) {
         return new bootstrap.Tooltip(tooltipTriggerEl);
     });
 }
