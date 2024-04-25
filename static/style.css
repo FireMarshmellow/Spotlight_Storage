@@ -1,0 +1,45 @@
+
+:root {
+    --background-color: #1b1b1f; /* Dark mode background color */
+    --background-secondary: #44474f; /* Dark mode background color */
+    --background-tertiaray: #bfc6dc; /* Dark mode background color */
+    --text-color: #ffffff; /* Dark mode text color */
+    --text-secondary: #030712FF; /* Dark mode text color */
+    --text-tertiary: #293041; /* Dark mode tertiary text color */
+}
+
+.light-mode {
+    --background-color: #FFFBFE; /* Light mode background color */
+    --background-secondary: #e1e2ec; /* Dark mode background color */
+    --background-tertiaray: #575e71; /* Dark mode background color */
+    --text-color: #002e69; /* Light mode text color */
+    --text-secondary: #004494; /* Light mode text color */
+    --text-tertiary:#ffffff; /* Light mode tertiary text color */
+}
+
+body{
+    background: var(--background-color);
+}
+h1{
+    color: var(--text-color);
+}
+::placeholder {
+    font-weight: bolder;
+    opacity: 0.5;
+}
+
+::-webkit-input-placeholder { /* WebKit, Blink, Edge */
+    color:   var(--text-secondary);
+}
+:-moz-placeholder { /* Mozilla Firefox 4 to 18 */
+    color:var(--text-secondary);
+    opacity:  1;
+}
+::-moz-placeholder { /* Mozilla Firefox 19+ */
+    color:var(--text-secondary);
+    opacity:  1;
+}
+:-ms-input-placeholder { /* Internet Explorer 10-11 */
+    color:var(--text-secondary);
+}
+

@@ -1,329 +1,322 @@
 <!DOCTYPE html>
-<html>
+<html data-bs-theme="auto">
 
 <head>
     <title>MIMOSA Interface</title>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-        .grid-container {
-            display: grid;
-            gap: 5px; /* Reduced gap between checkboxes */
-            margin-bottom: 20px;
-        }
-
-
-        .grid-cell {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            text-align: center;
-        }
-        .side-menu {
-            width: 0;
-            position: fixed;
-            top: 0;
-            left: 0;
-            height: 100%;
-            background-color: rgb(31 41 55);
-            overflow-x: hidden;
-            transition: 0.5s;
-            padding-top: 60px;
-            z-index: 1;
-            box-shadow: 5px 0 10px rgba(0, 0, 0, 0.45); /* Add shadow to the side menu */
-        }
-
-        .side-menu a {
-            padding: 8px 8px 8px 32px;
-            text-decoration: none;
-            font-size: 25px;
-            color: rgb(31 41 55);
-            display: block;
-            transition: 0.1s;
-        }
-
-        .menu-button:hover {
-            background-color: rgb(29 78 216);
-        }
-
-        .menu-button {
-            position: absolute;
-            top: 10px;
-            left: 10px;
-            z-index: 2;
-            background-color: #3B82F6FF;
-            color: white;
-            padding: 10px 20px; /* Increase padding in the x-direction */
-            border: none;
-            cursor: pointer;
-            border-radius: 10px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Add shadow to the button */
-            transition: background-color 0.1s, transform 0.1s;
-        }
-        .menu-title {
-            margin-bottom: 10px; /* Add padding to the title */
-            margin-left: 10px; /* Add padding to the title */
-            margin-top: 5px;
-            font-size: 25px;
-            color: white; /* Change title color */
-        }
-        @keyframes rainbow {
-            0% { background-color: red; }
-            14% { background-color: orange; }
-            28% { background-color: yellow; }
-            42% { background-color: green; }
-            57% { background-color: blue; }
-            71% { background-color: indigo; }
-            85% { background-color: violet; }
-            100% { background-color: red; }
-        }
-
-        #party-button:hover {
-            animation: rainbow 4s linear infinite;
-        }
-
-        footer {
-            background-color: #2D3748; /* Dark background for contrast */
-            color: #E2E8F0; /* Light text color for visibility */
-            padding: 20px 0; /* Padding around the content */
-            box-shadow: 0 -5px 10px rgba(0, 0, 0, 0.2); /* Shadow for a lifting effect */
-            border-radius: 15px; /* Rounded corners */
-            margin: 20px; /* Added margin for space around the footer */
-        }
-
-        footer h1, footer h3 {
-            margin: 0;
-            padding: 5px 0; /* Smaller padding for heading elements */
-        }
-
-        /* Responsive design for smaller screens */
-        @media (max-width: 600px) {
-            footer h1 {
-                font-size: 2.5rem; /* Smaller font size for the main heading */
-            }
-            footer h3 {
-                font-size: 1.2rem; /* Smaller font size for the subheading */
-            }
-        }
-    </style>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+    <link href="https://cdn.jsdelivr.net/npm/@yaireo/tagify/dist/tagify.css" rel="stylesheet" type="text/css"/>
+    <link rel="stylesheet" type="text/css" href="../static/overrides.css" media="screen"/>
+    <link rel="stylesheet" type="text/css" href="../static/bootstrap-negative-margins.css" media="screen"/>
 </head>
+<body>
 
-<body class="bg-gray-700 font-sans leading-normal tracking-normal">
-<div class="side-menu" id="mySideMenu">
-    <h1 class="menu-title">LED Settings</h1>
-    <ul>
-        <li>
+<nav class="navbar navbar-expand-md navbar-dark fixed-top bg-dark border-bottom border-light">
+    <div class="container-fluid">
+        <a class="navbar-brand scroll-to-top" href="#">M.I.M.O.S.A V4 Beta</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav me-auto mb-2 mb-md-0">
+                <li class="nav-item">
+                    <button type="button" class="btn btn-outline-success pe-3" data-bs-toggle="modal" data-bs-target="#item-modal">
+                        <span class="icon-n4px"><i data-lucide="plus" class="me-2"></i>Add Item</span>
+                    </button>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="https://youtu.be/7C4i-2IqSS4" target="_blank">Tutorial<i data-lucide="external-link" class="ms-1" style="height:20px; margin-top:-6px;"></i></a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="https://github.com/FireMarshmellow/M.I.M.O.S.A" target="_blank">GitHub Repo<i data-lucide="external-link" class="ms-1" style="height:20px; margin-top:-6px;"></i></a>
+                </li>
+            </ul>
 
-            <button id="on-button" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-8 rounded focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500", style="margin-bottom: 10px;margin-left: 10px;">
-                On
-            </button>
-        </li>
-        <li>
-            <button id="off-button" class="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-8 rounded focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500", style="margin-bottom: 10px;margin-left: 10px;">
-                Off
-            </button>
-        </li>
-        <li>
-            <button id="party-button" class="bg-gray-500 hover:bg-rainbow text-white font-bold py-2 px-8 rounded focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500" style="margin-bottom: 10px;margin-left: 10px;">
-                Party-Mode
-            </button>
-
-        </li>
-        <li>
-            <label for="brightness" class="block text-gray-200 font-bold mb-2 pr-2" style="margin-left: 10px;">Brightness:</label>
-            <div class="w-full" style="margin-left: 10px; padding-right: 10px;">
-                <input type="range" id="brightness" name="brightness" min="0" max="100" step="1" class="w-full">
-            </div>
-            <output for="brightness" id="brightness-output" class="text-gray-200 text-sm mt-2" style="margin-left: 10px;">50</output>
-        </li>
-        <li>
-            <label for="timeout" class="block text-gray-200 font-bold mb-2 pr-2" style="margin-left: 10px;">Timeout in Seconds:</label>
-            <div class="w-full" style="margin-left: 10px; padding-right: 10px;">
-                <input type="range" id="timeout" name="brightness" min="0" max="200" step="1" class="w-full">
-            </div>
-            <output for="timeout" id="timeout-output" class="text-gray-200 text-sm mt-2" style="margin-left: 10px;">5</output>
-        </li>
-        <li>
-            <button id="apply-settings" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-8 rounded focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500", style="margin-bottom: 10px;margin-left: 10px;">
-                Apply Settings
-            </button>
-        </li>
-
-
-    </ul>
-</div>
-
-<button class="menu-button" onclick="toggleSideMenu()">&#9776;</button>
-<div class="container mx-auto mt-8">
-    <div class="container mx-auto mt-8">
-        <head>
-            <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css">
-        </head>
-        <div class="absolut top-10 z-10 w-full  py-1">
-            <h1 class="text-4xl text-center font-bold mb-8 text-gray-200">M.I.M.O.S.A V3</h1>
-        </div>
-
-    <div class="flex flex-col items-center my-5 mx-auto">
-        <div class="relative">
-        <button type="button" id="btn-esp"
-                class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mb-2">Add ESP</button>
-
-        <button type="button" id="btn-add"
-                class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mb-2">Add item</button>
-        </div>
-        <div id="form-container" class="hidden w-full md:w-2/3 lg:w-1/2">
-            <form id="add-form" class="bg-gray-800 shadow-md rounded px-8 pt-6 pb-8 mb-4">
-                <div class="mb-4">
-                    <label for="name" class="block text-gray-200 font-bold mb-2">Name:</label>
-                    <input type="text" id="name" name="name" required
-                           placeholder="Enter your name"
-                           class="shadow appearance-none border rounded w-full py-2 px-3 placeholder:text-gray-500  text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
-                </div>
-
-                <div class="mb-4">
-                    <label for="link" class="block text-gray-200 font-bold mb-2">Link:</label>
-                    <input type="url" id="link" name="link" required
-                           placeholder="Enter the link"
-                           class="shadow appearance-none border rounded w-full py-2 px-3 placeholder:text-gray-500  text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
-                </div>
-                <div class="mb-4 flex flex-wrap">
-                <div class="w-full md:w-2/4 md:pr-2">
-                    <label for="image" class="block text-gray-200 font-bold mb-2">Image:</label>
-                    <input type="url" id="image" name="image" required
-                           placeholder="Enter the image URL"
-                           class="shadow appearance-none border rounded w-full py-2 px-3 placeholder:text-gray-500  text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
-                </div>
-                <div class="w-full md:w-2/4 md:pl-2">
-                    <label for="quantity" class="block text-gray-200 font-bold mb-2">Quantity:</label>
-                    <input type="number" id="quantity" name="quantity" required
-                           placeholder="Enter the quantity"
-                           class="shadow appearance-none border rounded w-full placeholder:text-gray-500 py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
-                </div>
-                </div>
-                <div class="mb-4 flex flex-wrap">
-                <div class="w-full md:w-3/5 md:pr-2">
-                    <label for="ip" class="block text-gray-200 font-bold mb-2">Select ESP:</label>
-                    <select id="ip" name="ip" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">                   </select>
-                </div>
-                <div class="w-full md:w-2/5 md:pl-2 text-right">
-                    <label for="generate_pos" class="block text-gray-200 font-bold mb-2">Generate Positions:</label>
-                    <button type="button" id="generate_pos" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mb-2">Select LEDS</button>
-                </div>
-                </div>
-                <div id="select_led_container" class="container mx-auto mt-8" style="display: none">
-                    <div class="mb-4 flex flex-wrap">
-                        <div class="w-full md:w-1/4 ">
-                            <button type="button" id="test_lights" onclick="TestLights()"
-                                    class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mb-2">Test Lights</button>
-                        </div>
-                        <div class="w-full md:w-1/4 md:pl-2">
-                            <button type="button" id="clear_grid" onclick="clearAll()"
-                                    class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mb-2">Clear All</button>
+            <div class="row">
+                <div class="col-12">
+                    <div class="input-group mb-2 mb-md-0">
+                        <div class="d-flex align-items-center position-relative w-100 me-0 me-md-2">
+                            <input type="text" class="form-control flex-grow-1" placeholder="Search items..." id="search">
+                            <i data-lucide="search" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%);"></i>
                         </div>
                     </div>
-
-                    <div class="mb-4">
-                        <div class="grid-container" id="gridContainer"></div>
-                    </div>
                 </div>
-                <button type="button" id="save-item"
-                        class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">Add</button>
+            </div>
+            <div class="dropdown" data-bs-toggle="tooltip" title="Sorting methods">
+                <button class="btn btn-outline-secondary my-2 my-md-0 me-0 me-md-2 dropdown-toggle icon-n4px" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                    <i data-lucide="arrow-down-up"></i>
+                </button>
+                <ul class="dropdown-menu dropdown-menu-end" id="sort_method">
+                    <li><a class="dropdown-item" href="#" onclick="sortItems('ip')"><i data-lucide="arrow-down-0-1" class="me-2"></i>Box</a></li>
+                    <li><a class="dropdown-item" href="#" onclick="sortItems('id')"><i data-lucide="arrow-down-0-1" class="me-2"></i>ID</a></li>
+                    <li><a class="dropdown-item" href="#" onclick="sortItems('name')"><i data-lucide="arrow-down-a-z" class="me-2"></i>Name</a></li>
+                    <li><a class="dropdown-item" href="#" onclick="sortItems('quantity')"><i data-lucide="arrow-down-0-1" class="me-2"></i>Quantity</a>
+                    <li><a class="dropdown-item" href="#" onclick="sortItems('position')"><i data-lucide="arrow-down-0-1" class="me-2"></i>Location</a>
+                    </li>
+                </ul>
+            </div>
+            <div class="dropdown">
+                <button class="btn btn-outline-secondary my-2 my-md-0 me-0 me-md-2 dropdown-toggle icon-n4px" type="button" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false">
+                    <i data-lucide="filter"></i>
+                </button>
+                <ul class="dropdown-menu dropdown-menu-end" id="sort_tags">
+                </ul>
+            </div>
 
-            </form>
-        </div>
-        <div id="esp-container" class="hidden w-full md:w-2/3 lg:w-1/2" >
-            <form id="esp-form" class="bg-gray-800 shadow-md rounded px-8 pt-6 pb-8 mb-4">
-                <div class="mb-4">
-                    <label for="select_esp" class="block text-gray-200 font-bold mb-2">Select ESP:</label>
-                    <select id="select_esp" name="select_esp" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
-                        <option value="add" selected>Add ESP</option>
-                    </select>
-                </div>
+            <button class="btn btn-outline-secondary my-2 my-md-0 icon-n4px" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasSettings" aria-controls="offcanvasExample">
+                <i data-lucide="settings"></i>
+            </button>
 
-                <div class="mb-4">
-                    <label for="esp_name" class="block text-gray-200 font-bold mb-2">Name:</label>
-                    <input type="text" id="esp_name" name="esp_name" required class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
-                </div>
 
-                <div class="mb-4">
-                    <label for="esp_ip" class="block text-gray-200 font-bold mb-2">ESP IP:</label>
-                    <input type="text" id="esp_ip" name="esp_ip" required class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
-                </div>
-
-                <div class="mb-4 flex flex-wrap">
-                    <div class="w-full md:w-1/2 md:pr-2">
-                        <label for="rows" class="block text-gray-200 font-bold mb-2">Rows:</label>
-                        <input type="number" id="rows" name="rows" min="1" value="4" required class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
-                    </div>
-
-                    <div class="w-full md:w-1/2 md:pl-2">
-                        <label for="cols" class="block text-gray-200 font-bold mb-2">Columns:</label>
-                        <input type="number" id="cols" name="cols" min="1" value="4" required class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
-                    </div>
-                </div>
-
-                <div class="mb-4 flex flex-wrap">
-                    <div class="w-full md:w-1/3 md:pr-2">
-                        <label for="start_top" class="block text-gray-200 font-bold mb-2">Start Top:</label>
-                        <select id="start_top" required class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
-                            <option value="top">Top</option>
-                            <option value="bottom">Bottom</option>
-                        </select>
-                    </div>
-
-                    <div class="w-full md:w-1/3 md:px-2">
-                        <label for="start_left" class="block text-gray-200 font-bold mb-2">Start Left:</label>
-                        <select id="start_left" required class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
-                            <option value="left">Left</option>
-                            <option value="right">Right</option>
-                        </select>
-                    </div>
-
-                    <div class="w-full md:w-1/3 md:pl-2">
-                        <label for="serpentine_direction" class="block text-gray-200 font-bold mb-2">Serpentine Direction:</label>
-                        <select id="serpentine_direction" required class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
-                            <option value="horizontal">Horizontal</option>
-                            <option value="vertical">Vertical</option>
-                        </select>
-                    </div>
-                </div>
-                <div class="flex items-left my-5 mx-auto">
-                    <button type="button" id="add-esp" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mb-2">Add</button>
-                    <button type="button" id="delete-esp" class="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded mb-2" style="margin-left: 10px;">Delete</button>
-                </div>
-            </form>
 
         </div>
-        <div class="flex items-center">
-        <input type="text" id="search" placeholder="Search items..."
-               class="flex-1 shadow appearance-none  rounded w-full py-2 px-3 text-gray-200 bg-gray-950 leading-tight focus:outline-none focus:shadow-outline">
 
-            <div class="relative ml-2">
-                <div id="sort_title" class="flex-1 shadow appearance-none rounded py-2 px-3 text-gray-200 bg-gray-950 leading-tight focus:outline-none focus:shadow-outline">
-                    Sort by: ID <!-- Initial title, replace with the default selected value -->
+    </div>
+</nav>
+
+<div class="container-fluid mt-5 pt-3">
+
+    <div id="items-container-grid" class="row"></div>
+    <div id="items-container-list"></div>
+    <div class="offcanvas offcanvas-end" tabindex="-1" id="offcanvasSettings" aria-labelledby="offcanvasSettingsLabel">
+        <div class="offcanvas-header">
+            <h5 class="offcanvas-title" id="offcanvasSettingsLabel">Settings</h5>
+            <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+        </div>
+        <div class="offcanvas-body">
+            <div class="row mb-3">
+                <h6>LEDs</h6>
+                <div class="btn-group mb-2" role="group">
+                    <button id="on-button" class="btn btn-success pe-3">
+                        <span class="icon-n4px"><i data-lucide="lightbulb" class="me-2"></i>On</span></button>
+                    <button id="off-button" class="btn btn-danger pe-3">
+                        <span class="icon-n4px"><i data-lucide="lightbulb-off" class="me-2"></i>Off</span></button>
+                    <button id="party-button" class="btn btn-rainbow pe-3">
+                        <span class="icon-n4px"><i data-lucide="party-popper" class="me-2"></i> Party-Mode</span>
+                    </button>
                 </div>
-                <select id="sort_method" class="absolute top-0 left-0 opacity-0 w-full h-full cursor-pointer text-gray-200 bg-gray-950" onchange="sortItems()">
-                    <option value="id">ID</option>
-                    <option value="name">Name</option>
-                    <option value="quantity">Quantity</option>
-                    <option value="ip">Box</option>
-                </select>
+
+                <label id="brightness-title" for="settings_brightness">Brightness:
+                    <span id="brightness-display">50%</span></label>
+                <input type="range" id="settings_brightness" name="brightness" min="0" max="100" step="1" class="form-range">
+
+                <label id="timeout-title" for="settings_timeout">Timeout:
+                    <span id="timeout-display">0m 0s</span></label>
+                <input type="range" id="settings_timeout" name="brightness" min="0" max="300" step="1" class="form-range">
+            </div>
+            <hr>
+            <div class="row">
+                <h6>ESP Devices</h6>
+                <div>
+                    <table class="table table-sm table-striped overflow-hidden" id="esp_table">
+                    </table>
+                </div>
+                <div>
+                    <button type="button" class="btn btn-outline-success me-0 me-md-2 pe-3" data-bs-toggle="modal" data-bs-target="#esp-modal">
+                        <span class="icon-n4px"><i data-lucide="plus" class="me-2"></i>Add ESP Device</span>
+                    </button>
+                </div>
+            </div>
+            <hr>
+            <div class="row">
+                <h6>Web Interface</h6>
+                <div class="btn-group" role="group">
+                    <button type="button" class="btn btn-light pe-3" data-bs-theme-value="light">
+                        <span class="icon-n4px"><i data-lucide="sun" class="me-2"></i>Light</span></button>
+                    <button type="button" class="btn btn-dark pe-3" data-bs-theme-value="dark">
+                        <span class="icon-n4px"><i data-lucide="moon" class="me-2"></i>Dark</span></button>
+                    <button type="button" class="btn btn-secondary pe-3" data-bs-theme-value="auto">
+                        <span class="icon-n4px"><i data-lucide="sun-moon" class="me-2"></i>Auto</span></button>
+                </div>
             </div>
         </div>
     </div>
-    <ul id="item-list"
-        class="relative grid sm:grid-cols-1 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 max-w-5xl mx-auto w-11/12 md:5/6 lg:full">
-    </ul>
-    <footer>
-        <h1 class="text-3xl text-center font-bold mb-8">Special thanks to my Github Corporation:</h1>
-        <h3 class="text-xl text-center mb-8">JustReit, cloudmaking, Heiniusw, nikpcenicni, kassner, ariasairforce, zorarkdouble8, Callsign-Carrot</h3>
-    </footer>
+
+    <div class="modal fade" id="item-modal" tabindex="-1" aria-labelledby="item-modal-label" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h1 class="modal-title fs-5" id="item-modal-label">Add Item</h1>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" onclick="resetModal()"> </button>
+                </div>
+                <div class="modal-body">
+
+                    <div class="form-floating mb-3">
+                        <input type="text" class="form-control" id="item_name" placeholder="Name" required>
+                        <label for="item_name">Item name</label>
+                    </div>
+                    <div class="form-floating mb-3">
+                        <input type="text" class="form-control" id="item_url" placeholder="URL">
+                        <label for="item_url">Item URL</label>
+                    </div>
+                    <div class="form-floating mb-3">
+                        <input type="number" class="form-control" id="item_quantity" placeholder="1" required>
+                        <label for="item_quantity">Item quantity</label>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-4 pe-2">
+                            <div class="form mb-3">
+                                <label for="item_image">Item image URL</label>
+                                <input type="url" class="form-control" id="item_image" placeholder="https://placehold.co/150x100?text=Hello+World">
+
+                            </div>
+                        </div>
+                        <div class="col-1 text-center or-text">
+                            <span>or</span>
+                        </div>
+                        <div class="col-7 ps-2">
+                            <div class="form">
+                                <label for="item_image_upload">Upload image file</label>
+                                <input type="file" class="form-control" id="item_image_upload" name="file">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form mb-3">
+                        <label for="item_url">Tags</label>
+                        <input type="text" class="form-control" id="item_tags">
+                    </div>
+
+                    <label for="item_esp_select">Select an ESP device</label>
+                    <select class="form-select mb-3" id="item_esp_select">
+                    </select>
+                    <div>
+                        <button id="test_led_button" class="btn btn-success pe-3">
+                            <span class="icon-n4px"><i data-lucide="lightbulb" class="me-2"></i>Test LEDs</span></button>
+                        <button id="clear_led_button" class="btn btn-danger pe-3">
+                            <span class="icon-n4px"><i data-lucide="x" class="me-2"></i>Clear Grid</span></button>
+                    </div>
+                    <label for="item-canvas-container">Select LEDs to assign to item</label>
+
+                    <div id="item-canvas-container" class="col-10 mx-auto">
+                        <canvas id="item-responsive-canvas"></canvas>
+                    </div>
+
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary pe-3" id="cancel-item-button" data-bs-dismiss="modal"  onclick="resetModal()">
+                        <span class="icon-n4px"><i data-lucide="x" class="me-2"></i>Cancel</span></button>
+                    <button type="button" class="btn btn-success pe-3" id="save-item-button" data-bs-dismiss="modal" >
+                        <span class="icon-n4px"><i data-lucide="plus" class="me-2"></i>Add</span></button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="esp-delete-modal" tabindex="-1" aria-labelledby="espDeleteModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="espDeleteModalLabel">Confirmation</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Are you sure you want to delete ESP device <span id="deviceNameSpan"></span> with IP address
+                        <span id="ipAddressSpan"></span>?</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">No</button>
+                    <button type="button" class="btn btn-danger" id="confirmDelete">Yes</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="esp-modal" tabindex="-1" aria-labelledby="esp-modal-label" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h1 class="modal-title fs-5" id="esp-modal-label">Add ESP</h1>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="alert alert-danger d-none" id="esp-error-alert">Please enter values in the follow empty fields:<br><span id="error-list"></span>
+                    </div>
+                    <div class="form-floating mb-3">
+                        <input type="text" class="form-control" id="esp_name" placeholder="Name" required>
+                        <label for="esp_name">Name</label>
+                    </div>
+                    <div class="form-floating mb-3">
+                        <input type="text" class="form-control" id="esp_ip" placeholder="IP">
+                        <label for="esp_ip">IP address</label>
+                    </div>
+                    <div class="row">
+                        <div class="col-6 pe-2">
+                            <div class="form-floating mb-3">
+                                <input type="number" class="form-control" id="esp_rows" placeholder="4" min="1" value="4" required>
+                                <label for="esp_rows">Rows</label>
+                            </div>
+                        </div>
+                        <div class="col-6 ps-2">
+                            <div class="form-floating mb-3">
+                                <input type="number" class="form-control" id="esp_columns" placeholder="4" min="1" value="4" required>
+                                <label for="esp_columns">Columns</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-4 pe-0">
+                            <div class="form-floating mb-3">
+                                <select class="form-select" id="esp_startx">
+                                    <option selected data-startx="Left">Left</option>
+                                    <option value="1" data-startx="Right">Right</option>
+                                </select>
+                                <label for="esp_startx">Start Left</label>
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <div class="form-floating mb-3">
+                                <select class="form-select" id="esp_starty">
+                                    <option selected data-starty="Top">Top</option>
+                                    <option data-starty="Bottom">Bottom</option>
+                                </select>
+                                <label for="esp_starty">Start Top</label>
+                            </div>
+
+                        </div>
+                        <div class="col-4 ps-0">
+                            <div class="form-floating mb-3">
+                                <select class="form-select" id="esp_serpentine">
+                                    <option selected data-serpentine="Horizontal">Horizontal</option>
+                                    <option value="1" data-serpentine="Vertical">Vertical</option>
+                                </select>
+                                <label for="esp_serpentine">Serpentine Direction</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="esp-canvas-container" class="col-10 mx-auto">
+                        <canvas id="esp-responsive-canvas"></canvas>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary pe-3" data-bs-dismiss="modal">
+                        <span class="icon-n4px"><i data-lucide="x" class="me-2"></i>Cancel</span></button>
+                    <button type="button" class="btn btn-success pe-3" id="save-esp-button">
+                        <span class="icon-n4px"><i data-lucide="plus" class="me-2"></i>Add</span></button>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
-    <script src="{{ url_for('static', filename='script.js') }}"></script>
-    <script src="{{ url_for('static', filename='esp.js') }}"></script>
-    <script src="{{ url_for('static', filename='gen_grid.js') }}"></script>
-    <script src="{{ url_for('static', filename='settings.js') }}"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/@yaireo/tagify"></script>
+<script src="https://cdn.jsdelivr.net/npm/@yaireo/tagify/dist/tagify.polyfills.min.js"></script>
+<script src="https://unpkg.com/lucide@latest"></script>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
+<script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+<script src="../static/script.js"></script>
+<script src="../static/esp.js"></script>
+<script src="../static/tags.js"></script>
+<script src="../static/settings.js"></script>
+<script src="../static/gen_grid.js"></script>
+<script src="../static/color-modes.js"></script>
+
+
+<script>
+        lucide.createIcons();
+</script>
 </body>
 
 </html>

@@ -1,0 +1,89 @@
+:root {
+    --bs-border-radius: 0.7rem;
+}
+.btn-rainbow {
+    position: relative;
+    display: inline-block;
+    overflow: hidden;
+    background: linear-gradient(45deg, red, orange, yellow, green, blue, indigo, red);;
+    --bs-btn-color: #fff;
+    --bs-btn-border-color: #212529;
+    --bs-btn-hover-color: #fff;
+    --bs-btn-hover-border-color: transparent;
+    --bs-btn-border-width: 0;
+}
+
+.btn-rainbow::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(to  left, red, orange, yellow, green, blue, indigo, red, orange, yellow, green, blue, indigo, red);
+    opacity: 0;
+    transition: opacity 0.5s; /* Smooth transition for opacity */
+    animation: slidebg 10s linear infinite paused; /* Rainbow animation */
+}
+
+.btn-rainbow:hover::before {
+    opacity: 1; /* Show the rainbow on hover */
+    animation-play-state: running; /* Start the animation on hover */
+}
+
+.btn-rainbow:hover {
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.75);
+}
+
+.btn-rainbow span {
+    position: relative;
+    z-index: 1;
+
+}
+
+@keyframes slidebg {
+    0% {
+        background-position: 0;
+    }
+    100% {
+        background-position: 100vw; /* Adjust the ending position to match the container width */
+    }
+}
+
+.form-range {
+    padding-right: calc(var(--bs-gutter-x) * .5) !important;
+    padding-left: calc(var(--bs-gutter-x) * .5) !important;
+}
+
+.icon-n4px .lucide {
+    margin-top: -4px;
+}
+
+.or-text {
+    padding-top: 29px;
+}
+label {
+    margin-bottom: 5px;
+}
+.card-title-link {
+    color: var(--bs-card-title-color) !important;
+    text-decoration: none;
+}
+
+.card-title-link:hover {
+    text-decoration: underline;
+}
+
+
+.tagify__dropdown {
+    background-color: #f8f9fa; /* Set the background color to match Bootstrap theme */
+}
+
+.tagify__dropdown__item {
+    padding: 8px 10px; /* Adjust padding as needed */
+    color: #495057; /* Set text color to match Bootstrap theme */
+}
+
+.tagify__dropdown__item:hover {
+    background-color: #e9ecef; /* Set hover background color to match Bootstrap theme */
+}
