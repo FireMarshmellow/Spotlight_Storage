@@ -6,6 +6,8 @@ function populateEspTable() {
     // Fetch and populate the ESP data into the table
     fetch("/api/esp").then((response) => response.json()).then((data) => {
         const tableBody = document.createElement("tbody");
+        ESPs = data;
+        populateESPMenu(data);
         data.forEach((esp) => {
             const row = document.createElement("tr");
             const cellName = document.createElement("td");
@@ -59,7 +61,8 @@ function populateEspTable() {
 }
 
 document.getElementById("save-esp-button").addEventListener('click', () => {
-    const espId = document.getElementById('save-esp-button').getAttribute('data-bs-esp-id');
+    const saveButton = document.getElementById('save-esp-button');
+    let espId = saveButton.getAttribute('data-bs-esp-id');
     const name = document.getElementById("esp_name").value;
     const esp_ip = document.getElementById("esp_ip").value;
     const rows = document.getElementById("esp_rows").value;
@@ -72,12 +75,14 @@ document.getElementById("save-esp-button").addEventListener('click', () => {
         const ipRegex = /^(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})$/;
         return ipRegex.test(ip) && ip.split('.').every(octet => parseInt(octet, 10) <= 255);
     };
+
     const showAlert = (alertId, message) => {
         const alert = document.getElementById(alertId);
         alert.classList.remove('d-none');
         const errorList = document.getElementById('error-list');
         errorList.innerHTML = message;
     };
+
     const handleEmptyFields = () => {
         if (name.trim() === '') {
             emptyFields.push('Name');
@@ -91,11 +96,13 @@ document.getElementById("save-esp-button").addEventListener('click', () => {
         }
         return false;
     };
+
     if (handleEmptyFields()) return;
     if (!isValidIPAddress(esp_ip)) {
         showAlert(espId !== null && espId !== '' ? 'edit-esp-error-alert' : 'esp-error-alert', "IP Address is not valid.");
         return;
     }
+
     const espItem = {
         name,
         esp_ip,
@@ -105,15 +112,15 @@ document.getElementById("save-esp-button").addEventListener('click', () => {
         startLeft,
         serpentineDirection
     };
+
     const processESPItem = () => {
-        // TODO Check for existing names and IP addresses when saving the edit of an existing ESP entry
         fetch(espId !== null && espId !== '' ? `/api/esp/${espId}` : '/api/esp', {
             method: espId !== null && espId !== '' ? "PUT" : "POST",
             headers: {
                 "Content-Type": "application/json"
             },
             body: JSON.stringify(espItem),
-        }).then((response) => response.json()).then((data) => {
+        }).then((response) => response.json()).then(() => {
             setTimeout(() => {
                 populateEspTable();
             }, 500);
@@ -122,20 +129,43 @@ document.getElementById("save-esp-button").addEventListener('click', () => {
             modal.hide();
         }).catch((error) => console.error(error));
     };
-    if (espId !== null && espId !== '') {
-        processESPItem();
-    } else {
-        fetch("/api/esp").then((response) => response.json()).then((data) => {
-            const existingNames = data.map(esp => esp.name);
-            const existingIPs = data.map(esp => esp.esp_ip);
-            if (existingNames.includes(name) || existingIPs.includes(esp_ip)) {
-                showAlert('esp-error-alert', (existingNames.includes(name) ? `- Name "${name}" already exists.<br>` : '') + (existingIPs.includes(esp_ip) ? `- IP Address "${esp_ip}" already exists.` : ''));
-                return;
-            }
+
+    const existingESP = ESPs.find(esp => esp.name === name || esp.esp_ip === esp_ip || esp.name === esp_ip);
+
+    if (existingESP && (espId == null || espId === '')) {
+        espId = existingESP.id;
+        // Hide the esp-modal
+        const espModal = bootstrap.Modal.getInstance(document.getElementById('esp-modal'));
+        espModal.hide();
+
+        // Show confirmation modal
+        const confirmationModal = new bootstrap.Modal(document.getElementById('esp-override-modal'));
+        document.getElementById('deviceNameSpan').textContent = existingESP.name;
+        document.getElementById('ipAddressSpan').textContent = existingESP.esp_ip;
+        confirmationModal.show();
+
+        document.getElementById('confirmOverride').addEventListener('click', () => {
             processESPItem();
-        }).catch((error) => console.error(error));
+            confirmationModal.hide();
+        }, { once: true });
+
+        // Restore the esp-modal and user inputs if the user cancels the action
+        document.querySelector('#esp-override-modal .btn-secondary').addEventListener('click', () => {
+            espModal.show();
+            document.getElementById("esp_name").value = espItem.name;
+            document.getElementById("esp_ip").value = espItem.esp_ip;
+            document.getElementById("esp_rows").value = espItem.rows;
+            document.getElementById("esp_columns").value = espItem.cols;
+            document.getElementById("esp_starty").value = espItem.startTop;
+            document.getElementById("esp_startx").value = espItem.startLeft;
+            document.getElementById("esp_serpentine").value = espItem.serpentineDirection;
+            espId = "";
+        }, { once: true });
+    } else {
+        processESPItem();
     }
 });
+
 document.getElementById('esp-delete-modal').addEventListener('show.bs.modal', function (event) {
     const button = event.relatedTarget;
     const espName = button.getAttribute('data-bs-esp-name');
@@ -171,7 +201,7 @@ document.getElementById('esp-modal').addEventListener('show.bs.modal', function 
         document.getElementById('save-esp-button').dataset.bsEspId = button.getAttribute('data-bs-esp-id');
     }
 });
-document.getElementById('esp-modal').addEventListener('shown.bs.modal', function (event) {
+document.getElementById('esp-modal').addEventListener('shown.bs.modal', function () {
     let inputField = document.getElementById('esp_name');
     inputField.focus();
     inputField.select();
@@ -236,3 +266,84 @@ document.getElementById('esp-modal').addEventListener('hidden.bs.modal', functio
     document.getElementById('save-esp-button').removeAttribute('data-bs-esp-start-x');
     document.getElementById('save-esp-button').removeAttribute('data-bs-esp-serpentinedirection');
 });
+
+
+const espTabs = document.getElementById('espTabs');
+let ESPs = [];
+let filterESP = [];
+
+// Fetch ESP data from the server and populate the tabs
+
+
+// Sort items based on the selected ESP filters
+function sortItemsByESP(filter, filter2 = "") {
+
+    const itemsContainer = document.getElementById('items-container-grid');
+    const items = Array.from(itemsContainer.children);
+    filterESP = [];
+    if (filter !== "") filterESP.push(filter);
+    if (filter2 !== "") filterESP.push(filter2);
+    toggleSelectedESP();
+    items.forEach(item => {
+        const itemESP = item.dataset.ip.toLowerCase();
+        const shouldDisplay = filterESP.length === 0 || filterESP.some(searchText => itemESP.includes(searchText.toLowerCase()));
+        item.style.display = shouldDisplay ? "flex" : "none";
+    });
+}
+
+
+
+// Create a tab for each ESP
+function createESPTab(name, onClickHandler, ip) {
+    const listItem = document.createElement('li');
+    listItem.classList.add('nav-item');
+    const anchor = document.createElement('a');
+    anchor.dataset.filter = name;
+    anchor.classList.add('nav-link');
+    anchor.href = '#';
+
+    if (name === "All Boxes") {
+        anchor.innerHTML = 'All Boxes';
+        anchor.classList.add('active');
+    } else {
+        anchor.innerHTML = `${name} <span class="esp_ip" style="color: #888;">(${ip})</span>`;
+    }
+
+    anchor.onclick = onClickHandler;
+    listItem.appendChild(anchor);
+
+    return listItem;
+}
+
+// Populate the ESP tabs with fetched data
+function populateESPMenu(espDataArray) {
+    espTabs.innerHTML = '';
+
+    if (espDataArray.length > 1) {
+        espTabs.parentElement.style.display = 'block'; // Display the tab view container
+        espTabs.appendChild(createESPTab("All Boxes", () => sortItemsByESP("")));
+
+        espDataArray.forEach(({ name, esp_ip }) => {
+            espTabs.appendChild(createESPTab(name, () => sortItemsByESP(name, esp_ip), esp_ip));
+        });
+    } else {
+        espTabs.parentElement.style.display = 'none'; // Hide the tab view container
+    }
+}
+
+// Toggle the active class on selected ESP tabs
+function toggleSelectedESP() {
+    const listItems = Array.from(espTabs.querySelectorAll('.nav-link'));
+
+    listItems.forEach(anchor => {
+        const anchorText = anchor.dataset.filter;
+        anchor.classList.toggle('active', filterESP.length === 0 ? anchorText === "All Boxes" : filterESP.includes(anchorText));
+    });
+}
+
+
+
+
+
+
+

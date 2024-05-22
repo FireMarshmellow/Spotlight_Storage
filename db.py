@@ -7,6 +7,7 @@ from collections import Counter
 COMBINED_DATABASE = 'combined_data.db'
 
 
+
 def create_combined_db():
     # Connect to the combined database
     conn_combined = sqlite3.connect(COMBINED_DATABASE)
@@ -44,14 +45,28 @@ def create_combined_db():
     conn_combined.execute('''
             CREATE TABLE IF NOT EXISTS settings (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
-                brightness INTEGER,
-                timeout INTEGER,
-                lightMode TEXT DEFAULT 'light'
+                brightness INTEGER DEFAULT 100,
+                timeout INTEGER DEFAULT 5,
+                lightMode TEXT DEFAULT 'light',
+                colors TEXT DEFAULT '[#00ff00, #00ff00]'
             )
         ''')
 
     # Commit the changes
     conn_combined.commit()
+
+    # Check and add new columns if they don't exist
+    cursor = conn_combined.cursor()
+
+    # Check for the existence of 'colors' column
+    cursor.execute("PRAGMA table_info(settings)")
+    columns = [column[1] for column in cursor.fetchall()]
+    if 'colors' not in columns:
+        cursor.execute("ALTER TABLE settings ADD COLUMN colors TEXT DEFAULT '[#00ff00, #00ff00]'")
+
+    # Commit the changes
+    conn_combined.commit()
+
     return conn_combined
 
 
@@ -223,30 +238,50 @@ def get_ip_by_name(esp_name):
 
 
 # Function to read settings from the database
+# Function to read settings from the database
 def read_settings():
     conn = create_combined_db()
-    settings = conn.execute('SELECT * FROM settings').fetchone()
-    conn.close()
-    if settings is None:
+    try:
+        cursor = conn.cursor()
+        cursor.execute('SELECT * FROM settings')
+        settings = cursor.fetchone()
+        if settings is None:
+            print("No settings found in the database.")
+            return {}
+        else:
+            # Convert the settings row to a dictionary
+            settings_dict = dict(zip([column[0] for column in cursor.description], settings))
+            # Deserialize the colors field if it exists
+            if 'colors' in settings_dict:
+                settings_dict['colors'] = json.loads(settings_dict['colors'])
+
+            else:
+                print("No 'colors' field found in the settings.")
+            return settings_dict
+    except sqlite3.Error as e:
+        print(f"SQLite error while reading settings: {e}")
         return {}
-    else:
-        return dict(settings)
+    finally:
+        conn.close()
 
 
 # Function to update settings in the database
 def update_settings(settings):
     try:
+        # Serialize the colors list to a JSON string
+        settings['colors'] = json.dumps(settings['colors'])
         conn = create_combined_db()
         cursor = conn.cursor()
         cursor.execute('DELETE FROM settings')  # Clear existing settings
-        cursor.execute('INSERT INTO settings (brightness, timeout, lightMode) VALUES (?,?,?)',
-                       [settings['brightness'], settings['timeout'], settings['lightMode']])
+        cursor.execute('''
+            INSERT INTO settings (brightness, timeout, lightMode, colors)
+            VALUES (?, ?, ?, ?)
+        ''', [settings['brightness'], settings['timeout'], settings['lightMode'], settings['colors']])
         conn.commit()
     except sqlite3.Error as e:
-        print(f"SQLite error: {e}")
+        print(f"SQLite error while updating settings: {e}")
     finally:
         conn.close()
-
 
 def get_all_tags():
     conn = create_combined_db()

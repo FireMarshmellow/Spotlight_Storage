@@ -39,7 +39,6 @@ async function doesImageExist(imageURL) {
 async function downloadImage(url) {
     const urlParts = url.split('/');
     const imageURL = urlParts[urlParts.length - 1];
-    console.log(imageURL)
     // Check if the image already exists on the server
     if (await doesImageExist(imageURL)) {
         console.log('Image already exists on the server.');
@@ -287,49 +286,49 @@ function createItem(item) {
     col.dataset.tags = item.tags;
     // Set inner HTML for the created column
     col.innerHTML = `
-        <div class="card overflow-hidden position-relative">
-            <!-- Image container with tooltip -->
-            <div class="overflow-hidden">
-                <img src="${item.image}" class="card-img-top" style="height: 15rem" alt="${item.name}"> 
-                <div class="position-absolute top-0 end-0 show-on-hover d-none"></div>
+    <div class="card overflow-hidden position-relative">
+        <!-- Image container with tooltip -->
+     <div class="overflow-hidden d-flex justify-content-center">
+            <img src="${item.image}" class="card-img-top" style="height: 15rem; width: auto; min-width: 10rem; max-width: 50rem;" alt="${item.name}"> 
+        
+        </div>
+
+        <!-- Card body with item details and buttons -->
+        <div class="card-body p-2">
+            <!-- Link to the item -->
+            <a href="${item.link}" target="_blank" class="card-title-link">
+                <h5 class="card-title" data-bs-toggle="tooltip" title="Shop for more">${item.name}</h5>
+            </a>
+
+            <!-- Buttons for locating, editing, and deleting the item -->
+            <div class="d-flex justify-content-between align-items-center mb-2">
+                <button class="btn btn-outline-info locate-btn" data-bs-toggle="tooltip" title="Locate" data-item-id="${item.id}">
+                    <span class="icon-n4px"><i data-lucide="lightbulb"></i></span>
+                </button>
+                <button class="btn btn-outline-primary edit-btn" data-bs-toggle="tooltip" title="Edit">
+                    <span class="icon-n4px"><i data-lucide="file-edit"></i></span>
+                </button>
+                <button class="btn btn-outline-secondary copy-btn" data-bs-toggle="tooltip" title="Copy Item">
+                    <span class="icon-n4px"><i data-lucide="copy"></i></span>
+                </button>
+                <button class="btn btn-outline-danger delete-btn" data-bs-toggle="tooltip" title="Delete" data-item-id="${item.id}">
+                    <span class="icon-n4px"><i data-lucide="trash"></i></span>
+                </button>
             </div>
 
-            <!-- Card body with item details and buttons -->
-            <div class="card-body p-2 >
-                <!-- Link to the item -->
-                <a href="${item.link}" target="_blank" class="card-title-link">
-                    <h5 class="card-title" data-bs-toggle="tooltip" title="Shop for more">${item.name}</h5>
-                </a>
-
-                <!-- Buttons for locating, editing, and deleting the item -->
-                <div class="d-flex justify-content-between align-items-center mb-2">
-                    <button class="btn btn-outline-info locate-btn" data-bs-toggle="tooltip" title="Locate" data-item-id="${item.id}">
-                        <span class="icon-n4px"><i data-lucide="lightbulb"></i></span>
-                    </button>
-                    <button class="btn btn-outline-primary edit-btn" data-bs-toggle="tooltip" title="Edit">
-                        <span class="icon-n4px"><i data-lucide="file-edit"></i></span>
-                    </button>
-                    <button class="btn btn-outline-secondary copy-btn" data-bs-toggle="tooltip" title="Copy Item">
-                        <span class="icon-n4px"><i data-lucide="copy"></i></span>
-                    </button>
-                    <button class="btn btn-outline-danger delete-btn" data-bs-toggle="tooltip" title="Delete" data-item-id="${item.id}">
-                        <span class="icon-n4px"><i data-lucide="trash"></i></span>
-                    </button>
-                </div>
-
-
-                <!-- Quantity control buttons -->
-                <div class="d-flex justify-content-center align-items-center">
-                    <button class="btn btn-outline-danger me-auto minus-btn" data-bs-toggle="tooltip" title="-1 from stock" data-item-id="${item.id}">
-                        <span class="icon-n4px"><i data-lucide="minus"></i></span>
-                    </button>
-                    <span id="quantity-${item.id}">${item.quantity}</span>
-                    <button class="btn btn-outline-success ms-auto plus-btn" data-bs-toggle="tooltip" title="+1 to stock" data-item-id="${item.id}">
-                        <span class="icon-n4px"><i data-lucide="plus"></i></span>
-                    </button>
-                </div>
+            <!-- Quantity control buttons -->
+            <div class="d-flex justify-content-center align-items-center">
+                <button class="btn btn-outline-danger me-auto minus-btn" data-bs-toggle="tooltip" title="-1 from stock" data-item-id="${item.id}">
+                    <span class="icon-n4px"><i data-lucide="minus"></i></span>
+                </button>
+                <span id="quantity-${item.id}">${item.quantity}</span>
+                <button class="btn btn-outline-success ms-auto plus-btn" data-bs-toggle="tooltip" title="+1 to stock" data-item-id="${item.id}">
+                    <span class="icon-n4px"><i data-lucide="plus"></i></span>
+                </button>
             </div>
-        </div>`;
+        </div>
+    </div>`;
+
 
     // Add event listeners for quantity change, locating, deleting, and editing
     col.querySelector('.minus-btn').addEventListener('click', () => {
@@ -401,6 +400,7 @@ function createItem(item) {
     col.querySelector('.edit-btn').addEventListener('click', () => {
         // Set flag for editing, remove local storage, and show the item modal
         isEditingItem = true;
+        console.log("editing item")
         removeLocalStorage();
         $("#item-modal").modal("show");
         document.getElementById("item_name").value = item.name;
@@ -554,5 +554,84 @@ document.getElementById("search").addEventListener("input", function (e){
         }
     });
 });
+
+
+document.getElementById("inventur").addEventListener("click", function () {
+    const edit_btn = document.getElementById('edit-btn-inventur');
+    const continue_btn = document.getElementById('continue-btn-inventur');
+    const text = document.getElementById('current-item-text');
+    let currentItemIndex = 0; // Keep track of the current item index
+    // Create an array of objects containing ids and names
+    const itemsData = fetchedItems
+    // Function to display current item
+    const confirmationModal = new bootstrap.Modal(document.getElementById('inventur-modal'));
+    confirmationModal.show();
+    function displayItem(index) {
+        const currentItem = itemsData[index];
+        text.innerHTML = currentItem.name;
+        fetch(`/api/items/${currentItem.id}`, {
+            method: "POST",
+            headers: { "Content-Type": "application/x-www-form-urlencoded" },
+            body: new URLSearchParams({ action: "locate" }),
+        }).catch((error) => console.error(error));
+    }
+
+    // Display the first item
+    displayItem(currentItemIndex);
+
+    edit_btn.addEventListener("click", function () {
+        const currentItem = itemsData[currentItemIndex];
+        isEditingItem = true;
+        console.log("editing item")
+        removeLocalStorage();
+
+
+        $("#item-modal").modal("show");
+        confirmationModal.hide();
+        document.getElementById("item_name").value = currentItem.name;
+        document.getElementById("item_url").value = currentItem.link;
+        document.getElementById("item_image").value = currentItem.image;
+        document.getElementById("item_quantity").value = currentItem.quantity;
+
+        // Set LED positions for editing
+        localStorage.setItem('led_positions', JSON.stringify(currentItem.position))
+        clickedCells = JSON.parse(localStorage.getItem('led_positions'));
+        localStorage.setItem('edit_led_positions', JSON.stringify(currentItem.position))
+        localStorage.setItem('edit_image_path', JSON.stringify(currentItem.image))
+
+        // Set item tags for editing
+        if (currentItem.tags) {
+            const cleanedTags = currentItem.tags.replace(/[\[\]'"`\\]/g, '');
+            const itemTagsArray = cleanedTags.split(',');
+            localStorage.setItem('item_tags', JSON.stringify(itemTagsArray))
+            tags = itemTagsArray;
+            loadTagsIntoTagify()
+        }
+
+        // Set editing item ID and IP
+        editingItemId = currentItem.id;
+        editingItemIP = currentItem.ip;
+        // Check if not already editing an item
+    });
+
+
+    // Handle the "continue" button click
+    continue_btn.addEventListener("click", function () {
+        console.log("Continue clicked for item with ID: " + itemsData[currentItemIndex].id);
+        currentItemIndex++; // Move to the next item
+        if (currentItemIndex < itemsData.length) {
+            // Display the next item if there's any left
+            displayItem(currentItemIndex);
+        } else {
+            console.log("End of items reached.");
+            currentItemIndex = 0; // Reset to the beginning
+            displayItem(currentItemIndex); // Display the first item again
+        }
+    });
+});
+
+
+
+
 
 loadItems();

@@ -1,3 +1,10 @@
+var myOffcanvas = document.getElementById('offcanvasSettings')
+const timeoutRange = document.getElementById('settings_timeout');
+const brightnessRange = document.getElementById('settings_brightness');
+const scrollToTop = document.querySelectorAll('.scroll-to-top');
+
+
+
 // Function to update brightness output
 function updateBrightnessOutput() {
     const brightnessSlider = document.getElementById("settings_brightness");
@@ -22,11 +29,14 @@ function addSettings(event) {
     //event.preventDefault();
     const brightness = document.getElementById("settings_brightness").value;
     const timeout = document.getElementById("settings_timeout").value;
+    const colors = [
+        document.getElementById("color-standby").value.toString(),
+        document.getElementById("color-locate").value.toString()
+    ];
     if (lightMode === undefined){
         lightMode = "light"
     }
-    const settings = {brightness, timeout, lightMode};
-    console.log(settings);
+    const settings = {brightness, timeout, lightMode, colors};
     // Save the settings in the database using fetch
     fetch("/api/settings", {
         method: "POST",
@@ -37,29 +47,7 @@ function addSettings(event) {
         .catch((error) => console.error(error));
 }
 
-const timeoutRange = document.getElementById('settings_timeout');
-timeoutRange.addEventListener('input', function () {
-    if (this.value < 1) {
-        document.getElementById('timeout-display').textContent = "Off";
-    } else {
-        var minutes = Math.floor(this.value / 60);
-        var seconds = this.value % 60;
 
-        var timeString = minutes + "m " + seconds + "s";
-        document.getElementById('timeout-display').textContent = timeString;
-    }
-});
-timeoutRange.addEventListener('change', function () {
-    updateTimeoutOutput();
-});
-
-const brightnessRange = document.getElementById('settings_brightness');
-brightnessRange.addEventListener('input', function () {
-    document.getElementById('brightness-display').textContent = this.value + "%";
-});
-brightnessRange.addEventListener('change', function () {
-    updateBrightnessOutput();
-});
 
 function loadSettings() {
     // Fetch the settings from the server
@@ -69,10 +57,14 @@ function loadSettings() {
     })
         .then((response) => response.json())
         .then((settings) => {
-            console.log("Loaded settings: setting_timeout(" + settings.timeout + "), setting_brightness(" + settings.brightness + ")");
             // Update input fields with the retrieved settings
             document.getElementById("settings_brightness").value = settings.brightness;
             document.getElementById("settings_timeout").value = settings.timeout;
+            // Ensure colors is an array and update the color inputs
+
+            const colors = Array.isArray(settings.colors) ? settings.colors : JSON.parse(settings.colors);
+            document.getElementById("color-standby").value = colors[0];
+            document.getElementById("color-locate").value = colors[1];
             lightMode = settings.lightMode;
         })
         .catch((error) => console.error(error));
@@ -101,15 +93,7 @@ function sendLedRequest(state) {
         });
 }
 
-var myOffcanvas = document.getElementById('offcanvasSettings')
-myOffcanvas.addEventListener('show.bs.offcanvas', function () {
-    console.log("Settings side-bar: 'show'");
-    updateBrightnessOutput();
-    updateTimeoutOutput();
-    populateEspTable();
-})
 
-var scrollToTop = document.querySelectorAll('.scroll-to-top');
 scrollToTop.forEach(function (scrollToTop) {
     scrollToTop.addEventListener('click', function (e) {
         e.preventDefault();
@@ -121,6 +105,27 @@ scrollToTop.forEach(function (scrollToTop) {
     });
 });
 
+// colorPicker.js
+
+function updateColor(inputId, spanId) {
+    const input = document.getElementById(inputId);
+    const span = document.getElementById(spanId);
+    const color = input.value;
+    console.log(color);
+    span.textContent = color;
+    input.style.color = color;
+    addSettings();
+}
+
+document.getElementById("color-standby").addEventListener('change', function () {
+    updateColor('color-standby', 'picked-color-standby')
+});
+document.getElementById("color-locate").addEventListener('change', function () {
+    updateColor('color-locate', 'picked-color-locate')
+});
+
+
+
 document.getElementById("on-button").addEventListener('click', () => {
     sendLedRequest('on')
 });
@@ -130,6 +135,36 @@ document.getElementById("off-button").addEventListener('click', () => {
 document.getElementById("party-button").addEventListener('click', () => {
     sendLedRequest('party')
 });
+
+brightnessRange.addEventListener('input', function () {
+    document.getElementById('brightness-display').textContent = this.value + "%";
+});
+brightnessRange.addEventListener('change', function () {
+    updateBrightnessOutput();
+});
+
+
+timeoutRange.addEventListener('input', function () {
+    if (this.value < 1) {
+        document.getElementById('timeout-display').textContent = "Off";
+    } else {
+        var minutes = Math.floor(this.value / 60);
+        var seconds = this.value % 60;
+
+        var timeString = minutes + "m " + seconds + "s";
+        document.getElementById('timeout-display').textContent = timeString;
+    }
+});
+timeoutRange.addEventListener('change', function () {
+    updateTimeoutOutput();
+});
+
+myOffcanvas.addEventListener('show.bs.offcanvas', function () {
+    updateBrightnessOutput();
+    updateTimeoutOutput();
+    populateEspTable();
+})
+
 
 loadSettings();
 populateEspTable();

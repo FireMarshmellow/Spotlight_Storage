@@ -17,6 +17,8 @@ app.config['JSON_SORT_KEYS'] = False
 app.brightness = 1
 app.delSegments = ""
 app.timeout = 5
+app.standbyColor = "#00ff00"
+app.locateColor = "#00ff00"
 app.config['UPLOAD_FOLDER'] = './images'
 app.previous_positions = []
 
@@ -101,16 +103,21 @@ def set_global_settings():
         app.brightness = settings['brightness'] / 100
         app.timeout = settings['timeout']
 
+        colors = settings.get('colors')
+        # Assign colors
+        if isinstance(colors, list) and len(colors) >= 2:
+            app.standbyColor = colors[0]
+            app.locateColor = colors[1]
+
 
 @app.route('/api/settings', methods=['GET', 'POST'])
 def settings():
     if request.method == 'GET':
         # If the request method is GET, read data from the database and return as JSON
-        settings = db.read_settings()
-        return jsonify(settings)
+        return jsonify(db.read_settings())
     elif request.method == 'POST':
-        settings = request.get_json()
-        db.update_settings(settings)  # Update settings in the database
+        print(request.get_json())
+        db.update_settings(request.get_json())  # Update settings in the database
         return jsonify({'success': True})
 
 
@@ -227,8 +234,42 @@ def send_request(target_ip, data, timeout=0.2):
         print(f"Timeout error: {e}")
 
 
-# Function to control lights
+def hex_to_rgb(hex_color):
+    if hex_color:
+        # Remove '#' if present in the hexadecimal color code
+        if hex_color.startswith('#'):
+            hex_color = hex_color[1:]
+
+        # Check if the input is a valid hexadecimal color value
+        if len(hex_color) != 6 or not all(c in '0123456789abcdefABCDEF' for c in hex_color):
+            # If not valid, return default colors (red, green, blue)
+            return [0, 255, 0]
+
+        # Convert hexadecimal color code to RGB
+        r = int(hex_color[0:2], 16)
+        g = int(hex_color[2:4], 16)
+        b = int(hex_color[4:6], 16)
+
+        return [r, g, b]
+    else:
+        return [0, 255, 0]
+
+
+def get_total_leds(ip):
+    try:
+        response = requests.get(f"http://{ip}/json/info")
+        response.raise_for_status()
+        info = response.json()
+        return info['leds']['count']
+    except requests.RequestException as e:
+        print(f"Error fetching total LEDs: {e}")
+        return 1000  # Default value if the request fails
+
+
 def light(positions, ip, quantity=1, testing=False):
+    # Get the total number of LEDs from the WLED API
+    total_leds = get_total_leds(ip)
+
     # Turn off existing segments if they exist
     if app.delSegments:
         off_data = {"on": False, "bri": 0, "transition": 0, "mainseg": 0, "seg": app.delSegments}
@@ -238,25 +279,27 @@ def light(positions, ip, quantity=1, testing=False):
     set_global_settings()
 
     # Initialize default segments
-    segments = [{"id": 1, "start": 0, "stop": 1000, "col": [0, 0, 0]}]
-    delSegments = [{"id": 1, "start": 0, "stop": 0, "col": [0, 0, 0]}]
+    segments = [{"id": 1, "start": 0, "stop": total_leds, "col": [0, 0, 0]}]
+    del_segments = [{"id": 1, "start": 0, "stop": total_leds, "col": [0, 0, 0]}]
 
     # Set color based on quantity
-    color = [0, 255, 0] if quantity >= 1 else [255, 0, 0]
+    locate_color = hex_to_rgb(app.locateColor) if quantity >= 1 else [255, 0, 0]
+    standby_color = hex_to_rgb(app.standbyColor)
 
     # Parse and sort positions
-    positions_list = PositionOptimization(sorted(json.loads(positions)))
-    print(positions_list)
+    positions_list = position_optimization(sorted(json.loads(positions)))
+
     # Check if positions have changed
     if app.previous_positions != positions:
         # Create segments based on positions
         for i, (start, end) in enumerate(positions_list):
             if start is None or end is None:
                 continue  # Skip if pos is None
-            start_num = int(start-1)
+            start_num = int(start - 1)
             stop_num = int(end)
-            segments.append({"id": i + 2, "start": start_num, "stop": stop_num, "col": [color, [0, 0, 0], [0, 0, 0]]})
-            delSegments.append({"id": i + 2, "start": start_num, "stop": 0, "col": [255, 255, 255]})
+            segments.append(
+                {"id": i + 2, "start": start_num, "stop": stop_num, "col": [locate_color]})
+            del_segments.append({"id": i + 2, "start": 0, "stop": total_leds, "col": [standby_color]})
 
         # Turn on the new segments
         on_data = {"on": True, "bri": 255 * app.brightness, "transition": 0, "mainseg": 0, "seg": segments}
@@ -264,7 +307,7 @@ def light(positions, ip, quantity=1, testing=False):
         app.previous_positions = positions
     else:
         # Turn off existing segments and reset previous_positions if positions haven't changed
-        off_data = {"bri": 255 * app.brightness, "transition": 5, "mainseg": 0, "seg": delSegments}
+        off_data = {"bri": 255 * app.brightness, "transition": 0, "mainseg": 0, "seg": del_segments}
         send_request(ip, off_data)
         app.previous_positions = []
         app.timeout = 0
@@ -272,22 +315,22 @@ def light(positions, ip, quantity=1, testing=False):
     # If timeout is set, sleep and then turn off the segments
     if app.timeout != 0 and not testing:
         time.sleep(app.timeout)
-        off_data = {"bri": 255 * app.brightness, "transition": 5, "mainseg": 0, "seg": delSegments}
+        off_data = {"bri": 255 * app.brightness, "transition": 0, "mainseg": 0, "seg": del_segments}
         send_request(ip, off_data)
 
     # For testing, sleep for at least 3 seconds and then turn off the segments
     if testing:
         app.previous_positions = []
         time.sleep(app.timeout + 3)
-        off_data = {"bri": 255 * app.brightness, "transition": 5, "mainseg": 0, "seg": delSegments}
+        off_data = {"bri": 255 * app.brightness, "transition": 0, "mainseg": 0, "seg": del_segments}
         send_request(ip, off_data)
 
     # Update global delSegments and previous_positions
-    app.delSegments = delSegments
+    app.delSegments = del_segments
     app.previous_positions = []
 
 
-def PositionOptimization(positions):
+def position_optimization(positions):
     segments = []
     start = positions[0]
     end = positions[0]
@@ -296,13 +339,12 @@ def PositionOptimization(positions):
         if positions[i] == positions[i - 1] + 1:
             end = positions[i]
         else:
-            segments .append((start, end))
+            segments.append((start, end))
             start = positions[i]
             end = positions[i]
     # Append the last segment
-    segments .append((start, end))
+    segments.append((start, end))
     return segments
-
 
 
 @app.route('/test_lights', methods=['POST'])
