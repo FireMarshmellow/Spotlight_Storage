@@ -7,7 +7,6 @@ from collections import Counter
 COMBINED_DATABASE = 'combined_data.db'
 
 
-
 def create_combined_db():
     # Connect to the combined database
     conn_combined = sqlite3.connect(COMBINED_DATABASE)
@@ -63,9 +62,7 @@ def create_combined_db():
     columns = [column[1] for column in cursor.fetchall()]
     if 'colors' not in columns:
         cursor.execute("ALTER TABLE settings ADD COLUMN colors TEXT DEFAULT '[#00ff00, #00ff00]'")
-
-    # Commit the changes
-    conn_combined.commit()
+        conn_combined.commit()
 
     return conn_combined
 
@@ -93,15 +90,31 @@ def write_item(item):
 # Function to update data in the database
 def update_item(id, data):
     conn = create_combined_db()
+
     try:
+
         conn.execute(
             'UPDATE items SET name = ?, link = ?, image = ?, position = ?, quantity = ?, ip = ?, tags = ? WHERE id = ?',
             [data['name'], data['link'], data['image'], data['position'], data['quantity'], data['ip'], data['tags'],
              id])
         conn.commit()
-
     except sqlite3.Error as e:
         conn.rollback()
+    finally:
+        conn.close()
+
+
+def update_item_quantity(id, data):
+    conn = create_combined_db()
+    try:
+
+        conn.execute(
+            'UPDATE items SET  quantity = ? WHERE id = ?',
+            [data['quantity'],id])
+        conn.commit()
+    except sqlite3.Error as e:
+        conn.rollback()
+        print(e)
     finally:
         conn.close()
 
@@ -282,6 +295,7 @@ def update_settings(settings):
         print(f"SQLite error while updating settings: {e}")
     finally:
         conn.close()
+
 
 def get_all_tags():
     conn = create_combined_db()

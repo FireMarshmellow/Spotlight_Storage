@@ -29,11 +29,7 @@
                         <span class="icon-n4px"><i data-lucide="plus" class="me-2"></i>Add Item</span>
                     </button>
                 </li>
-                <li class="nav-item" style="margin-left:1rem ">
-                    <button  id="inventur" type="button" class="btn btn-outline-success pe-3">
-                        <span class="icon-n4px"><i data-lucide="scroll-text" class="me-2"></i>Inventur</span>
-                    </button>
-                </li>
+
 
                 <!--<li class="nav-item">
                     <a class="nav-link" href="https://youtu.be/7C4i-2IqSS4" target="_blank">Tutorial<i data-lucide="external-link" class="ms-1" style="height:20px; margin-top:-6px;"></i></a>
@@ -131,14 +127,11 @@
                     <input type="color" id="color-standby" name="standby" value="#f0f0f0" class="form-color" style="margin-left: 0.5rem; width: 2rem; height: 1rem; border: none; padding: 0;">
                 </label>
 
-
-
             </div>
             <hr>
             <div class="row">
                 <h6>ESP Devices</h6>
                 <div>
-
                         <table class="table table-sm table-striped overflow-hidden" id="esp_table">
                         </table>
                     </div>
@@ -160,6 +153,15 @@
                             <span class="icon-n4px"><i data-lucide="sun-moon" class="me-2"></i>Auto</span></button>
                     </div>
                 </div>
+            <hr>
+            <div class="row">
+                <h6>Inventur</h6>
+                    <div>
+                        <button  id="inventur" type="button" class="btn btn-outline-success pe-3">
+                            <span class="icon-n4px"><i data-lucide="scroll-text" class="me-2"></i>Inventur</span>
+                        </button>
+                    </div>
+            </div>
             </div>
         </div>
 
@@ -235,6 +237,7 @@
             </div>
         </div>
 
+
     <div class="modal fade" id="inventur-modal" tabindex="-1" aria-labelledby="inventur-modal-label" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
@@ -242,17 +245,31 @@
                     <h1 class="modal-title fs-5" id="inventur-modal-label">Inventur</h1>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-                <div class="modal-body">
+                <div class="modal-body text-center">
                     <!-- Display the text of the current item -->
-                    <p id="current-item-text"></p>
-                    <!-- Add an edit button -->
-                    <button id="edit-btn-inventur" class="btn btn-outline-primary edit-btn" data-bs-toggle="tooltip" title="Edit">
-                        <span class="icon-n4px"><i data-lucide="file-edit"></i></span>
-                    </button>
-                    <button id="continue-btn-inventur" class="btn btn-outline-primary " data-bs-toggle="tooltip" title="Continue">
-                        <span class="icon-n4px"><i data-lucide="step-forward"></i></span>
-                    </button>
+                    <p id="current-item-text" class="h5 mb-2"></p>
+                    <div class="d-flex justify-content-center align-items-center mb-4">
+                        <button id="minus-btn-inventur" class="btn btn-outline-danger me-2 minus-btn" data-bs-toggle="tooltip" title="-1 from stock">
+                            <i data-lucide="minus"></i>
+                        </button>
+                        <span id="current-item-amount" class="h6 text-muted"></span>
+                        <button id="plus-btn-inventur" class="btn btn-outline-success ms-2 plus-btn" data-bs-toggle="tooltip" title="+1 to stock">
+                            <i data-lucide="plus"></i>
+                        </button>
+                    </div>
+                    <img id="current-item-img" class="img-fluid rounded mb-4" style="height: 15rem; width: auto; min-width: 10rem; max-width: 50rem;">
+                    <!-- Add buttons with better styling -->
+                    <div class="d-flex justify-content-center">
+                        <button id="edit-btn-inventur" class="btn btn-outline-primary me-2" data-bs-toggle="tooltip" title="Edit">
+                            <i data-lucide="file-edit"></i> Edit
+                        </button>
+                        <button id="continue-btn-inventur" class="btn btn-outline-success" data-bs-toggle="tooltip" title="Continue">
+                            <i data-lucide="step-forward"></i> Continue
+                        </button>
+                    </div>
                 </div>
+
+
                 <div class="modal-footer">
                     <!-- Add a button to continue -->
                     <button type="button" class="btn btn-secondary pe-3" id="cancel-inventur-button" data-bs-dismiss="modal">
@@ -260,7 +277,7 @@
                     </button>
                     <!-- Add a button to save the item -->
                     <button type="button" class="btn btn-success pe-3" id="save-inventur-button" data-bs-dismiss="modal">
-                        <span class="icon-n4px"><i data-lucide="plus" class="me-2"></i>Add</span>
+                        <span class="icon-n4px"><i data-lucide="save" class="me-2"></i>Save</span>
                     </button>
                 </div>
             </div>

@@ -21,6 +21,7 @@ app.standbyColor = "#00ff00"
 app.locateColor = "#00ff00"
 app.config['UPLOAD_FOLDER'] = './images'
 app.previous_positions = []
+app.request_amount = 0
 
 
 # Route to Favicon
@@ -194,7 +195,10 @@ def item(id):
             return jsonify({'error': 'Item not found'}), 404
 
     elif request.method == 'PUT':
-        db.update_item(id, request.get_json())
+        if request.headers.get('Update-Quantity') == 'true':
+            db.update_item_quantity(id, request.get_json())
+        else:
+            db.update_item(id, request.get_json())
         return jsonify(dict(item))
 
     elif request.method == 'DELETE':
@@ -222,6 +226,7 @@ def send_request(target_ip, data, timeout=0.2):
 
         if response.status_code == 200:
             # Success
+            app.request_amount += 1
             print("Request was successful")
         else:
             # Handle other status codes (e.g., 404, 500, etc.) as needed
@@ -266,21 +271,33 @@ def get_total_leds(ip):
         return 1000  # Default value if the request fails
 
 
+def clear_segments(ip):
+    off_data = {
+        "on": False,
+        "bri": 128,
+        "transition": 0,
+        "mainseg": 0,
+        "seg": [{"id": 1, "start": 0, "stop": 0, "grp": 1}] + [{"stop": 0} for _ in range(15)]
+    }
+    send_request(ip, off_data)
+
+
 def light(positions, ip, quantity=1, testing=False):
     # Get the total number of LEDs from the WLED API
     total_leds = get_total_leds(ip)
 
-    # Turn off existing segments if they exist
+    # Clear existing segments if they exist
     if app.delSegments:
-        off_data = {"on": False, "bri": 0, "transition": 0, "mainseg": 0, "seg": app.delSegments}
+        off_data = {"on": False, "bri": 0, "transition": 0, "mainseg": 0, "seg": []}
         send_request(ip, off_data)
+        time.sleep(0.3)
 
     # Set global settings
     set_global_settings()
 
     # Initialize default segments
-    segments = [{"id": 1, "start": 0, "stop": total_leds, "col": [0, 0, 0]}]
-    del_segments = [{"id": 1, "start": 0, "stop": total_leds, "col": [0, 0, 0]}]
+    segments = [{"id": 0, "start": 0, "stop": total_leds, "col": [0, 0, 0]}]
+    del_segments = [{"id": 0, "start": 0, "stop": total_leds, "col": [0, 0, 0]}]
 
     # Set color based on quantity
     locate_color = hex_to_rgb(app.locateColor) if quantity >= 1 else [255, 0, 0]
@@ -298,8 +315,12 @@ def light(positions, ip, quantity=1, testing=False):
             start_num = int(start - 1)
             stop_num = int(end)
             segments.append(
-                {"id": i + 2, "start": start_num, "stop": stop_num, "col": [locate_color]})
-            del_segments.append({"id": i + 2, "start": 0, "stop": total_leds, "col": [standby_color]})
+                {"id": i + 1, "start": start_num, "stop": stop_num, "col": [locate_color]})
+            del_segments.append({"id": i + 1, "start": 0, "stop": total_leds, "col": [standby_color]})
+
+        # If there are more segments in the previous state, turn off the excess ones
+        if len(app.previous_positions) > len(positions_list):
+            clear_segments(ip)
 
         # Turn on the new segments
         on_data = {"on": True, "bri": 255 * app.brightness, "transition": 0, "mainseg": 0, "seg": segments}
@@ -309,6 +330,7 @@ def light(positions, ip, quantity=1, testing=False):
         # Turn off existing segments and reset previous_positions if positions haven't changed
         off_data = {"bri": 255 * app.brightness, "transition": 0, "mainseg": 0, "seg": del_segments}
         send_request(ip, off_data)
+        clear_segments(ip)
         app.previous_positions = []
         app.timeout = 0
 
@@ -317,6 +339,8 @@ def light(positions, ip, quantity=1, testing=False):
         time.sleep(app.timeout)
         off_data = {"bri": 255 * app.brightness, "transition": 0, "mainseg": 0, "seg": del_segments}
         send_request(ip, off_data)
+        clear_segments(ip)
+        app.previous_positions = []
 
     # For testing, sleep for at least 3 seconds and then turn off the segments
     if testing:
@@ -324,10 +348,10 @@ def light(positions, ip, quantity=1, testing=False):
         time.sleep(app.timeout + 3)
         off_data = {"bri": 255 * app.brightness, "transition": 0, "mainseg": 0, "seg": del_segments}
         send_request(ip, off_data)
+        clear_segments(ip)
 
     # Update global delSegments and previous_positions
     app.delSegments = del_segments
-    app.previous_positions = []
 
 
 def position_optimization(positions):
@@ -367,10 +391,58 @@ def turn_led_on():
     if request.method == 'GET':
         ips = get_unique_ips_from_database()
         for ip in ips:
-            on_data = {"on": True, "bri": 255 * app.brightness, "transition": 0, "mainseg": 0, "seg": [
-                {"id": 0, "grp": 1, "spc": 0, "of": 0, "on": True, "frz": False, "bri": 255, "cct": 127, "set": 0,
-                 "col": [[255 * app.brightness, 255 * app.brightness, 255 * app.brightness], [0, 0, 0], [0, 0, 0]],
-                 "fx": 0, "sx": 128, "ix": 128, "pal": 0, "c1": 128, "c2": 128, "c3": 16}]}
+            total_leds = get_total_leds(ip)
+            on_data = {
+                "on": True,
+                "bri": app.brightness,
+                "transition": 5,
+                "mainseg": 0,
+                "seg": [
+                    {
+                        "id": 0,
+                        "start": 0,
+                        "stop": total_leds,
+                        "grp": 1,
+                        "spc": 0,
+                        "of": 0,
+                        "on": True,
+                        "frz": False,
+                        "cct": 127,
+                        "set": 0,
+                        "col": [hex_to_rgb(app.standbyColor)],
+                        "fx": 0,
+                        "sx": 128,
+                        "ix": 128,
+                        "pal": 0,
+                        "c1": 128,
+                        "c2": 128,
+                        "c3": 16,
+                        "sel": True,
+                        "rev": False,
+                        "mi": False,
+                        "o1": False,
+                        "o2": False,
+                        "o3": False,
+                        "si": 0,
+                        "m12": 1
+                    },
+                    {"stop": 0},
+                    {"stop": 0},
+                    {"stop": 0},
+                    {"stop": 0},
+                    {"stop": 0},
+                    {"stop": 0},
+                    {"stop": 0},
+                    {"stop": 0},
+                    {"stop": 0},
+                    {"stop": 0},
+                    {"stop": 0},
+                    {"stop": 0},
+                    {"stop": 0},
+                    {"stop": 0},
+                    {"stop": 0}
+                ]
+            }
             send_request(ip, on_data)
         return jsonify({'success': True})
 
@@ -383,9 +455,7 @@ def turn_led_off():
     if request.method == 'GET':
         ips = get_unique_ips_from_database()
         for ip in ips:
-            off_data = {"on": False, "bri": 128, "transition": 0, "mainseg": 0,
-                        "seg": [{"id": 1, "start": 0, "stop": 0, "grp": 1}]}
-            send_request(ip, off_data)
+            clear_segments(ip)
         return jsonify()
 
 
@@ -399,7 +469,22 @@ def turn_led_party():
             party_data = {"on": True, "bri": round(255 * app.brightness), "transition": 5, "mainseg": 0, "seg": [
                 {"id": 0, "grp": 1, "spc": 0, "of": 0, "on": True, "frz": False, "bri": 255, "cct": 127, "set": 0,
                  "col": [[255, 255, 255], [0, 0, 0], [0, 0, 0]], "fx": 9, "sx": 128, "ix": 128, "pal": 0, "c1": 128,
-                 "c2": 128, "c3": 16}]}
+                 "c2": 128, "c3": 16},
+                {"stop": 0},
+                {"stop": 0},
+                {"stop": 0},
+                {"stop": 0},
+                {"stop": 0},
+                {"stop": 0},
+                {"stop": 0},
+                {"stop": 0},
+                {"stop": 0},
+                {"stop": 0},
+                {"stop": 0},
+                {"stop": 0},
+                {"stop": 0},
+                {"stop": 0},
+                {"stop": 0}]}
             send_request(ip, party_data)
         return jsonify()
 
