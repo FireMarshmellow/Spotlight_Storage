@@ -4,7 +4,7 @@ import sqlite3
 from collections import Counter
 
 # Define the path for the combined database
-COMBINED_DATABASE = 'combined_data.db'
+COMBINED_DATABASE = 'database/combined_data.db'
 
 
 def create_combined_db():

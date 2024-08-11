@@ -1,0 +1,16 @@
+version: '3.8'
+
+services:
+  flinker-jake:
+    build:
+      context: .
+    image: technolitrix-mimosa_v1.0
+    ports:
+      - "5000:5000"
+      - "5001:5001"
+    restart: always
+    volumes:
+      - ./data:/database:rw
+      - ./images:/images:rw
+    command: >
+      bash -c "python setup.py && python app.py"
