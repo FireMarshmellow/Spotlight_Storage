@@ -1,5 +1,6 @@
 # MIMOSA - short for "Mellow_Labs Inventory Management and Organization System Apparatus". Just like a refreshing mimosa, this system will make your life brighter and more organized!
-pic!
+![MIMOSA](https://github.com/user-attachments/assets/79bdf901-aec4-45b8-97d5-1e768b65df19)
+
 
 
 ## MIMOSA is from [Mellow Labs](https://github.com/FireMarshmellow/M.I.M.O.S.A)
