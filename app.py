@@ -171,6 +171,7 @@ def items():
         return jsonify(items)
     elif request.method == 'POST':
         item = request.get_json()
+        print("'image:' '" + item['image'] + "'")
         id = db.write_item(item)
         item['id'] = id
         return jsonify(item)
@@ -187,7 +188,10 @@ def item(id):
             return jsonify({'error': 'Item not found'}), 404
 
     elif request.method == 'PUT':
-        db.update_item(id, request.get_json())
+        request_item = request.get_json()
+        image_path = request_item['image']
+        request_item['image'] = re.sub(r'https?://[^/]+(/images/[^ ]*)', r'\1', image_path)
+        db.update_item(id, request_item)
         return jsonify(dict(item))
 
     elif request.method == 'DELETE':
@@ -341,8 +345,17 @@ def turn_led_off():
     if request.method == 'GET':
         ips = get_unique_ips_from_database()
         for ip in ips:
-            off_data = {"on": False, "bri": 128, "transition": 0, "mainseg": 0,
-                        "seg": [{"id": 1, "start": 0, "stop": 0, "grp": 1}]}
+            off_data = {
+                "on": True,
+                "bri": 150,
+                "transition": 5,
+                "mainseg": 0,
+                "seg": [{
+                    "id": 0,
+                    "col": [[0, 0, 0]],  # Setzt die Farbe auf Schwarz
+                    "fx": 0  # Setzt den Effekt auf "aus"
+                }]
+            }
             send_request(ip, off_data)
         return jsonify()
 

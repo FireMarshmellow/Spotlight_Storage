@@ -111,7 +111,7 @@ async function addItem(event) {
     // Gather item information from the form
     const name = document.getElementById("item_name").value;
     const link = document.getElementById("item_url").value || "";
-    const image = document.getElementById("item_image").value;
+    const image = document.getElementById("item_image").value.replace(window.location.href, "");
     let position = localStorage.getItem('led_positions');
     const quantity = document.getElementById("item_quantity").value;
     const tags = localStorage.getItem('item_tags');
