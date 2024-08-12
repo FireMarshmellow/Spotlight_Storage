@@ -263,4 +263,4 @@ document.getElementById("inventur").addEventListener("click", function () {
 
 loadSettings();
 populateEspTable();
-sendLedRequest('off');
+sendLedRequest('on');

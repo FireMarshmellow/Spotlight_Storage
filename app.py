@@ -291,7 +291,8 @@ def light(positions, ip, quantity=1, testing=False):
         off_data = {"on": False, "bri": 0, "transition": 0, "mainseg": 0, "seg": []}
         send_request(ip, off_data)
         time.sleep(0.3)
-
+    else:
+        clear_segments(ip)
     # Set global settings
     set_global_settings()
 

@@ -291,7 +291,7 @@ function createItem(item) {
     <div class="card overflow-hidden position-relative">
         <!-- Image container with tooltip -->
         <div class="overflow-hidden d-flex justify-content-center">
-            <img src="${item.image}" class="card-img-top" style="height: 15rem; width: auto; max-width: 50rem;" alt="${item.name}"> 
+            <img src="${item.image}" class="card-img-top dynamic-img" alt="${item.name}">
         </div>
 
         <!-- Card body with item details and buttons -->

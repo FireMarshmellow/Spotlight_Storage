@@ -414,7 +414,12 @@
 <script src="../static/settings.js"></script>
 <script src="../static/gen_grid.js"></script>
 <script src="../static/color-modes.js"></script>
-
+<script>
+    window.addEventListener('beforeunload', function () {
+        // Turn off WLED and reset segments when the window is closed
+        sendLedRequest('off');
+    });
+</script>
 
 <script>
     lucide.createIcons();

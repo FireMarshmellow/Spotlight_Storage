@@ -87,3 +87,18 @@ label {
 .tagify__dropdown__item:hover {
     background-color: #e9ecef; /* Set hover background color to match Bootstrap theme */
 }
+
+.dynamic-img {
+    height: auto;
+    width: auto;
+    max-height: 10rem;
+    max-width: 10rem;
+}
+
+
+@media (min-width: 1300px) { /* 6 columns (large devices) */
+    .col-lg-2 .dynamic-img {
+        max-height: 14rem;
+        max-width: 14rem;
+    }
+}
