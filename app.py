@@ -229,7 +229,6 @@ def send_request(target_ip, data, timeout=0.2):
         if response.status_code == 200:
             # Success
             app.request_amount += 1
-            print("Request was successful")
         else:
             # Handle other status codes (e.g., 404, 500, etc.) as needed
             print(f"Request failed with status code {response.status_code}")

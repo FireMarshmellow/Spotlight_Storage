@@ -84,7 +84,7 @@ async function downloadImage(url) {
         // Check if the image already exists on the server and is identical
         if (await doesImageExistAndIsIdentical(imageName, blob)) {
             console.log('Identical image already exists on the server.');
-            return /images/${imageName};
+            return `/images/${imageName}`;
         } else if (await doesImageExist(imageName)) {
             console.log('Image with the same name exists but is different.');
             imageName = await getNextAvailableFilename(baseName, extension);
@@ -116,7 +116,7 @@ async function processCroppedImage(croppedImageFile, item) {
         fetchDataAndLoadTags();
 
         // Update the database with the new image URL
-        await handleImageChange(item, fullImageUrl);
+        await handleImageChange(item, imageURL);
     } catch (error) {
         console.error('Error uploading cropped image:', error);
     }
@@ -171,7 +171,7 @@ function resetModalAndCropper(modalElement) {
 
 function handleImageChange(item, url) {
     const itemId = item.id;
-
+    console.log(url);
     // Create the updated item object
     const updatedItem = { image: url };
 

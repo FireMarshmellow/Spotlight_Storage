@@ -261,6 +261,9 @@ document.getElementById("inventur").addEventListener("click", function () {
 });
 
 
-loadSettings();
-populateEspTable();
-sendLedRequest('on');
+
+document.addEventListener('DOMContentLoaded', function() {
+    loadSettings();
+    populateEspTable();
+    sendLedRequest('on');
+});

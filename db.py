@@ -89,13 +89,10 @@ def write_item(item):
 
 def update_item_image(item_id, new_image_url):
     conn = create_combined_db()
-
     try:
         cursor = conn.cursor()
-
         # Update the image of the item with the specified item_id
-        cursor.execute('UPDATE items SET image = ? WHERE id = ?', [new_image_url, item_id])
-
+        cursor.execute('UPDATE items SET image = ? WHERE id = ?', [new_image_url['image'], item_id])
         conn.commit()
     except sqlite3.Error as e:
         conn.rollback()
