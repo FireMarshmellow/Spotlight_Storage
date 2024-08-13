@@ -197,6 +197,8 @@ def item(id):
     elif request.method == 'PUT':
         if request.headers.get('Update-Quantity') == 'true':
             db.update_item_quantity(id, request.get_json())
+        elif request.headers.get('Update-Image') == 'true':
+            db.update_item_image(id, request.get_json())
         else:
             db.update_item(id, request.get_json())
         return jsonify(dict(item))

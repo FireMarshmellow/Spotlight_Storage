@@ -87,6 +87,23 @@ def write_item(item):
     return lastId
 
 
+def update_item_image(item_id, new_image_url):
+    conn = create_combined_db()
+
+    try:
+        cursor = conn.cursor()
+
+        # Update the image of the item with the specified item_id
+        cursor.execute('UPDATE items SET image = ? WHERE id = ?', [new_image_url, item_id])
+
+        conn.commit()
+    except sqlite3.Error as e:
+        conn.rollback()
+        print(e)
+    finally:
+        conn.close()
+
+
 # Function to update data in the database
 def update_item(id, data):
     conn = create_combined_db()
@@ -110,7 +127,7 @@ def update_item_quantity(id, data):
 
         conn.execute(
             'UPDATE items SET  quantity = ? WHERE id = ?',
-            [data['quantity'],id])
+            [data['quantity'], id])
         conn.commit()
     except sqlite3.Error as e:
         conn.rollback()

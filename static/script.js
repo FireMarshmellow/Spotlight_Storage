@@ -3,69 +3,7 @@ let fetchedItems = []; // Define an array to store fetched items
 let isEditingItem = false;
 let isCopyingItem = false;
 let editingItemId = null; // Track the ID of the item being edited
-let editingItemIP = null; // Track the ID of the item being edited
-
-async function uploadImage() {
-    const formData = new FormData();
-    const fileInput = document.getElementById("item_image_upload");
-    // Append the file input to the formData
-    formData.append('file', fileInput.files[0]);
-
-    // returns undefined if no file is selected
-    if (!fileInput.files[0]) {
-        console.log('no file uploaded');
-        return null;
-    }
-    try {
-        const response = await fetch('/upload', { body: formData, method: 'POST' });
-        const imageURL = await response.text();
-        return new URL(window.location.href + imageURL);
-    } catch (error) {
-        console.error('Error uploading file:', error);
-        return null;
-    }
-}
-// Function to check if an image exists on the server
-async function doesImageExist(imageURL) {
-    try {
-        const response = await fetch(`/images/${imageURL}`);
-        return response.ok;
-    } catch (error) {
-        console.error('Error checking image existence:', error);
-        return false;
-    }
-}
-
-// Function to download an image from a URL
-async function downloadImage(url) {
-    const urlParts = url.split('/');
-    const imageURL = urlParts[urlParts.length - 1];
-    // Check if the image already exists on the server
-    if (await doesImageExist(imageURL)) {
-        console.log('Image already exists on the server.');
-        return `/images/${imageURL}`;
-    }
-
-    try {
-        const response = await fetch(url);
-        const blob = await response.blob();
-
-        // Check if the file extension is valid
-        const validExtensions = ['.jpeg', '.jpg', '.png'];
-        const hasValidExtension = validExtensions.some(extension => imageURL.endsWith(extension));
-        if (!hasValidExtension) {
-            // Append ".jpg" if the file extension is missing or invalid
-            return new File([blob], imageURL + '.jpg', { type: 'image/jpeg' });
-        }
-
-        return new File([blob], imageURL, { type: 'image/jpeg' });
-    } catch (error) {
-        console.error('Error downloading image:', error);
-        return null;
-    }
-}
-
-
+let editingItemIP = null; // Track the IP of the item being edited
 
 
 // Async function to handle the addition or editing of an item
@@ -111,7 +49,7 @@ async function addItem(event) {
     // Gather item information from the form
     const name = document.getElementById("item_name").value;
     const link = document.getElementById("item_url").value || "";
-    const image = document.getElementById("item_image").value;
+    const image = document.getElementById("item_image").value.replace(window.location.href, "");
     let position = localStorage.getItem('led_positions');
     const quantity = document.getElementById("item_quantity").value;
     const tags = localStorage.getItem('item_tags');
@@ -281,8 +219,10 @@ function createItem(item) {
     col.dataset.name = item.name;
     col.dataset.quantity = parseInt(item.quantity, 10);  // Store as numbers
     col.dataset.ip = item.ip;
-    item.position = item.position.replace('[', '').replace(']', '');
-    item.position = item.position.split(',').map(Number).filter(num => !isNaN(num));
+    if (!Array.isArray(item.position)) {
+        item.position = item.position.replace('[', '').replace(']', '');
+        item.position = item.position.split(',').map(Number).filter(num => !isNaN(num));
+    }
     col.dataset.position = item.position;
     col.dataset.tags = item.tags;
 
@@ -318,6 +258,7 @@ function createItem(item) {
                     <ul class=" dropdown-menu" aria-labelledby="dropdownMenuButton-${item.id}">
                         <li><a class="dropdown-item copy-btn"  href="#">Copy Item</a></li>
                         <li><a class="dropdown-item delete-btn" href="#">Delete</a></li>
+                        <li><a class="dropdown-item image-edit-btn" href="#">Crop Image</a></li>
                     </ul>
                 </div>
             </div>
@@ -402,6 +343,40 @@ function createItem(item) {
             loadTagsIntoTagify()
         }
     });
+    col.querySelector('.image-edit-btn').addEventListener('click', () => {
+        const imageElement = document.getElementById('imageToCrop');
+        imageElement.src = item.image;
+
+        // Initialize Cropper.js
+        initializeCropper(imageElement);
+
+        // Show the modal
+        const cropImageModal = new bootstrap.Modal(document.getElementById('cropImageModal'));
+        cropImageModal.show();
+
+        // Define event handlers
+        const cropAndSaveBtn = document.getElementById('cropAndSaveBtn');
+        const cropCancelBtn = document.getElementById('cropCancel');
+
+        // Remove previous event listeners
+        cropAndSaveBtn.removeEventListener('click', onCropAndSave);
+        cropCancelBtn.removeEventListener('click', onCropCancel);
+
+        // Define new event handlers
+        function onCropAndSave() {
+            handleCropAndSave(item);
+            resetModalAndCropper(cropImageModal);
+        }
+
+        function onCropCancel() {
+            resetModalAndCropper(cropImageModal);
+        }
+
+        // Add new event listeners
+        cropAndSaveBtn.addEventListener('click', onCropAndSave);
+        cropCancelBtn.addEventListener('click', onCropCancel);
+    });
+
 
     col.querySelector('.edit-btn').addEventListener('click', () => {
         // Set flag for editing, remove local storage, and show the item modal
