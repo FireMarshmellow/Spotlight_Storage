@@ -7,7 +7,7 @@ COPY favicon.ico favicon.ico
 COPY requirements.txt requirements.txt
 COPY templates templates
 COPY setup.py setup.py
-COPY .env .env
+
 
 RUN pip install -r requirements.txt
 RUN python setup.py
