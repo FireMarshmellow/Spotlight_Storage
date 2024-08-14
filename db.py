@@ -1,10 +1,11 @@
 import json
 import os
+import shutil
 import sqlite3
 from collections import Counter
 
 # Define the path for the combined database
-COMBINED_DATABASE = 'combined_data.db'
+COMBINED_DATABASE = 'data/combined_data.db'
 
 
 def create_combined_db():
@@ -436,6 +437,24 @@ def perform_migration():
     if should_perform_migration(DATABASE_SETTING, 'settings'):
         migrate_settings()
         print("General settings migration successful.")
+
+    # Call the function to perform the check and move
+    move_db_to_data_dir()
+
+
+def move_db_to_data_dir():
+    main_dir_db = 'combined_data.db'  # The original path in the main directory
+    data_dir_db = 'data/combined_data.db'  # The new path inside the data directory
+
+    # Check if the database exists in the main directory
+    if os.path.exists(main_dir_db):
+        # Ensure the data directory exists, create if it doesn't
+        if not os.path.exists('data'):
+            os.makedirs('data')
+
+        # Move the database to the data directory
+        shutil.move(main_dir_db, data_dir_db)
+        print(f"Database moved to {data_dir_db}")
 
 
 # Perform migration

@@ -1,0 +1,16 @@
+version: '3.8'
+
+services:
+  spotlight-storage:
+    build:
+      context: .
+    image: spotlight_storage_v4
+    ports:
+      - "5000:5000"
+      - "5001:5001"
+    restart: always
+    volumes:
+      - ./data:/data:rw
+      - ./images:/images:rw
+    command: >
+      bash -c "python setup.py && python app.py"
