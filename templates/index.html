@@ -2,7 +2,7 @@
 <html data-bs-theme="auto">
 
 <head>
-    <title>MIMOSA Interface</title>
+    <title>Spotlight Storage</title>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
@@ -17,7 +17,7 @@
 
         <a class="navbar-brand scroll-to-top" href="#">
             <img src="../static/favicon.png" alt="" width="32" height="32" class="d-inline-block align-text-top">
-            M.I.M.O.S.A V4
+            Spotlight Storage V4
         </a>
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
@@ -132,110 +132,110 @@
             <div class="row">
                 <h6>ESP Devices</h6>
                 <div>
-                        <table class="table table-sm table-striped overflow-hidden" id="esp_table">
-                        </table>
-                    </div>
-                    <div>
-                        <button type="button" class="btn btn-outline-success me-0 me-md-2 pe-3" data-bs-toggle="modal" data-bs-target="#esp-modal">
-                            <span class="icon-n4px"><i data-lucide="plus" class="me-2"></i>Add ESP Device</span>
-                        </button>
-                    </div>
+                    <table class="table table-sm table-striped overflow-hidden" id="esp_table">
+                    </table>
                 </div>
-                <hr>
-                <div class="row">
-                    <h6>Web Interface</h6>
-                    <div class="btn-group" role="group">
-                        <button type="button" class="btn btn-light pe-3" data-bs-theme-value="light">
-                            <span class="icon-n4px"><i data-lucide="sun" class="me-2"></i>Light</span></button>
-                        <button type="button" class="btn btn-dark pe-3" data-bs-theme-value="dark">
-                            <span class="icon-n4px"><i data-lucide="moon" class="me-2"></i>Dark</span></button>
-                        <button type="button" class="btn btn-secondary pe-3" data-bs-theme-value="auto">
-                            <span class="icon-n4px"><i data-lucide="sun-moon" class="me-2"></i>Auto</span></button>
-                    </div>
+                <div>
+                    <button type="button" class="btn btn-outline-success me-0 me-md-2 pe-3" data-bs-toggle="modal" data-bs-target="#esp-modal">
+                        <span class="icon-n4px"><i data-lucide="plus" class="me-2"></i>Add ESP Device</span>
+                    </button>
                 </div>
+            </div>
+            <hr>
+            <div class="row">
+                <h6>Web Interface</h6>
+                <div class="btn-group" role="group">
+                    <button type="button" class="btn btn-light pe-3" data-bs-theme-value="light">
+                        <span class="icon-n4px"><i data-lucide="sun" class="me-2"></i>Light</span></button>
+                    <button type="button" class="btn btn-dark pe-3" data-bs-theme-value="dark">
+                        <span class="icon-n4px"><i data-lucide="moon" class="me-2"></i>Dark</span></button>
+                    <button type="button" class="btn btn-secondary pe-3" data-bs-theme-value="auto">
+                        <span class="icon-n4px"><i data-lucide="sun-moon" class="me-2"></i>Auto</span></button>
+                </div>
+            </div>
             <hr>
             <div class="row">
                 <h6>Inventur</h6>
-                    <div>
-                        <button  id="inventur" type="button" class="btn btn-outline-success pe-3">
-                            <span class="icon-n4px"><i data-lucide="scroll-text" class="me-2"></i>Inventur</span>
-                        </button>
-                    </div>
-            </div>
-            </div>
-        </div>
-
-        <div class="modal fade" id="item-modal" tabindex="-1" aria-labelledby="item-modal-label" aria-hidden="true">
-            <div class="modal-dialog">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h1 class="modal-title fs-5" id="item-modal-label">Add Item</h1>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" onclick="resetModal()"> </button>
-                    </div>
-                    <div class="modal-body">
-
-                        <div class="form-floating mb-3">
-                            <input type="text" class="form-control" id="item_name" placeholder="Name" required>
-                            <label for="item_name">Item name</label>
-                        </div>
-                        <div class="form-floating mb-3">
-                            <input type="text" class="form-control" id="item_url" placeholder="URL">
-                            <label for="item_url">Item URL</label>
-                        </div>
-                        <div class="form-floating mb-3">
-                            <input type="number" class="form-control" id="item_quantity" placeholder="1" required>
-                            <label for="item_quantity">Item quantity</label>
-                        </div>
-
-                        <div class="row">
-                            <div class="col-4 pe-2">
-                                <div class="form mb-3">
-                                    <label for="item_image">Item image URL</label>
-                                    <input type="url" class="form-control" id="item_image" placeholder="https://placehold.co/150x100?text=Hello+World">
-
-                                </div>
-                            </div>
-                            <div class="col-1 text-center or-text">
-                                <span>or</span>
-                            </div>
-                            <div class="col-7 ps-2">
-                                <div class="form">
-                                    <label for="item_image_upload">Upload image file</label>
-                                    <input type="file" class="form-control" id="item_image_upload" name="file">
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="form mb-3">
-                            <label for="item_tags">Tags</label>
-                            <input type="text" class="form-control" id="item_tags">
-                        </div>
-
-                        <label for="item_esp_select">Select an ESP device</label>
-                        <select class="form-select mb-3" id="item_esp_select">
-                        </select>
-                        <div>
-                            <button id="test_led_button" class="btn btn-success pe-3">
-                                <span class="icon-n4px"><i data-lucide="lightbulb" class="me-2"></i>Test LEDs</span></button>
-                            <button id="clear_led_button" class="btn btn-danger pe-3">
-                                <span class="icon-n4px"><i data-lucide="x" class="me-2"></i>Clear Grid</span></button>
-                        </div>
-                        <label for="item-canvas-container">Select LEDs to assign to item</label>
-
-                        <div id="item-canvas-container" class="col-10 mx-auto">
-                            <canvas id="item-responsive-canvas"></canvas>
-                        </div>
-
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary pe-3" id="cancel-item-button" data-bs-dismiss="modal"  onclick="resetModal()">
-                            <span class="icon-n4px"><i data-lucide="x" class="me-2"></i>Cancel</span></button>
-                        <button type="button" class="btn btn-success pe-3" id="save-item-button" data-bs-dismiss="modal" >
-                            <span class="icon-n4px"><i data-lucide="plus" class="me-2"></i>Add</span></button>
-                    </div>
+                <div>
+                    <button  id="inventur" type="button" class="btn btn-outline-success pe-3">
+                        <span class="icon-n4px"><i data-lucide="scroll-text" class="me-2"></i>Inventur</span>
+                    </button>
                 </div>
             </div>
         </div>
+    </div>
+
+    <div class="modal fade" id="item-modal" tabindex="-1" aria-labelledby="item-modal-label" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h1 class="modal-title fs-5" id="item-modal-label">Add Item</h1>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" onclick="resetModal()"> </button>
+                </div>
+                <div class="modal-body">
+
+                    <div class="form-floating mb-3">
+                        <input type="text" class="form-control" id="item_name" placeholder="Name" required>
+                        <label for="item_name">Item name</label>
+                    </div>
+                    <div class="form-floating mb-3">
+                        <input type="text" class="form-control" id="item_url" placeholder="URL">
+                        <label for="item_url">Item URL</label>
+                    </div>
+                    <div class="form-floating mb-3">
+                        <input type="number" class="form-control" id="item_quantity" placeholder="1" required>
+                        <label for="item_quantity">Item quantity</label>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-4 pe-2">
+                            <div class="form mb-3">
+                                <label for="item_image">Item image URL</label>
+                                <input type="url" class="form-control" id="item_image" placeholder="https://placehold.co/150x100?text=Hello+World">
+
+                            </div>
+                        </div>
+                        <div class="col-1 text-center or-text">
+                            <span>or</span>
+                        </div>
+                        <div class="col-7 ps-2">
+                            <div class="form">
+                                <label for="item_image_upload">Upload image file</label>
+                                <input type="file" class="form-control" id="item_image_upload" name="file">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form mb-3">
+                        <label for="item_tags">Tags</label>
+                        <input type="text" class="form-control" id="item_tags">
+                    </div>
+
+                    <label for="item_esp_select">Select an ESP device</label>
+                    <select class="form-select mb-3" id="item_esp_select">
+                    </select>
+                    <div>
+                        <button id="test_led_button" class="btn btn-success pe-3">
+                            <span class="icon-n4px"><i data-lucide="lightbulb" class="me-2"></i>Test LEDs</span></button>
+                        <button id="clear_led_button" class="btn btn-danger pe-3">
+                            <span class="icon-n4px"><i data-lucide="x" class="me-2"></i>Clear Grid</span></button>
+                    </div>
+                    <label for="item-canvas-container">Select LEDs to assign to item</label>
+
+                    <div id="item-canvas-container" class="col-10 mx-auto">
+                        <canvas id="item-responsive-canvas"></canvas>
+                    </div>
+
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary pe-3" id="cancel-item-button" data-bs-dismiss="modal"  onclick="resetModal()">
+                        <span class="icon-n4px"><i data-lucide="x" class="me-2"></i>Cancel</span></button>
+                    <button type="button" class="btn btn-success pe-3" id="save-item-button" data-bs-dismiss="modal" >
+                        <span class="icon-n4px"><i data-lucide="plus" class="me-2"></i>Add</span></button>
+                </div>
+            </div>
+        </div>
+    </div>
 
 
     <div class="modal fade" id="inventur-modal" tabindex="-1" aria-labelledby="inventur-modal-label" aria-hidden="true">
@@ -307,24 +307,24 @@
     </div>
 
 
-        <div class="modal fade" id="esp-delete-modal" tabindex="-1" aria-labelledby="espDeleteModalLabel" aria-hidden="true">
-            <div class="modal-dialog">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="espDeleteModalLabel">Confirmation</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                    </div>
-                    <div class="modal-body">
-                        <p>Are you sure you want to delete ESP device <span id="deviceNameSpan"></span> with IP address
-                            <span id="ipAddressSpan"></span>?</p>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">No</button>
-                        <button type="button" class="btn btn-danger" id="confirmDelete">Yes</button>
-                    </div>
+    <div class="modal fade" id="esp-delete-modal" tabindex="-1" aria-labelledby="espDeleteModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="espDeleteModalLabel">Confirmation</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Are you sure you want to delete ESP device <span id="deviceNameSpan"></span> with IP address
+                        <span id="ipAddressSpan"></span>?</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">No</button>
+                    <button type="button" class="btn btn-danger" id="confirmDelete">Yes</button>
                 </div>
             </div>
         </div>
+    </div>
 
     <!-- Crop Image Modal -->
     <div class="modal fade" id="cropImageModal" tabindex="-1" aria-labelledby="cropImageModalLabel" aria-hidden="true">
@@ -350,81 +350,81 @@
 
 
     <div class="modal fade" id="esp-modal" tabindex="-1" aria-labelledby="esp-modal-label" aria-hidden="true">
-            <div class="modal-dialog">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h1 class="modal-title fs-5" id="esp-modal-label">Add ESP</h1>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h1 class="modal-title fs-5" id="esp-modal-label">Add ESP</h1>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="alert alert-danger d-none" id="esp-error-alert">Please enter values in the follow empty fields:<br><span id="error-list"></span>
                     </div>
-                    <div class="modal-body">
-                        <div class="alert alert-danger d-none" id="esp-error-alert">Please enter values in the follow empty fields:<br><span id="error-list"></span>
-                        </div>
-                        <div class="form-floating mb-3">
-                            <input type="text" class="form-control" id="esp_name" placeholder="Name" required>
-                            <label for="esp_name">Name</label>
-                        </div>
-                        <div class="form-floating mb-3">
-                            <input type="text" class="form-control" id="esp_ip" placeholder="IP">
-                            <label for="esp_ip">IP address</label>
-                        </div>
-                        <div class="row">
-                            <div class="col-6 pe-2">
-                                <div class="form-floating mb-3">
-                                    <input type="number" class="form-control" id="esp_rows" placeholder="4" min="1" value="4" required>
-                                    <label for="esp_rows">Rows</label>
-                                </div>
-                            </div>
-                            <div class="col-6 ps-2">
-                                <div class="form-floating mb-3">
-                                    <input type="number" class="form-control" id="esp_columns" placeholder="4" min="1" value="4" required>
-                                    <label for="esp_columns">Columns</label>
-                                </div>
+                    <div class="form-floating mb-3">
+                        <input type="text" class="form-control" id="esp_name" placeholder="Name" required>
+                        <label for="esp_name">Name</label>
+                    </div>
+                    <div class="form-floating mb-3">
+                        <input type="text" class="form-control" id="esp_ip" placeholder="IP">
+                        <label for="esp_ip">IP address</label>
+                    </div>
+                    <div class="row">
+                        <div class="col-6 pe-2">
+                            <div class="form-floating mb-3">
+                                <input type="number" class="form-control" id="esp_rows" placeholder="4" min="1" value="4" required>
+                                <label for="esp_rows">Rows</label>
                             </div>
                         </div>
-                        <div class="row">
-                            <div class="col-4 pe-0">
-                                <div class="form-floating mb-3">
-                                    <select class="form-select" id="esp_startx">
-                                        <option selected data-startx="Left">Left</option>
-                                        <option value="1" data-startx="Right">Right</option>
-                                    </select>
-                                    <label for="esp_startx">Start Left</label>
-                                </div>
+                        <div class="col-6 ps-2">
+                            <div class="form-floating mb-3">
+                                <input type="number" class="form-control" id="esp_columns" placeholder="4" min="1" value="4" required>
+                                <label for="esp_columns">Columns</label>
                             </div>
-                            <div class="col-4">
-                                <div class="form-floating mb-3">
-                                    <select class="form-select" id="esp_starty">
-                                        <option selected data-starty="Top">Top</option>
-                                        <option data-starty="Bottom">Bottom</option>
-                                    </select>
-                                    <label for="esp_starty">Start Top</label>
-                                </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-4 pe-0">
+                            <div class="form-floating mb-3">
+                                <select class="form-select" id="esp_startx">
+                                    <option selected data-startx="Left">Left</option>
+                                    <option value="1" data-startx="Right">Right</option>
+                                </select>
+                                <label for="esp_startx">Start Left</label>
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <div class="form-floating mb-3">
+                                <select class="form-select" id="esp_starty">
+                                    <option selected data-starty="Top">Top</option>
+                                    <option data-starty="Bottom">Bottom</option>
+                                </select>
+                                <label for="esp_starty">Start Top</label>
+                            </div>
 
-                            </div>
-                            <div class="col-4 ps-0">
-                                <div class="form-floating mb-3">
-                                    <select class="form-select" id="esp_serpentine">
-                                        <option selected data-serpentine="Horizontal">Horizontal</option>
-                                        <option value="1" data-serpentine="Vertical">Vertical</option>
-                                    </select>
-                                    <label for="esp_serpentine">Serpentine Direction</label>
-                                </div>
+                        </div>
+                        <div class="col-4 ps-0">
+                            <div class="form-floating mb-3">
+                                <select class="form-select" id="esp_serpentine">
+                                    <option selected data-serpentine="Horizontal">Horizontal</option>
+                                    <option value="1" data-serpentine="Vertical">Vertical</option>
+                                </select>
+                                <label for="esp_serpentine">Serpentine Direction</label>
                             </div>
                         </div>
-                        <div id="esp-canvas-container" class="col-10 mx-auto">
-                            <canvas id="esp-responsive-canvas"></canvas>
-                        </div>
                     </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary pe-3" data-bs-dismiss="modal">
-                            <span class="icon-n4px"><i data-lucide="x" class="me-2"></i>Cancel</span></button>
-                        <button type="button" class="btn btn-success pe-3" id="save-esp-button">
-                            <span class="icon-n4px"><i data-lucide="plus" class="me-2"></i>Add</span></button>
+                    <div id="esp-canvas-container" class="col-10 mx-auto">
+                        <canvas id="esp-responsive-canvas"></canvas>
                     </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary pe-3" data-bs-dismiss="modal">
+                        <span class="icon-n4px"><i data-lucide="x" class="me-2"></i>Cancel</span></button>
+                    <button type="button" class="btn btn-success pe-3" id="save-esp-button">
+                        <span class="icon-n4px"><i data-lucide="plus" class="me-2"></i>Add</span></button>
                 </div>
             </div>
         </div>
     </div>
+</div>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
 <script src="https://cdn.jsdelivr.net/npm/@yaireo/tagify"></script>
 <script src="https://cdn.jsdelivr.net/npm/@yaireo/tagify/dist/tagify.polyfills.min.js"></script>
