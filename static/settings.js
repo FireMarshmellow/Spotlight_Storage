@@ -36,7 +36,10 @@ function addSettings(event) {
     if (lightMode === undefined){
         lightMode = "light"
     }
-    const settings = {brightness, timeout, lightMode, colors};
+    if (language === undefined){
+        language = "en"
+    }
+    const settings = {brightness, timeout, lightMode, colors, language};
     // Save the settings in the database using fetch
     fetch("/api/settings", {
         method: "POST",
@@ -66,6 +69,7 @@ function loadSettings() {
             document.getElementById("color-standby").value = colors[0];
             document.getElementById("color-locate").value = colors[1];
             lightMode = settings.lightMode;
+            language = settings.language;
         })
         .catch((error) => console.error(error));
 }

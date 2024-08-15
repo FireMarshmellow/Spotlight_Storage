@@ -11,7 +11,7 @@ COMBINED_DATABASE = 'data/combined_data.db'
 def create_combined_db():
     # Ensure the 'data' directory exists
     if not os.path.exists(os.path.dirname(COMBINED_DATABASE)):
-        os.makedirs(os.path.dirname(COMBINED_DATABASE))    # Connect to the combined database
+        os.makedirs(os.path.dirname(COMBINED_DATABASE))  # Connect to the combined database
 
     conn_combined = sqlite3.connect(COMBINED_DATABASE)
     conn_combined.row_factory = sqlite3.Row
@@ -51,7 +51,8 @@ def create_combined_db():
                 brightness INTEGER DEFAULT 100,
                 timeout INTEGER DEFAULT 5,
                 lightMode TEXT DEFAULT 'light',
-                colors TEXT DEFAULT '[#00ff00, #00ff00]'
+                colors TEXT DEFAULT '[#00ff00, #00ff00]',
+                language TEXT DEFAULT en
             )
         ''')
 
@@ -66,6 +67,9 @@ def create_combined_db():
     columns = [column[1] for column in cursor.fetchall()]
     if 'colors' not in columns:
         cursor.execute("ALTER TABLE settings ADD COLUMN colors TEXT DEFAULT '[#00ff00, #00ff00]'")
+        conn_combined.commit()
+    if 'language' not in columns:
+        cursor.execute("ALTER TABLE settings ADD COLUMN language TEXT DEFAULT 'en'")
         conn_combined.commit()
 
     return conn_combined
@@ -239,11 +243,34 @@ def delete_esp_settings(id):
         conn.close()
 
 
-def get_esp_settings_by_ip(id):
+def get_esp_settings_by_id(id):
     conn = create_combined_db()  # Get a database connection
     try:
         cursor = conn.cursor()
         cursor.execute('SELECT * FROM esp WHERE id = ?', (id,))
+        row = cursor.fetchone()
+
+        if row is None:
+            return None  # No record found for the given IP
+
+        # Convert the row to a dictionary
+        esp_settings = {col[0]: row[idx] for idx, col in enumerate(cursor.description)}
+
+        return esp_settings
+
+    except Exception as e:
+        print(f"Database error: {e}")
+        return None
+
+    finally:
+        conn.close()
+
+
+def get_esp_settings_by_ip(ip):
+    conn = create_combined_db()  # Get a database connection
+    try:
+        cursor = conn.cursor()
+        cursor.execute('SELECT * FROM esp WHERE esp_ip = ?', (ip,))
         row = cursor.fetchone()
 
         if row is None:
@@ -305,9 +332,9 @@ def update_settings(settings):
         cursor = conn.cursor()
         cursor.execute('DELETE FROM settings')  # Clear existing settings
         cursor.execute('''
-            INSERT INTO settings (brightness, timeout, lightMode, colors)
-            VALUES (?, ?, ?, ?)
-        ''', [settings['brightness'], settings['timeout'], settings['lightMode'], settings['colors']])
+            INSERT INTO settings (brightness, timeout, lightMode, colors, language)
+            VALUES (?, ?, ?, ?, ?)
+        ''', [settings['brightness'], settings['timeout'], settings['lightMode'], settings['colors'], settings['language']])
         conn.commit()
     except sqlite3.Error as e:
         print(f"SQLite error while updating settings: {e}")

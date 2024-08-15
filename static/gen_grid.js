@@ -414,3 +414,34 @@ function submitLights() {
 
 document.getElementById('test_led_button').addEventListener('click',TestLights);
 document.getElementById('clear_led_button').addEventListener('click',clearAll);
+
+
+function convertLedNumber(ledNumber, startX, startY, serpentineDirection, rows, columns) {
+    let row, column;
+
+    // Convert LED number to zero-based index
+    const index = ledNumber - 1;
+
+    if (serpentineDirection === "horizontal") {
+        // Handle horizontal serpentine direction
+        row = Math.floor(index / columns);
+        column = (row % 2 === 0) ? (index % columns) : (columns - 1 - (index % columns));
+    } else { // serpentineDirection === "vertical"
+        // Handle vertical serpentine direction
+        column = Math.floor(index / rows);
+        row = (column % 2 === 0) ? (index % rows) : (rows - 1 - (index % rows));
+    }
+
+    // Adjust for starting positions
+    if (startX === "right") {
+        column = columns - 1 - column;
+    }
+    if (startY === "bottom") {
+        row = rows - 1 - row;
+    }
+    ledNumber = row * columns + column;
+
+    return  ledNumber;
+}
+
+

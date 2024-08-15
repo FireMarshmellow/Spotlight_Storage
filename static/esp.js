@@ -1,64 +1,86 @@
 // Function to populate the ESP table with data fetched from the server
 function populateEspTable() {
     const espTable = document.getElementById("esp_table");
+
     // Display loading state
     espTable.innerHTML = '<tr><td colspan="3">Loading...</td></tr>';
+
     // Fetch and populate the ESP data into the table
-    fetch("/api/esp").then((response) => response.json()).then((data) => {
-        const tableBody = document.createElement("tbody");
-        ESPs = data;
-        populateESPMenu(data);
-        data.forEach((esp) => {
-            const row = document.createElement("tr");
-            const cellName = document.createElement("td");
-            cellName.textContent = esp.name;
-            cellName.classList.add("ps-2");
-            const cellIp = document.createElement("td");
-            cellIp.textContent = esp.esp_ip;
-            const cellActions = document.createElement("td");
-            cellActions.classList.add("text-end");
-            // Creating buttons with esp id as data attribute
-            const editButton = document.createElement("button");
-            editButton.type = "button";
-            editButton.classList.add("btn", "btn-link", "me-2", "p-0", "icon-n4px");
-            editButton.dataset.bsTarget = "#esp-modal";
-            editButton.dataset.bsMode = "edit";
-            editButton.dataset.bsEspId = esp.id;
-            editButton.dataset.bsEspIp = esp.esp_ip;
-            editButton.dataset.bsEspName = esp.name;
-            editButton.dataset.bsEspRows = esp.rows;
-            editButton.dataset.bsEspColumns = esp.cols;
-            editButton.dataset.bsEspStartY = esp.start_top;
-            editButton.dataset.bsEspStartX = esp.start_left;
-            editButton.dataset.bsEspSerpentinedirection = esp.serpentine_direction;
-            editButton.dataset.bsToggle = "modal";
-            editButton.innerHTML = '<i data-lucide="file-edit" class="text-primary"></i>';
-            const deleteButton = document.createElement("button");
-            deleteButton.type = "button";
-            deleteButton.classList.add("btn", "btn-link", "me-2", "p-0", "icon-n4px");
-            deleteButton.dataset.bsTarget = "#esp-delete-modal";
-            deleteButton.dataset.bsEspId = esp.id;
-            deleteButton.dataset.bsEspIp = esp.esp_ip;
-            deleteButton.dataset.bsEspName = esp.name;
-            deleteButton.dataset.bsToggle = "modal";
-            deleteButton.innerHTML = '<i data-lucide="trash" class="text-danger"></i>';
-            cellActions.appendChild(editButton);
-            cellActions.appendChild(deleteButton);
-            row.appendChild(cellName);
-            row.appendChild(cellIp);
-            row.appendChild(cellActions);
-            tableBody.appendChild(row);
+    fetch("/api/esp")
+        .then((response) => response.json())
+        .then((data) => {
+            const tableBody = document.createElement("tbody");
+            ESPs = data;
+            populateESPMenu(data);
+            data.forEach((esp) => {
+                const row = document.createElement("tr");
+
+                const cellName = document.createElement("td");
+                cellName.textContent = esp.name;
+                cellName.classList.add("ps-2");
+
+                const cellIp = document.createElement("td");
+                const ipLink = document.createElement("a");
+                ipLink.href = `http://${esp.esp_ip}`;
+                ipLink.textContent = esp.esp_ip;
+                ipLink.target = "_blank"; // Opens link in a new window/tab
+                ipLink.setAttribute("data-bs-toggle", "tooltip");
+                ipLink.setAttribute("title", "WLED"); // Tooltip text
+                cellIp.appendChild(ipLink);
+
+                const cellActions = document.createElement("td");
+                cellActions.classList.add("text-end");
+
+                // Edit Button
+                const editButton = document.createElement("button");
+                editButton.type = "button";
+                editButton.classList.add("btn", "btn-link", "me-2", "p-0", "icon-n4px");
+                editButton.dataset.bsTarget = "#esp-modal";
+                editButton.dataset.bsMode = "edit";
+                editButton.dataset.bsEspId = esp.id;
+                editButton.dataset.bsEspIp = esp.esp_ip;
+                editButton.dataset.bsEspName = esp.name;
+                editButton.dataset.bsEspRows = esp.rows;
+                editButton.dataset.bsEspColumns = esp.cols;
+                editButton.dataset.bsEspStartY = esp.start_top;
+                editButton.dataset.bsEspStartX = esp.start_left;
+                editButton.dataset.bsEspSerpentinedirection = esp.serpentine_direction;
+                editButton.dataset.bsToggle = "modal";
+                editButton.innerHTML = '<i data-lucide="file-edit" class="text-primary"></i>';
+
+                // Delete Button
+                const deleteButton = document.createElement("button");
+                deleteButton.type = "button";
+                deleteButton.classList.add("btn", "btn-link", "me-2", "p-0", "icon-n4px");
+                deleteButton.dataset.bsTarget = "#esp-delete-modal";
+                deleteButton.dataset.bsEspId = esp.id;
+                deleteButton.dataset.bsEspIp = esp.esp_ip;
+                deleteButton.dataset.bsEspName = esp.name;
+                deleteButton.dataset.bsToggle = "modal";
+                deleteButton.innerHTML = '<i data-lucide="trash" class="text-danger"></i>';
+
+                cellActions.appendChild(editButton);
+                cellActions.appendChild(deleteButton);
+
+                row.appendChild(cellName);
+                row.appendChild(cellIp);
+                row.appendChild(cellActions);
+
+                tableBody.appendChild(row);
+            });
+
+            // Clear the table and append the new data
+            espTable.innerHTML = ""; // Clear the loading state
+            espTable.appendChild(tableBody);
+            lucide.createIcons();
+        })
+        .catch((error) => {
+            console.error(error);
+            // Display an error message or handle the error accordingly
+            espTable.innerHTML = '<tr><td colspan="3">Failed to fetch data.</td></tr>';
         });
-        // Clear the table and append the new data
-        espTable.innerHTML = ""; // Clear the loading state
-        espTable.appendChild(tableBody);
-        lucide.createIcons();
-    }).catch((error) => {
-        console.error(error);
-        // Display an error message or handle the error accordingly
-        espTable.innerHTML = '<tr><td colspan="3">Failed to fetch data.</td></tr>';
-    });
 }
+
 
 document.getElementById("save-esp-button").addEventListener('click', () => {
     const saveButton = document.getElementById('save-esp-button');
