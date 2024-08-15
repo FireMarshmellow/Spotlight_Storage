@@ -1,5 +1,6 @@
 # Spotlight Storage - The easy way to find your parts
-![MIMOSA](https://github.com/user-attachments/assets/79bdf901-aec4-45b8-97d5-1e768b65df19)
+![Spotlight-stor](https://github.com/user-attachments/assets/65a8ce23-b271-433b-a8d6-596360a2be69)
+
 
 
 
