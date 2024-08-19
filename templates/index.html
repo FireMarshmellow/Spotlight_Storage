@@ -135,17 +135,17 @@
                 </div>
                 <input type="range" id="settings_timeout" name="timeout" min="0" max="300" step="1" class="form-range">
 
+                <div style="display: flex; align-items: center; margin-top: 10px;">
+                    <span id="locate_led_color_label" >Locate LED-Color:</span>
+                    <span id="picked-color-locate" style="margin-left: 5px;">#00ff00</span>
+                </div>
+                <input type="color" id="color-locate" name="locate" value="#00ff00" class="form-color" style="margin-left: 0.5rem; width: 2rem; height: 1rem; border: none; padding: 0;">
 
-
-                <label for="color-locate" style="display: flex; align-items: center;">Locate LED-Color:
-                    <span id="picked-color-locate" style="margin-left: 0.5rem">#00ff00</span>
-                    <input type="color" id="color-locate" name="locate" value="#00ff00" class="form-color" style="margin-left: 0.5rem; width: 2rem; height: 1rem; border: none; padding: 0;">
-                </label>
-
-                <label for="color-standby" style="display: flex; align-items: center;">Standby LED-Color:
-                    <span id="picked-color-standby" style="margin-left: 0.5rem">#f0f0f0</span>
-                    <input type="color" id="color-standby" name="standby" value="#f0f0f0" class="form-color" style="margin-left: 0.5rem; width: 2rem; height: 1rem; border: none; padding: 0;">
-                </label>
+                <div style="display: flex; align-items: center; margin-top: 10px;">
+                    <span id="standby_led_color_label" >Standby LED-Color:</span>
+                    <span id="picked-color-standby" style="margin-left: 5px;">#f0f0f0</span>
+                </div>
+                <input type="color" id="color-standby" name="standby" value="#f0f0f0" class="form-color" style="margin-left: 0.5rem; width: 2rem; height: 1rem; border: none; padding: 0;">
 
             </div>
             <hr>

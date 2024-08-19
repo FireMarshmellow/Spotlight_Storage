@@ -54,8 +54,8 @@
                     document.getElementById('brightness-title').textContent = translation.settings_brightness;
                     document.getElementById('timeout-title').textContent = translation.settings_timeout;
                     
-                    //document.getElementById('locate_led_color_label').textContent = translation.locate_led_color;
-                    //document.getElementById('standby_led_color_label').textContent = translation.standby_led_color;
+                    document.getElementById('locate_led_color_label').textContent = translation.locate_led_color;
+                    document.getElementById('standby_led_color_label').textContent = translation.standby_led_color;
                     
                     document.getElementById('esp_devices_text').textContent = translation.esp_devices_text;
                     document.getElementById('add_esp_button').textContent = translation.add_esp_button;
