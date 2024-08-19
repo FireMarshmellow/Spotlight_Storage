@@ -9,6 +9,7 @@ import time
 import os
 from werkzeug.utils import secure_filename
 
+
 # Creating a Flask application instance
 app = Flask(__name__)
 app.config['JSON_SORT_KEYS'] = False
@@ -117,6 +118,7 @@ def settings():
         # If the request method is GET, read data from the database and return as JSON
         return jsonify(db.read_settings())
     elif request.method == 'POST':
+        print(request.get_json())
         db.update_settings(request.get_json())  # Update settings in the database
         return jsonify({'success': True})
 
@@ -212,9 +214,7 @@ def item(id):
                 ip = item['ip']
             else:
                 ip = db.get_ip_by_name(item['ip'])
-            esp = db.get_esp_settings_by_ip(ip)
-            light(item['position'], ip, esp, item['quantity'])
-
+            light(item['position'], ip, item['quantity'])
             return jsonify({'success': True})
         else:
             return jsonify({'error': 'Invalid action'}), 400
@@ -241,147 +241,6 @@ def send_request(target_ip, data, timeout=0.2):
         print(f"Timeout error: {e}")
 
 
-def get_total_leds(ip):
-    try:
-        response = requests.get(f"http://{ip}/json/info")
-        response.raise_for_status()
-        info = response.json()
-        return info['leds']['count']
-    except requests.RequestException as e:
-        print(f"Error fetching total LEDs: {e}")
-        return 1000  # Default value if the request fails
-
-
-def set_leds(led_indices, color, off_color, timeout, ip, testing):
-    # Initialize payload for turning off LEDs
-
-    payload = {
-           "on": True,  # Keep LEDs on
-           "seg": {
-              "i": []
-        }
-    }
-    # Turn off the previous LEDs by setting them to the off_color
-    for i in range(get_total_leds(ip)):
-        payload["seg"]["i"].extend([i, '#000000'])
-    send_request(ip, payload)
-
-    # Convert the LED indices from a string to a list of integers if necessary
-    if isinstance(led_indices, str):
-        led_indices_new = list(map(int, led_indices.split(',')))
-    else:
-        led_indices_new = list(map(int, led_indices))
-
-    # If the new positions are different from the previous ones, update them
-    if app.previous_positions != led_indices_new:
-        payload = {
-            "on": True,
-            "seg": {
-                "i": []
-            }
-        }
-
-        # Light up the current LEDs with the desired color
-        for i in led_indices_new:
-            payload["seg"]["i"].extend([i, color[1:]])
-
-        # Send the API request to set the colors of the LEDs
-        send_request(ip, payload)
-
-        # Update the previous positions to the current ones
-        app.previous_positions = led_indices_new
-    else:
-        # If the positions are the same, turn off all LEDs
-        payload = {
-            "on": True,
-            "seg": {
-                "i": []
-            }
-        }
-        for i in range(get_total_leds(ip)):
-            payload["seg"]["i"].extend([i, '#000000'])
-        send_request(ip, payload)
-        timeout = 0
-        app.previous_positions = []  # Reset previous positions
-
-    # Handle timeout and turn off LEDs after delay if needed
-    time.sleep(timeout)
-    if timeout > 0 and not testing:
-        payload = {
-            "on": True,
-            "seg": {
-                "i": []
-            }
-        }
-        for i in range(get_total_leds(ip)):
-            payload["seg"]["i"].extend([i, off_color[1:]])
-
-        send_request(ip, payload)
-        app.previous_positions = []  # Reset previous positions
-
-
-def light(positions, ip, esp, quantity=1, testing=False):
-    # Set global settings
-    set_global_settings()
-    positions_list = position_optimization(sorted(json.loads(positions)), esp)
-    if testing:
-        set_leds(positions_list, app.locateColor, app.standbyColor, app.timeout + 3, ip, testing)
-    elif quantity <= 0:
-        set_leds(positions_list, "#FF0000", app.standbyColor, app.timeout, ip, testing)
-    else:
-        set_leds(positions_list, app.locateColor, app.standbyColor, app.timeout, ip, testing)
-
-
-def position_optimization(positions, esp):
-    segments = []
-    rows = esp['rows']
-    columns = esp['cols']
-    start_y = esp['start_top'].lower()  # Convert to lowercase
-    start_x = "right" if esp['start_left'] == "1" else "left" if esp['start_left'] == "0" else esp['start_left']
-    serpentine_direction = "vertical" if esp['serpentine_direction'] == "1" else "horizontal" if esp[
-                                                                                                     'serpentine_direction'] == "0" else \
-        esp['serpentine_direction']
-
-    for pos in positions:
-        i = pos - 1
-
-        if serpentine_direction == "horizontal":
-            # Handle horizontal serpentine direction
-            row = i // columns
-            column = i % columns if row % 2 == 0 else columns - 1 - (i % columns)
-        else:  # serpentine_direction == "vertical"
-            # Handle vertical serpentine direction
-            column = i // rows
-            row = i % rows if column % 2 == 0 else rows - 1 - (i % rows)
-
-        # Adjust for starting positions
-        if start_x == "right":
-            column = columns - 1 - column
-        if start_y == "bottom":
-            row = rows - 1 - row
-
-        # Calculate the LED number
-        led_number = row * columns + column
-        # Append the last segment
-        segments.append(led_number)
-
-    return segments
-
-
-@app.route('/test_lights', methods=['POST'])
-def test_lights():
-    set_global_settings()
-    lights_list = request.get_json()
-    for ip, positions in lights_list.items():
-        # Validate positions list
-        if not positions or not all(isinstance(pos, int) for pos in positions):
-            return {'error': 'Invalid positions list'}, 400
-        positions_json = json.dumps(positions)
-        esp = db.get_esp_settings_by_ip(ip)
-        light(positions_json, ip, esp, 1, True)
-    return {'status': 'Lights controlled'}
-
-
 def hex_to_rgb(hex_color):
     if hex_color:
         # Remove '#' if present in the hexadecimal color code
@@ -403,65 +262,146 @@ def hex_to_rgb(hex_color):
         return [0, 255, 0]
 
 
+def get_total_leds(ip):
+    try:
+        response = requests.get(f"http://{ip}/json/info")
+        response.raise_for_status()
+        info = response.json()
+        return info['leds']['count']
+    except requests.RequestException as e:
+        print(f"Error fetching total LEDs: {e}")
+        return 1000  # Default value if the request fails
+
+
+def clear_segments(ip):
+    off_data = {
+        "on": False,
+        "bri": 128,
+        "transition": 0,
+        "mainseg": 0,
+        "seg": [{"id": 1, "start": 0, "stop": 0, "grp": 1}] + [{"stop": 0} for _ in range(15)]
+    }
+    send_request(ip, off_data)
+
+
+def light(positions, ip, quantity=1, testing=False):
+    # Get the total number of LEDs from the WLED API
+    total_leds = get_total_leds(ip)
+
+    # Clear existing segments if they exist
+    if app.delSegments:
+        off_data = {"on": False, "bri": 0, "transition": 0, "mainseg": 0, "seg": []}
+        send_request(ip, off_data)
+        time.sleep(0.3)
+    else:
+        clear_segments(ip)
+    # Set global settings
+    set_global_settings()
+
+    # Initialize default segments
+    segments = [{"id": 0, "start": 0, "stop": total_leds, "col": [0, 0, 0]}]
+    del_segments = [{"id": 0, "start": 0, "stop": total_leds, "col": [0, 0, 0]}]
+
+    # Set color based on quantity
+    locate_color = hex_to_rgb(app.locateColor) if quantity >= 1 else [255, 0, 0]
+    standby_color = hex_to_rgb(app.standbyColor)
+
+    # Parse and sort positions
+    positions_list = position_optimization(sorted(json.loads(positions)))
+
+    # Check if positions have changed
+    if app.previous_positions != positions:
+        # Create segments based on positions
+        for i, (start, end) in enumerate(positions_list):
+            if start is None or end is None:
+                continue  # Skip if pos is None
+            start_num = int(start - 1)
+            stop_num = int(end)
+            segments.append(
+                {"id": i + 1, "start": start_num, "stop": stop_num, "col": [locate_color]})
+            del_segments.append({"id": i + 1, "start": 0, "stop": total_leds, "col": [standby_color]})
+
+        # If there are more segments in the previous state, turn off the excess ones
+        if len(app.previous_positions) > len(positions_list):
+            clear_segments(ip)
+
+        # Turn on the new segments
+        on_data = {"on": True, "bri": 255 * app.brightness, "transition": 0, "mainseg": 0, "seg": segments}
+        send_request(ip, on_data)
+        app.previous_positions = positions
+    else:
+        # Turn off existing segments and reset previous_positions if positions haven't changed
+        off_data = {"bri": 255 * app.brightness, "transition": 0, "mainseg": 0, "seg": del_segments}
+        send_request(ip, off_data)
+        clear_segments(ip)
+        app.previous_positions = []
+        app.timeout = 0
+
+    # If timeout is set, sleep and then turn off the segments
+    if app.timeout != 0 and not testing:
+        time.sleep(app.timeout)
+        off_data = {"bri": 255 * app.brightness, "transition": 0, "mainseg": 0, "seg": del_segments}
+        send_request(ip, off_data)
+        clear_segments(ip)
+        app.previous_positions = []
+
+    # For testing, sleep for at least 3 seconds and then turn off the segments
+    if testing:
+        app.previous_positions = []
+        time.sleep(app.timeout + 3)
+        off_data = {"bri": 255 * app.brightness, "transition": 0, "mainseg": 0, "seg": del_segments}
+        send_request(ip, off_data)
+        clear_segments(ip)
+
+    # Update global delSegments and previous_positions
+    app.delSegments = del_segments
+
+
+def position_optimization(positions):
+    segments = []
+    start = positions[0]
+    end = positions[0]
+    for i in range(1, len(positions)):
+        # Check if the current position is consecutive to the previous one
+        if positions[i] == positions[i - 1] + 1:
+            end = positions[i]
+        else:
+            segments.append((start, end))
+            start = positions[i]
+            end = positions[i]
+    # Append the last segment
+    segments.append((start, end))
+    return segments
+
+
+@app.route('/test_lights', methods=['POST'])
+def test_lights():
+    set_global_settings()
+    lights_list = request.get_json()
+    testing = True
+    for ip, positions in lights_list.items():
+        # Validate positions list
+        if not positions or not all(isinstance(pos, int) for pos in positions):
+            return {'error': 'Invalid positions list'}, 400
+        positions_json = json.dumps(positions)
+        light(positions_json, ip, 1, testing)
+    return {'status': 'Lights controlled'}
+
+
 @app.route('/led/on', methods=['GET'])
 def turn_led_on():
     set_global_settings()
-    app.previous_positions = []  # Reset previous positions
     if request.method == 'GET':
         ips = get_unique_ips_from_database()
         for ip in ips:
             total_leds = get_total_leds(ip)
-            on_data = {
-                "on": True,
-                "bri": app.brightness,
-                "transition": 5,
-                "mainseg": 0,
-                "seg": [
-                    {
-                        "id": 0,
-                        "start": 0,
-                        "stop": total_leds,
-                        "grp": 1,
-                        "spc": 0,
-                        "of": 0,
-                        "on": True,
-                        "frz": False,
-                        "cct": 127,
-                        "set": 0,
-                        "col": [hex_to_rgb(app.standbyColor)],
-                        "fx": 0,
-                        "sx": 128,
-                        "ix": 128,
-                        "pal": 0,
-                        "c1": 128,
-                        "c2": 128,
-                        "c3": 16,
-                        "sel": True,
-                        "rev": False,
-                        "mi": False,
-                        "o1": False,
-                        "o2": False,
-                        "o3": False,
-                        "si": 0,
-                        "m12": 1
-                    },
-                    {"stop": 0},
-                    {"stop": 0},
-                    {"stop": 0},
-                    {"stop": 0},
-                    {"stop": 0},
-                    {"stop": 0},
-                    {"stop": 0},
-                    {"stop": 0},
-                    {"stop": 0},
-                    {"stop": 0},
-                    {"stop": 0},
-                    {"stop": 0},
-                    {"stop": 0},
-                    {"stop": 0},
-                    {"stop": 0}
-                ]
-            }
+            on_data = {"on": True, "bri": 255 * app.brightness, "transition": 0, "mainseg": 0, "seg": [
+                {"id": 0, "grp": 1, "spc": 0, "of": 0, "on": True, "frz": False, "bri": 255, "cct": 127, "set": 0,
+                 "col": [[255 * app.brightness, 255 * app.brightness, 255 * app.brightness], [0, 0, 0], [0, 0, 0]],
+                 "fx": 0, "sx": 128, "ix": 128, "pal": 0, "c1": 128, "c2": 128, "c3": 16, "sel": True, "rev": False,
+                 "mi": False, "o1": False, "o2": False, "o3": False, "si": 0, "m12": 0}, {"stop": 0}, {"stop": 0},
+                {"stop": 0}, {"stop": 0}, {"stop": 0}, {"stop": 0}, {"stop": 0}, {"stop": 0}, {"stop": 0}, {"stop": 0},
+                {"stop": 0}, {"stop": 0}, {"stop": 0}, {"stop": 0}, {"stop": 0}]}
             send_request(ip, on_data)
         return jsonify({'success': True})
 
@@ -469,44 +409,29 @@ def turn_led_on():
 # Route to turn the LED off
 @app.route('/led/off', methods=['GET'])
 def turn_led_off():
-    ips = get_unique_ips_from_database()
-    app.previous_positions = []  # Reset previous positions
-    for ip in ips:
-        total_leds = get_total_leds(ip)
-        on_data = {
-            "on": False,
-            "transition": 5,
-            "seg": [
-                {
+    set_global_settings()
+
+    if request.method == 'GET':
+        ips = get_unique_ips_from_database()
+        for ip in ips:
+            #clear_segments(ip)
+            {
+                "on": True,
+                "bri": 150,
+                "transition": 5,
+                "mainseg": 0,
+                "seg": [{
                     "id": 0,
-                    "start": 0,
-                    "stop": total_leds,
-                },
-                {"stop": 0},
-                {"stop": 0},
-                {"stop": 0},
-                {"stop": 0},
-                {"stop": 0},
-                {"stop": 0},
-                {"stop": 0},
-                {"stop": 0},
-                {"stop": 0},
-                {"stop": 0},
-                {"stop": 0},
-                {"stop": 0},
-                {"stop": 0},
-                {"stop": 0},
-                {"stop": 0}
-            ]
-        }
-        send_request(ip, on_data)
-    return jsonify({'success': True})
+                    "col": [[0, 0, 0]],  # Setzt die Farbe auf Schwarz
+                    "fx": 0  # Setzt den Effekt auf "aus"
+                }]
+            }
+        return jsonify()
 
 
 # Route to turn the LED to Party
 @app.route('/led/party', methods=['GET'])
 def turn_led_party():
-    app.previous_positions = []  # Reset previous positions
     set_global_settings()
     if request.method == 'GET':
         ips = get_unique_ips_from_database()
@@ -514,25 +439,24 @@ def turn_led_party():
             party_data = {"on": True, "bri": round(255 * app.brightness), "transition": 5, "mainseg": 0, "seg": [
                 {"id": 0, "grp": 1, "spc": 0, "of": 0, "on": True, "frz": False, "bri": 255, "cct": 127, "set": 0,
                  "col": [[255, 255, 255], [0, 0, 0], [0, 0, 0]], "fx": 9, "sx": 128, "ix": 128, "pal": 0, "c1": 128,
-                 "c2": 128, "c3": 16},
-                {"stop": 0},
-                {"stop": 0},
-                {"stop": 0},
-                {"stop": 0},
-                {"stop": 0},
-                {"stop": 0},
-                {"stop": 0},
-                {"stop": 0},
-                {"stop": 0},
-                {"stop": 0},
-                {"stop": 0},
-                {"stop": 0},
-                {"stop": 0},
-                {"stop": 0},
+                 "c2": 128, "c3": 16, "sel": True, "rev": False, "mi": False, "o1": False, "o2": False, "o3": False,
+                 "si": 0, "m12": 0}, {"stop": 0}, {"stop": 0}, {"stop": 0}, {"stop": 0}, {"stop": 0}, {"stop": 0},
+                {"stop": 0}, {"stop": 0}, {"stop": 0}, {"stop": 0}, {"stop": 0}, {"stop": 0}, {"stop": 0}, {"stop": 0},
                 {"stop": 0}]}
             send_request(ip, party_data)
         return jsonify()
 
+# Route to get available languages based on the JSON files in the 'translations' folder
+@app.route('/api/translations', methods=['GET'])
+def get_languages():
+    translations_dir = '/static/translations'  # Define the directory containing the translation files
+    try:
+        # List all .json files in the translations directory
+        languages = [f.split('.')[0] for f in os.listdir(translations_dir) if f.endswith('.json')]
+        return jsonify(languages), 200
+    except Exception as e:
+        print(f"Error fetching languages: {e}")
+        return jsonify({"error": "An error occurred fetching available languages"}), 500
 
 if __name__ == '__main__':
     app.run(host="0.0.0.0", debug=True)
