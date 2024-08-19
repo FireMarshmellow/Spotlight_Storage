@@ -26,7 +26,10 @@
             <ul class="navbar-nav me-auto mb-2 mb-md-0">
                 <li class="nav-item">
                     <button type="button" class="btn btn-outline-success pe-3" data-bs-toggle="modal" data-bs-target="#item-modal">
-                        <span class="icon-n4px"><i data-lucide="plus" class="me-2"></i>Add Item</span>
+                        <span class="icon-n4px">
+                            <i data-lucide="plus" class="me-2"></i>
+                        </span>
+                        <span id="add_item">Add Item</span>
                     </button>
                 </li>
 
@@ -51,20 +54,20 @@
             </div>
 
 
-            <div class="dropdown" data-bs-toggle="tooltip" title="Sorting methods">
+            <div class="dropdown" data-bs-toggle="tooltip" id="sortingMethods_text" title="Sorting methods">
                 <button class="btn btn-outline-secondary my-2 my-md-0 me-0 me-md-2 dropdown-toggle icon-n4px" type="button" data-bs-toggle="dropdown" aria-expanded="false">
                     <i data-lucide="arrow-down-up"></i>
                 </button>
                 <ul class="dropdown-menu dropdown-menu-end" id="sort_method">
-                    <li><a class="dropdown-item" href="#" onclick="sortItems('ip')"><i data-lucide="arrow-down-0-1" class="me-2"></i>Box</a></li>
-                    <li><a class="dropdown-item" href="#" onclick="sortItems('id')"><i data-lucide="arrow-down-0-1" class="me-2"></i>ID</a></li>
-                    <li><a class="dropdown-item" href="#" onclick="sortItems('name')"><i data-lucide="arrow-down-a-z" class="me-2"></i>Name</a></li>
-                    <li><a class="dropdown-item" href="#" onclick="sortItems('quantity')"><i data-lucide="arrow-down-0-1" class="me-2"></i>Quantity</a>
-                    <li><a class="dropdown-item" href="#" onclick="sortItems('position')"><i data-lucide="arrow-down-0-1" class="me-2"></i>Location</a>
+                    <li><a id="sortBybox" class="dropdown-item" href="#" onclick="sortItems('ip')"><i data-lucide="arrow-down-0-1" class="me-2"></i>Box</a></li>
+                    <li><a id="sortByid" class="dropdown-item" href="#" onclick="sortItems('id')"><i data-lucide="arrow-down-0-1" class="me-2"></i>ID</a></li>
+                    <li><a id="sortByname" class="dropdown-item" href="#" onclick="sortItems('name')"><i data-lucide="arrow-down-a-z" class="me-2"></i>Name</a></li>
+                    <li><a id="sortByquantity" class="dropdown-item" href="#" onclick="sortItems('quantity')"><i data-lucide="arrow-down-0-1" class="me-2"></i>Quantity</a>
+                    <li><a id="sortBylocation" class="dropdown-item" href="#" onclick="sortItems('position')"><i data-lucide="arrow-down-0-1" class="me-2"></i>Location</a>
                     </li>
                 </ul>
             </div>
-            <div class="dropdown" data-bs-toggle="tooltip" title="Sorting by Tags">
+            <div class="dropdown" data-bs-toggle="tooltip" id="sortingBytags_text" title="Sorting by Tags">
                 <button class="btn btn-outline-secondary my-2 my-md-0 me-0 me-md-2 dropdown-toggle icon-n4px" type="button" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false">
                     <i data-lucide="filter"></i>
                 </button>
@@ -98,14 +101,25 @@
         </div>
         <div class="offcanvas-body">
             <div class="row mb-3">
-                <h6>LEDs</h6>
+                <h6 id="leds_text">LEDs</h6>
                 <div class="btn-group mb-2" role="group">
                     <button id="on-button" class="btn btn-success pe-3">
-                        <span class="icon-n4px"><i data-lucide="lightbulb" class="me-2"></i>On</span></button>
+                        <span class="icon-n4px">
+                            <i data-lucide="lightbulb" class="me-2"></i>
+                        </span>
+                        <span id="on_btn_label">On</span>
+                    </button>
                     <button id="off-button" class="btn btn-danger pe-3">
-                        <span class="icon-n4px"><i data-lucide="lightbulb-off" class="me-2"></i>Off</span></button>
+                        <span class="icon-n4px">
+                            <i data-lucide="lightbulb-off" class="me-2"></i>
+                        </span>
+                        <span id="off_btn_label">Off</span>
+                    </button>    
                     <button id="party-button" class="btn btn-rainbow pe-3">
-                        <span class="icon-n4px"><i data-lucide="party-popper" class="me-2"></i> Party-Mode</span>
+                        <span class="icon-n4px">
+                            <i data-lucide="party-popper" class="me-2"></i>
+                        </span>
+                        <span id="party_btn_label">Party Mode</span>
                     </button>
                 </div>
 
@@ -130,36 +144,62 @@
             </div>
             <hr>
             <div class="row">
-                <h6>ESP Devices</h6>
+                <h6 id="esp_devices_text">ESP Devices</h6>
                 <div>
                     <table class="table table-sm table-striped overflow-hidden" id="esp_table">
                     </table>
                 </div>
                 <div>
                     <button type="button" class="btn btn-outline-success me-0 me-md-2 pe-3" data-bs-toggle="modal" data-bs-target="#esp-modal">
-                        <span class="icon-n4px"><i data-lucide="plus" class="me-2"></i>Add ESP Device</span>
+                        <span class="icon-n4px">
+                            <i data-lucide="plus" class="me-2"></i>
+                        </span>
+                        <span id="add_esp_button">Add ESP Device</span>
                     </button>
                 </div>
             </div>
             <hr>
             <div class="row">
-                <h6>Web Interface</h6>
+                <h6 id="titile">Web Interface</h6>
                 <div class="btn-group" role="group">
                     <button type="button" class="btn btn-light pe-3" data-bs-theme-value="light">
-                        <span class="icon-n4px"><i data-lucide="sun" class="me-2"></i>Light</span></button>
+                        <span class="icon-n4px">
+                            <i data-lucide="sun" class="me-2"></i>
+                        </span>
+                        <span id="light_mode_label">Light</span>
+                    </button>
                     <button type="button" class="btn btn-dark pe-3" data-bs-theme-value="dark">
-                        <span class="icon-n4px"><i data-lucide="moon" class="me-2"></i>Dark</span></button>
+                        <span class="icon-n4px">
+                            <i data-lucide="moon" class="me-2"></i>
+                        </span>
+                        <span id="dark_mode_label">Dark</span>
+                    </button>
                     <button type="button" class="btn btn-secondary pe-3" data-bs-theme-value="auto">
-                        <span class="icon-n4px"><i data-lucide="sun-moon" class="me-2"></i>Auto</span></button>
+                        <span class="icon-n4px">
+                            <i data-lucide="sun-moon" class="me-2"></i>
+                        </span>
+                        <span id="auto_mode_label">Auto</span>
+                    </button>
                 </div>
             </div>
             <hr>
             <div class="row">
-                <h6>Inventur</h6>
+                <h6 id="inventur_label">Inventur</h6>
                 <div>
                     <button  id="inventur" type="button" class="btn btn-outline-success pe-3">
-                        <span class="icon-n4px"><i data-lucide="scroll-text" class="me-2"></i>Inventur</span>
+                        <span class="icon-n4px">
+                            <i data-lucide="scroll-text" class="me-2"></i>
+                        </span>
+                        <span id="inventur_btn_label">Inventur</span>
                     </button>
+                </div>
+            </div>
+            <hr>
+            <div class="col-4">
+                <div class="form-floating mb-3">
+                    <select class="form-select" id="language-selector">
+                    </select>
+                    <label id="language_selector_label" for="language-selector">Language</label>
                 </div>
             </div>
         </div>
@@ -176,51 +216,59 @@
 
                     <div class="form-floating mb-3">
                         <input type="text" class="form-control" id="item_name" placeholder="Name" required>
-                        <label for="item_name">Item name</label>
+                        <label id="item_name_label" for="item_name">Item name</label>
                     </div>
                     <div class="form-floating mb-3">
                         <input type="text" class="form-control" id="item_url" placeholder="URL">
-                        <label for="item_url">Item URL</label>
+                        <label id="item_url_label" for="item_url">Item URL</label>
                     </div>
                     <div class="form-floating mb-3">
                         <input type="number" class="form-control" id="item_quantity" placeholder="1" required>
-                        <label for="item_quantity">Item quantity</label>
+                        <label id="item_quantity_label" for="item_quantity">Item quantity</label>
                     </div>
 
                     <div class="row">
                         <div class="col-4 pe-2">
                             <div class="form mb-3">
-                                <label for="item_image">Item image URL</label>
-                                <input type="url" class="form-control" id="item_image" placeholder="https://placehold.co/150x100?text=Hello+World">
+                                <label id="item_imageUrl_label" for="item_image">Item image URL</label>
+                                <input type="url" class="form-control" id="item_image" placeholder="https://placehold.co/150x100">
 
                             </div>
                         </div>
                         <div class="col-1 text-center or-text">
-                            <span>or</span>
+                            <span id="or_text">or</span>
                         </div>
                         <div class="col-7 ps-2">
                             <div class="form">
-                                <label for="item_image_upload">Upload image file</label>
+                                <label id="item_imageUplad_label" for="item_image_upload">Upload image file</label>
                                 <input type="file" class="form-control" id="item_image_upload" name="file">
                             </div>
                         </div>
                     </div>
 
                     <div class="form mb-3">
-                        <label for="item_tags">Tags</label>
+                        <label id="item_tag_label" for="item_tags">Tags</label>
                         <input type="text" class="form-control" id="item_tags">
                     </div>
 
-                    <label for="item_esp_select">Select an ESP device</label>
+                    <label for="item_esp_select" id="item_esp_select_label">Select an ESP device</label>
                     <select class="form-select mb-3" id="item_esp_select">
                     </select>
                     <div>
                         <button id="test_led_button" class="btn btn-success pe-3">
-                            <span class="icon-n4px"><i data-lucide="lightbulb" class="me-2"></i>Test LEDs</span></button>
+                            <span class="icon-n4px">
+                                <i data-lucide="lightbulb" class="me-2"></i>
+                            </span>
+                            <span id="test_led_btn_label">Test LEDs</span>
+                        </button>
                         <button id="clear_led_button" class="btn btn-danger pe-3">
-                            <span class="icon-n4px"><i data-lucide="x" class="me-2"></i>Clear Grid</span></button>
+                            <span class="icon-n4px">
+                                <i data-lucide="x" class="me-2"></i>
+                            </span>
+                            <span id="clear_grid_btn_label">Clear Grid</span>
+                        </button>
                     </div>
-                    <label for="item-canvas-container">Select LEDs to assign to item</label>
+                    <p id="item_select_leds_label">Select LEDs to assign to item</p>
 
                     <div id="item-canvas-container" class="col-10 mx-auto">
                         <canvas id="item-responsive-canvas"></canvas>
@@ -229,9 +277,17 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary pe-3" id="cancel-item-button" data-bs-dismiss="modal"  onclick="resetModal()">
-                        <span class="icon-n4px"><i data-lucide="x" class="me-2"></i>Cancel</span></button>
+                        <span class="icon-n4px">
+                            <i data-lucide="x" class="me-2"></i>
+                        </span>
+                        <span id="item_cancel_btn_label">Cancel</span>
+                    </button>
                     <button type="button" class="btn btn-success pe-3" id="save-item-button" data-bs-dismiss="modal" >
-                        <span class="icon-n4px"><i data-lucide="plus" class="me-2"></i>Add</span></button>
+                        <span class="icon-n4px">
+                            <i data-lucide="plus" class="me-2"></i>
+                        </span>
+                        <span id="item_add_btn_label">Add</span>
+                    </button>
                 </div>
             </div>
         </div>
@@ -242,7 +298,7 @@
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h1 class="modal-title fs-5" id="inventur-modal-label">Inventur</h1>
+                    <h1 id="inventur_box_label" class="modal-title fs-5" >Inventur</h1>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body text-center">
@@ -261,10 +317,12 @@
                     <!-- Add buttons with better styling -->
                     <div class="d-flex justify-content-center">
                         <button id="edit-btn-inventur" class="btn btn-outline-primary me-2" data-bs-toggle="tooltip" title="Edit">
-                            <i data-lucide="file-edit"></i> Edit
+                            <i data-lucide="file-edit"></i>
+                            <span id="edit_inventur_btn_label">Edit</span>
                         </button>
                         <button id="continue-btn-inventur" class="btn btn-outline-success" data-bs-toggle="tooltip" title="Continue">
-                            <i data-lucide="step-forward"></i> Continue
+                            <i data-lucide="step-forward"></i>
+                            <span id="continue_inventur_btn_label">Continue</span>
                         </button>
                     </div>
                 </div>
@@ -273,11 +331,17 @@
                 <div class="modal-footer">
                     <!-- Add a button to continue -->
                     <button type="button" class="btn btn-secondary pe-3" id="cancel-inventur-button" data-bs-dismiss="modal">
-                        <span class="icon-n4px"><i data-lucide="x" class="me-2"></i>Cancel</span>
+                        <span class="icon-n4px">
+                            <i data-lucide="x" class="me-2"></i>
+                        </span>
+                        <span id="cancel_inventur_btn_label">Cancel</span>
                     </button>
                     <!-- Add a button to save the item -->
                     <button type="button" class="btn btn-success pe-3" id="save-inventur-button" data-bs-dismiss="modal">
-                        <span class="icon-n4px"><i data-lucide="save" class="me-2"></i>Save</span>
+                        <span class="icon-n4px">
+                            <i data-lucide="save" class="me-2"></i>
+                        </span>
+                        <span id="save_inventur_btn_label">Save</span>
                     </button>
                 </div>
             </div>
@@ -341,7 +405,7 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" id="cropCancel" data-bs-dismiss="modal">Cancel</button>
-                    <button type="button" class="btn btn-primary" id="cropAndSaveBtn">Crop and Save</button>
+                    <button type="button" class="btn btn-primary" id="cropAndSaveBtn">Crop and save</button>
                 </div>
             </div>
         </div>
@@ -361,23 +425,23 @@
                     </div>
                     <div class="form-floating mb-3">
                         <input type="text" class="form-control" id="esp_name" placeholder="Name" required>
-                        <label for="esp_name">Name</label>
+                        <label id="esp_name_text" for="esp_name">Name</label>
                     </div>
                     <div class="form-floating mb-3">
                         <input type="text" class="form-control" id="esp_ip" placeholder="IP">
-                        <label for="esp_ip">IP address</label>
+                        <label id="esp_ip_text" for="esp_ip">IP address</label>
                     </div>
                     <div class="row">
                         <div class="col-6 pe-2">
                             <div class="form-floating mb-3">
                                 <input type="number" class="form-control" id="esp_rows" placeholder="4" min="1" value="4" required>
-                                <label for="esp_rows">Rows</label>
+                                <label id="esp_rows_text" for="esp_rows">Rows</label>
                             </div>
                         </div>
                         <div class="col-6 ps-2">
                             <div class="form-floating mb-3">
                                 <input type="number" class="form-control" id="esp_columns" placeholder="4" min="1" value="4" required>
-                                <label for="esp_columns">Columns</label>
+                                <label id="esp_columns_text" for="esp_columns">Columns</label>
                             </div>
                         </div>
                     </div>
@@ -385,29 +449,29 @@
                         <div class="col-4 pe-0">
                             <div class="form-floating mb-3">
                                 <select class="form-select" id="esp_startx">
-                                    <option selected data-startx="Left">Left</option>
-                                    <option value="1" data-startx="Right">Right</option>
+                                    <option id="left_label" selected data-startx="Left">Left</option>
+                                    <option id="right_label" value="1" data-startx="Right">Right</option>
                                 </select>
-                                <label for="esp_startx">Start Left</label>
+                                <label id="start_left_label" for="esp_startx">Start Left</label>
                             </div>
                         </div>
                         <div class="col-4">
                             <div class="form-floating mb-3">
                                 <select class="form-select" id="esp_starty">
-                                    <option selected data-starty="Top">Top</option>
-                                    <option data-starty="Bottom">Bottom</option>
+                                    <option id="top_label" selected data-starty="Top">Top</option>
+                                    <option id="bottom_label" data-starty="Bottom">Bottom</option>
                                 </select>
-                                <label for="esp_starty">Start Top</label>
+                                <label id="start_top_label" for="esp_starty">Start Top</label>
                             </div>
 
                         </div>
                         <div class="col-4 ps-0">
                             <div class="form-floating mb-3">
                                 <select class="form-select" id="esp_serpentine">
-                                    <option selected data-serpentine="Horizontal">Horizontal</option>
-                                    <option value="1" data-serpentine="Vertical">Vertical</option>
+                                    <option id="horizontal_label" selected data-serpentine="Horizontal">Horizontal</option>
+                                    <option id="vertical_label" value="1" data-serpentine="Vertical">Vertical</option>
                                 </select>
-                                <label for="esp_serpentine">Serpentine Direction</label>
+                                <label id="serpentine_dir_label" for="esp_serpentine">Serpentine Direction</label>
                             </div>
                         </div>
                     </div>
@@ -417,9 +481,17 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary pe-3" data-bs-dismiss="modal">
-                        <span class="icon-n4px"><i data-lucide="x" class="me-2"></i>Cancel</span></button>
+                        <span class="icon-n4px">
+                            <i data-lucide="x" class="me-2"></i>
+                        </span>
+                        <span id="cancel_esp_btn_label">Cancel</span>
+                    </button>
                     <button type="button" class="btn btn-success pe-3" id="save-esp-button">
-                        <span class="icon-n4px"><i data-lucide="plus" class="me-2"></i>Add</span></button>
+                        <span class="icon-n4px">
+                            <i data-lucide="plus" class="me-2"></i>
+                        </span>
+                        <span id="add_esp_btn_label">Add</span>
+                    </button>
                 </div>
             </div>
         </div>
@@ -440,6 +512,8 @@
 <script src="../static/settings.js"></script>
 <script src="../static/gen_grid.js"></script>
 <script src="../static/color-modes.js"></script>
+<script src="../static/translation.js"></script>
+
 
 <script>
     window.addEventListener('beforeunload', function () {
