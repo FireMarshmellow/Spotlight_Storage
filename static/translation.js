@@ -32,13 +32,37 @@
                     document.getElementById('add_item').textContent = translation.add_item;
                     document.getElementById('search').setAttribute('placeholder', translation.search);
                     
-                    // Übersetzte Tooltips setzen
+                    // Translate Tooltips
                     document.getElementById('sortingMethods_text').setAttribute('title', translation.sortingMethods_text);
                     document.getElementById('sortingBytags_text').setAttribute('title', translation.sortingBytags_text);
                     document.getElementById('plus-btn-inventur').setAttribute('title', translation.plus_btn_label);
                     document.getElementById('minus-btn-inventur').setAttribute('title', translation.minus_btn_label);
                     document.getElementById('edit-btn-inventur').setAttribute('title', translation.edit_btn_label);
                     document.getElementById('continue-btn-inventur').setAttribute('title', translation.continue_btn_label);
+
+                    const itemsContainer = document.getElementById('items-container-grid');
+                    const items = Array.from(itemsContainer.children);
+
+                    items.forEach(item => {
+                        const itemId = item.dataset.id;  // Get the item ID from the dataset
+
+                        // Check if each dropdown item exists before setting text content
+                        const copyItem = document.getElementById(`copy_item_${itemId}`);
+                        const deleteItem = document.getElementById(`delete_item_${itemId}`);
+                        const cropImage = document.getElementById(`crop_image_${itemId}`);
+                        copyItem.textContent = translation.copy_item;
+                        deleteItem.textContent = translation.delete_item;
+                        cropImage.textContent = translation.crop_image;
+
+                        // Set tooltip titles
+                        document.getElementById(`plus-btn-${itemId}`)?.setAttribute('title', translation.plus_btn_label);
+                        document.getElementById(`minus-btn-${itemId}`)?.setAttribute('title', translation.minus_btn_label);
+                        document.getElementById(`locate-btn-${itemId}`)?.setAttribute('title', translation.locate_btn_label);
+                        document.getElementById(`edit-btn-${itemId}`)?.setAttribute('title', translation.edit_btn_label);
+                        document.getElementById(`link-btn-${itemId}`)?.setAttribute('title', translation.link_btn_label);
+                    });
+
+
                     // Bootstrap-Tooltips neu initialisieren
                     var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
                     tooltipTriggerList.forEach(function (tooltipTriggerEl) {

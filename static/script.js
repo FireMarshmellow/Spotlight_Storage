@@ -237,16 +237,16 @@ function createItem(item) {
         <!-- Card body with item details and buttons -->
         <div class="card-body p-2">
             <!-- Link to the item -->
-            <a href="${item.link}" target="_blank" class="card-title-link">
-                <h5 class="card-title" data-bs-toggle="tooltip" title="Shop for more">${item.name}</h5>
+            <a href="${item.link}" target="_blank" class="card-title-link" >
+                <h5 id="link-btn-${item.id}" class="card-title" data-bs-toggle="tooltip" title="Shop for more">${item.name}</h5>
             </a>
 
             <!-- Buttons for locating, editing, and dropdown menu -->
             <div class="d-flex justify-content-between align-items-center mb-2">
-                <button class="btn btn-outline-info locate-btn" data-bs-toggle="tooltip" title="Locate" data-item-id="${item.id}">
+                <button class="btn btn-outline-info locate-btn" id="locate-btn-${item.id}" data-bs-toggle="tooltip" title="Locate" data-item-id="${item.id}">
                     <span class="icon-n4px"><i data-lucide="lightbulb"></i></span>
                 </button>
-                <button class="btn btn-outline-primary edit-btn" data-bs-toggle="tooltip" title="Edit">
+                <button class="btn btn-outline-primary edit-btn" id="edit-btn-${item.id}" data-bs-toggle="tooltip" title="Edit">
                     <span class="icon-n4px"><i data-lucide="file-edit"></i></span>
                 </button>
 
@@ -255,27 +255,26 @@ function createItem(item) {
                     <button class="btn btn-outline-secondary" type="button" id="dropdownMenuButton-${item.id}" data-bs-toggle="dropdown" aria-expanded="false">
                         <span class="icon-n4px"><i data-lucide="more-vertical"></i></span>
                     </button>
-                    <ul class=" dropdown-menu" aria-labelledby="dropdownMenuButton-${item.id}">
-                        <li><a class="dropdown-item copy-btn"  href="#">Copy Item</a></li>
-                        <li><a class="dropdown-item delete-btn" href="#">Delete</a></li>
-                        <li><a class="dropdown-item image-edit-btn" href="#">Crop Image</a></li>
+                   <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton-${item.id}">
+                        <li><a id="copy_item_${item.id}" class="dropdown-item copy-btn" href="#">Copy Item</a></li>
+                        <li><a id="delete_item_${item.id}" class="dropdown-item delete-btn" href="#">Delete</a></li>
+                        <li><a id="crop_image_${item.id}" class="dropdown-item image-edit-btn" href="#">Crop Image</a></li>
                     </ul>
                 </div>
             </div>
 
             <!-- Quantity control buttons -->
             <div class="d-flex justify-content-center align-items-center">
-                <button class="btn btn-outline-danger me-auto minus-btn" data-bs-toggle="tooltip" title="-1 from stock" data-item-id="${item.id}">
+                <button class="btn btn-outline-danger me-auto minus-btn" id="minus-btn-${item.id}" data-bs-toggle="tooltip" title="-1 from stock" data-item-id="${item.id}">
                     <span class="icon-n4px"><i data-lucide="minus"></i></span>
                 </button>
                 <span id="quantity-${item.id}">${item.quantity}</span>
-                <button class="btn btn-outline-success ms-auto plus-btn" data-bs-toggle="tooltip" title="+1 to stock" data-item-id="${item.id}">
+                <button class="btn btn-outline-success ms-auto plus-btn" id="plus-btn-${item.id}" data-bs-toggle="tooltip" title="+1 to stock" data-item-id="${item.id}">
                     <span class="icon-n4px"><i data-lucide="plus"></i></span>
                 </button>
             </div>
         </div>
     </div>`;
-
     // Add event listeners for quantity change, locating, deleting, and editing
     col.querySelector('.minus-btn').addEventListener('click', () => {
         handleQuantityChange(item, -1); // Decrease quantity by 1

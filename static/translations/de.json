@@ -60,5 +60,9 @@
     "sortBylocation": "Lagerort",
     "minus_btn_label": "-1 von Bestand",
     "plus_btn_label": "+1 zum Bestand",
-    "locate_btn_label": "Lokalisieren"
+    "locate_btn_label": "Lokalisieren",
+    "copy_item": "Element kopieren",
+    "delete_item": "Löschen",
+    "crop_image": "Bild zuschneiden",
+    "link_btn_label": "Mehr kaufen"
 }
