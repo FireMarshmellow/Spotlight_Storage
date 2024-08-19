@@ -52,7 +52,7 @@ def create_combined_db():
                 timeout INTEGER DEFAULT 5,
                 lightMode TEXT DEFAULT 'light',
                 colors TEXT DEFAULT '[#00ff00, #00ff00]',
-                language TEXT DEFAULT en
+                language TEXT DEFAULT 'en'
             )
         ''')
 
@@ -296,7 +296,6 @@ def get_ip_by_name(esp_name):
 
 
 # Function to read settings from the database
-# Function to read settings from the database
 def read_settings():
     conn = create_combined_db()
     try:
@@ -305,7 +304,13 @@ def read_settings():
         settings = cursor.fetchone()
         if settings is None:
             print("No settings found in the database.")
-            return {}
+            return {
+                'brightness': 100,
+                'timeout': 5,
+                'lightMode': 'light',
+                'colors': ['#ffff00', '#00ffff'],
+                'language': 'en'
+            }
         else:
             # Convert the settings row to a dictionary
             settings_dict = dict(zip([column[0] for column in cursor.description], settings))

@@ -4,6 +4,8 @@ services:
   spotlight-storage:
     build:
       context: .
+    environment:
+      - TRANSLATIONS_DIR=/app/static/translations
     image: spotlight_storage_v4
     ports:
       - "5000:5000"

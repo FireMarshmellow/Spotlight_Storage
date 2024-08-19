@@ -33,7 +33,8 @@ function addSettings(event) {
         document.getElementById("color-standby").value.toString(),
         document.getElementById("color-locate").value.toString()
     ];
-    if (lightMode === undefined){
+    let lightMode;
+    if (lightMode === undefined) {
         lightMode = "light"
     }
     if (language === undefined){

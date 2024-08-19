@@ -7,6 +7,7 @@ COPY favicon.ico favicon.ico
 COPY requirements.txt requirements.txt
 COPY templates templates
 COPY setup.py setup.py
+ENV TRANSLATIONS_DIR=/app/static/translations
 
 
 RUN pip install -r requirements.txt

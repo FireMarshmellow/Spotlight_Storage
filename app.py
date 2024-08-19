@@ -537,7 +537,7 @@ def turn_led_party():
 @app.route('/api/translations', methods=['GET'])
 def get_languages():
     # Define the directory containing the translation files, relative to the location of app.py
-    translations_dir = os.path.join(os.path.dirname(__file__), 'static', 'translations')
+    translations_dir = os.getenv('TRANSLATIONS_DIR', os.path.join(os.path.dirname(__file__), 'static', 'translations'))
 
     try:
         # List all .json files in the translations directory
