@@ -2,7 +2,7 @@ var myOffcanvas = document.getElementById('offcanvasSettings')
 const timeoutRange = document.getElementById('settings_timeout');
 const brightnessRange = document.getElementById('settings_brightness');
 const scrollToTop = document.querySelectorAll('.scroll-to-top');
-
+var language = "en";
 
 
 // Function to update brightness output
@@ -70,6 +70,8 @@ function loadSettings() {
             document.getElementById("color-locate").value = colors[1];
             lightMode = settings.lightMode;
             language = settings.language;
+            console.log(language);
+            loadAvailableLanguages();
         })
         .catch((error) => console.error(error));
 }

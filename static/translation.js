@@ -11,12 +11,13 @@
                         const option = document.createElement('option');
                         option.value = lang;
                         option.textContent = lang.charAt(0).toUpperCase() + lang.slice(1); // Capitalize first letter
+                        // Check if this option matches the 'language' variable
+                        if (lang === language) {
+                             option.selected = true;
+                        }
                         languageSelector.appendChild(option);
                     });
-
-                    // Load default language (first available)
-                    const defaultLang = languages[0];
-                    loadTranslation(defaultLang);
+                    loadTranslation(language);
                 })
                 .catch(error => {
                     console.error('Error loading languages:', error);
@@ -24,8 +25,8 @@
         }
 
         // Load the translation file for the selected language
-        function loadTranslation(language) {
-            fetch(`/static/translations/${language}.json`)
+        function loadTranslation(lang) {
+            fetch(`/static/translations/${lang}.json`)
                 .then(response => response.json())
                 .then(translation => {
                     document.getElementById('add_item').textContent = translation.add_item;
@@ -131,11 +132,8 @@
 
         // Event listener for language selection
         document.getElementById('language-selector').addEventListener('change', function() {
-            const selectedLanguage = this.value;
-            loadTranslation(selectedLanguage);
+            language = this.value;
+            loadTranslation(language);
+            addSettings();
         });
 
-        // Load available languages on page load
-        document.addEventListener('DOMContentLoaded', function() {
-            loadAvailableLanguages();
-        });

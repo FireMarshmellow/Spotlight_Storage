@@ -123,13 +123,19 @@
                     </button>
                 </div>
 
-                <label id="brightness-title" for="settings_brightness">Brightness:
-                    <span id="brightness-display">50%</span></label>
+                <div style="display: flex; align-items: center;">
+                    <span id="brightness-title" >Brightness:</span>
+                    <span id="brightness-display" style="margin-left: 5px;">50%</span>
+                </div>
                 <input type="range" id="settings_brightness" name="brightness" min="0" max="100" step="1" class="form-range">
 
-                <label id="timeout-title" for="settings_timeout">Timeout:
-                    <span id="timeout-display">0m 0s</span></label>
+                <div style="display: flex; align-items: center; margin-top: 10px;">
+                    <span id="timeout-title" >Timeout:</span>
+                    <span id="timeout-display" style="margin-left: 5px;">0m 0s</span>
+                </div>
                 <input type="range" id="settings_timeout" name="timeout" min="0" max="300" step="1" class="form-range">
+
+
 
                 <label for="color-locate" style="display: flex; align-items: center;">Locate LED-Color:
                     <span id="picked-color-locate" style="margin-left: 0.5rem">#00ff00</span>
