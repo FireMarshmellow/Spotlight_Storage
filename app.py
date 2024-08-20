@@ -252,19 +252,30 @@ def get_total_leds(ip):
         return 1000  # Default value if the request fails
 
 
-def set_leds(led_indices, color, off_color, timeout, ip, testing):
-    # Initialize payload for turning off LEDs
+def set_leds(led_indices, color, off_color, ip, testing=False):
+    # Get the total number of LEDs from the WLED API
+    total_leds = get_total_leds(ip)
 
-    payload = {
-        "on": True,  # Keep LEDs on
-        "seg": {
-            "i": []
+    # Clear existing segments if they exist
+    if app.delSegments:
+        off_data = {"on": False, "bri": 0, "transition": 0, "mainseg": 0, "seg": []}
+        send_request(ip, off_data)
+        time.sleep(0.3)
+    else:
+        # Turn off all LEDs with the off_color
+        payload = {
+            "on": True,
+            "seg": {"i": []}
         }
+        for i in range(total_leds):
+            payload["seg"]["i"].extend([i, off_color[1:]])
+        send_request(ip, payload)
+
+    # Initialize payload for turning off LEDs (if needed)
+    off_payload = {
+        "on": True,
+        "seg": {"i": []}
     }
-    # Turn off the previous LEDs by setting them to the off_color
-    for i in range(get_total_leds(ip)):
-        payload["seg"]["i"].extend([i, '#000000'])
-    send_request(ip, payload)
 
     # Convert the LED indices from a string to a list of integers if necessary
     if isinstance(led_indices, str):
@@ -272,52 +283,44 @@ def set_leds(led_indices, color, off_color, timeout, ip, testing):
     else:
         led_indices_new = list(map(int, led_indices))
 
-    # If the new positions are different from the previous ones, update them
+    # Check if the new positions are different from the previous ones
     if app.previous_positions != led_indices_new:
-        payload = {
+        # Initialize payload for turning on LEDs with the desired color
+        on_payload = {
             "on": True,
-            "seg": {
-                "i": []
-            }
+            "seg": {"i": []}
         }
 
         # Light up the current LEDs with the desired color
         for i in led_indices_new:
-            payload["seg"]["i"].extend([i, color[1:]])
+            on_payload["seg"]["i"].extend([i, color[1:]])
 
         # Send the API request to set the colors of the LEDs
-        send_request(ip, payload)
+        send_request(ip, on_payload)
 
         # Update the previous positions to the current ones
         app.previous_positions = led_indices_new
     else:
         # If the positions are the same, turn off all LEDs
-        payload = {
-            "on": True,
-            "seg": {
-                "i": []
-            }
-        }
-        for i in range(get_total_leds(ip)):
-            payload["seg"]["i"].extend([i, '#000000'])
-        send_request(ip, payload)
-        timeout = 0
+        for i in range(total_leds):
+            off_payload["seg"]["i"].extend([i, off_color[1:]])
+        send_request(ip, off_payload)
         app.previous_positions = []  # Reset previous positions
+        app.timeout = 0  # Reset timeout
 
     # Handle timeout and turn off LEDs after delay if needed
-    time.sleep(timeout)
-    if timeout > 0 and not testing:
-        payload = {
-            "on": True,
-            "seg": {
-                "i": []
-            }
-        }
-        for i in range(get_total_leds(ip)):
-            payload["seg"]["i"].extend([i, off_color[1:]])
-
-        send_request(ip, payload)
+    if app.timeout > 0 and not testing:
+        time.sleep(app.timeout)
+        for i in range(total_leds):
+            off_payload["seg"]["i"].extend([i, off_color[1:]])
+        send_request(ip, off_payload)
         app.previous_positions = []  # Reset previous positions
+    elif testing:
+        time.sleep(app.timeout + 3)  # Ensure a minimum delay during testing
+
+    # Update global delSegments to include the off_payload segment
+    app.delSegments = off_payload
+
 
 
 def light(positions, ip, esp, quantity=1, testing=False):
@@ -325,11 +328,11 @@ def light(positions, ip, esp, quantity=1, testing=False):
     set_global_settings()
     positions_list = position_optimization(sorted(json.loads(positions)), esp)
     if testing:
-        set_leds(positions_list, app.locateColor, app.standbyColor, app.timeout + 3, ip, testing)
+        set_leds(positions_list, app.locateColor, app.standbyColor, ip, testing)
     elif quantity <= 0:
-        set_leds(positions_list, "#FF0000", app.standbyColor, app.timeout, ip, testing)
+        set_leds(positions_list, "#FF0000", app.standbyColor, ip, testing)
     else:
-        set_leds(positions_list, app.locateColor, app.standbyColor, app.timeout, ip, testing)
+        set_leds(positions_list, app.locateColor, app.standbyColor, ip, testing)
 
 
 def position_optimization(positions, esp):
@@ -546,7 +549,6 @@ def get_languages():
     except Exception as e:
         print(f"Error fetching languages: {e}")
         return jsonify({"error": "An error occurred fetching available languages"}), 500
-
 
 
 if __name__ == '__main__':

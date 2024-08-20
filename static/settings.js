@@ -71,7 +71,6 @@ function loadSettings() {
             document.getElementById("color-locate").value = colors[1];
             lightMode = settings.lightMode;
             language = settings.language;
-            console.log(language);
             loadAvailableLanguages();
         })
         .catch((error) => console.error(error));

@@ -89,9 +89,13 @@ document.getElementById("save-esp-button").addEventListener('click', () => {
     const esp_ip = document.getElementById("esp_ip").value;
     const rows = document.getElementById("esp_rows").value;
     const cols = document.getElementById("esp_columns").value;
-    const startTop = document.getElementById("esp_starty").value;
-    const startLeft = document.getElementById("esp_startx").value;
-    const serpentineDirection = document.getElementById("esp_serpentine").value;
+
+    const startTop = document.querySelector("#esp_starty option:checked").getAttribute("data-starty");
+    const startLeft = document.querySelector("#esp_startx option:checked").getAttribute("data-startx");
+    const serpentineDirection = document.querySelector("#esp_serpentine option:checked").getAttribute("data-serpentine");
+
+    console.log(startTop, startLeft, serpentineDirection);
+
     const emptyFields = [];
     const isValidIPAddress = (ip) => {
         const ipRegex = /^(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})$/;
@@ -212,17 +216,29 @@ document.getElementById('esp-modal').addEventListener('show.bs.modal', function 
         const espStartTop = button.getAttribute('data-bs-esp-start-y');
         const espStartLeft = button.getAttribute('data-bs-esp-start-x');
         const espSerpentineDirection = button.getAttribute('data-bs-esp-serpentinedirection');
+        console.log(espSerpentineDirection, espStartTop, espStartLeft);
         // Set device name and IP address in the modal
         document.getElementById('esp_name').value = espName;
         document.getElementById('esp_ip').value = ipAddress;
         document.getElementById('esp_rows').value = espRows;
         document.getElementById('esp_columns').value = espColumns;
-        document.getElementById('esp_starty').value = espStartTop;
-        document.getElementById('esp_startx').value = espStartLeft;
-        document.getElementById('esp_serpentine').value = espSerpentineDirection;
+        setSelectedIndexByValue('esp_starty', espStartTop, 'data-starty');
+        setSelectedIndexByValue('esp_startx', espStartLeft, 'data-startx');
+        setSelectedIndexByValue('esp_serpentine', espSerpentineDirection, 'data-serpentine');
         document.getElementById('save-esp-button').dataset.bsEspId = button.getAttribute('data-bs-esp-id');
     }
 });
+
+// Function to set selectedIndex based on the attribute value
+function setSelectedIndexByValue(selectId, value, attributeName) {
+    const selectElement = document.getElementById(selectId);
+    for (let i = 0; i < selectElement.options.length; i++) {
+        if (selectElement.options[i].getAttribute(attributeName) === value) {
+            selectElement.selectedIndex = i;
+            break;
+        }
+    }
+}
 document.getElementById('esp-modal').addEventListener('shown.bs.modal', function () {
     let inputField = document.getElementById('esp_name');
     inputField.focus();
@@ -274,9 +290,9 @@ document.getElementById('esp-modal').addEventListener('hidden.bs.modal', functio
     document.getElementById('esp_ip').value = "";
     document.getElementById('esp_rows').value = 4;
     document.getElementById('esp_columns').value = 4;
-    document.getElementById('esp_starty').value = "Top";
-    document.getElementById('esp_startx').value = "Left";
-    document.getElementById('esp_serpentine').value = "Horizontal";
+    document.getElementById('esp_starty').selectedIndex = 1;
+    document.getElementById('esp_startx').selectedIndex = 1;
+    document.getElementById('esp_serpentine').selectedIndex = 1;
 
     // Clear any existing data attributes
     document.getElementById('save-esp-button').removeAttribute('data-bs-esp-id');

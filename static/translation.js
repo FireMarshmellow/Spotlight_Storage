@@ -115,7 +115,7 @@
                     document.getElementById('item_select_leds_label').textContent = translation.item_select_leds_label;
                     document.getElementById('item_cancel_btn_label').textContent = translation.cancel_btn_label;
                     document.getElementById('item_add_btn_label').textContent = translation.add_btn_label;
-                    
+
                     //Add ESP BOX
                     document.getElementById('left_label').textContent = translation.left_label;
                     document.getElementById('right_label').textContent = translation.right_label;
@@ -132,7 +132,7 @@
                     document.getElementById('esp_rows_text').textContent = translation.esp_rows_text;
                     document.getElementById('esp_columns_text').textContent = translation.esp_columns_text;
                     document.getElementById('cancel_esp_btn_label').textContent = translation.cancel_btn_label;
-                    document.getElementById('add_esp_btn_label').textContent = translation.add_btn_label;
+                    document.getElementById('add_esp_button').textContent = translation.add_btn_label;
                     
                     
                     document.getElementById('cropAndSaveBtn').textContent = translation.cropAndSaveBtn;
