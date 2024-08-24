@@ -4,6 +4,7 @@ import re
 from flask import Flask, render_template, jsonify, request, send_from_directory, redirect, url_for, flash
 from requests import Timeout
 import db
+
 import requests
 import time
 import os
@@ -340,10 +341,23 @@ def position_optimization(positions, esp):
     rows = esp['rows']
     columns = esp['cols']
     start_y = esp['start_top'].lower()  # Convert to lowercase
-    start_x = "right" if esp['start_left'] == "1" else "left" if esp['start_left'] == "0" else esp['start_left']
-    serpentine_direction = "vertical" if esp['serpentine_direction'] == "1" else "horizontal" if esp[
-                                                                                                     'serpentine_direction'] == "0" else \
-        esp['serpentine_direction']
+    start_x = esp['start_left']
+    serpentine_direction = esp['serpentine_direction']
+
+    if isinstance(start_x, str):
+        start_x = start_x.lower()
+    else:
+        # Conditional logic for non-string types
+        start_x = "right" if start_x == "1" else "left" if start_x == "0" else start_x
+
+    # Process serpentine_direction
+
+    if isinstance(serpentine_direction, str):
+        serpentine_direction = serpentine_direction.lower()
+    else:
+        # Conditional logic for non-string types
+        serpentine_direction = "vertical" if serpentine_direction == "1" else "horizontal" if serpentine_direction == "0" else serpentine_direction
+
 
     for pos in positions:
         i = pos - 1
