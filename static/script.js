@@ -9,38 +9,25 @@ let editingItemIP = null; // Track the IP of the item being edited
 // Async function to handle the addition or editing of an item
 async function addItem(event) {
     event.preventDefault();
+
     const imageUrl = document.getElementById("item_image").value.trim();
     const imageFileInput = document.getElementById("item_image_upload");
-    let editImageURL = ""
-    if(isEditingItem) {
-         editImageURL = localStorage.getItem('edit_image_path').replace(/"/g, '').trim();
+    let editImageURL = "";
+
+    if (isEditingItem) {
+        editImageURL = localStorage.getItem('edit_image_path').replace(/"/g, '').trim();
     }
-    if (imageFileInput.files.length === 0 && imageUrl !== editImageURL) {
-        const downloadedImage = await downloadImage(imageUrl);
-        console.log('Downloading image', downloadedImage);
-        if (downloadedImage) {
-            const formData = new FormData();
-            formData.append('file', downloadedImage);
 
-            try {
-                const response = await fetch('/upload', { body: formData, method: 'POST' });
-                const imageURL = await response.text();
-                document.getElementById("item_image").value = new URL(window.location.href + imageURL);
-            } catch (error) {
-                console.error('Error uploading file:', error);
-            }
-        } else {
-            console.log('Failed to download image from the provided URL.');
-        }
-    } else if (imageFileInput.files.length > 0) {
-        // Upload the new image and update the local storage
+    if (imageFileInput.files.length > 0) {
+        // If an image file is uploaded, upload the image and set its URL
         const localImage = await uploadImage();
-
         if (localImage) {
             document.getElementById("item_image").value = localImage;
         }
+    } else if (imageUrl !== editImageURL && imageUrl) {
+        // If an image URL is provided and it's different from the editing image URL, use it directly
+        document.getElementById("item_image").value = imageUrl;
     }
-
 
     // Submit lights and tags information
     submitLights();
@@ -346,41 +333,34 @@ function createItem(item) {
         const imageElement = document.getElementById('imageToCrop');
         imageElement.src = item.image;
 
-        // Initialize Cropper.js
         initializeCropper(imageElement);
 
-        // Show the modal
         const cropImageModal = new bootstrap.Modal(document.getElementById('cropImageModal'));
         cropImageModal.show();
 
-        // Define event handlers
         const cropAndSaveBtn = document.getElementById('cropAndSaveBtn');
         const cropCancelBtn = document.getElementById('cropCancel');
 
-        // Remove previous event listeners
-        cropAndSaveBtn.removeEventListener('click', onCropAndSave);
-        cropCancelBtn.removeEventListener('click', onCropCancel);
+        function onCropAndSaveHandler() {
+            onCropAndSave(item, cropImageModal);
 
-        // Define new event handlers
-        function onCropAndSave() {
-            handleCropAndSave(item);
+        }
+
+        function onCropCancelHandler() {
             resetModalAndCropper(cropImageModal);
         }
 
-        function onCropCancel() {
-            resetModalAndCropper(cropImageModal);
-        }
+        cropAndSaveBtn.removeEventListener('click', onCropAndSaveHandler);
+        cropCancelBtn.removeEventListener('click', onCropCancelHandler);
 
-        // Add new event listeners
-        cropAndSaveBtn.addEventListener('click', onCropAndSave);
-        cropCancelBtn.addEventListener('click', onCropCancel);
+        cropAndSaveBtn.addEventListener('click', onCropAndSaveHandler);
+        cropCancelBtn.addEventListener('click', onCropCancelHandler);
     });
 
 
     col.querySelector('.edit-btn').addEventListener('click', () => {
         // Set flag for editing, remove local storage, and show the item modal
         isEditingItem = true;
-        console.log("editing item")
         removeLocalStorage();
         $("#item-modal").modal("show");
         document.getElementById("item_name").value = item.name;

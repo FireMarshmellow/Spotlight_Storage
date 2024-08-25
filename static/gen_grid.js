@@ -33,9 +33,13 @@ function drawGrid(mode, rows, columns, startX, startY, serpentineDirection) {
         serpentineDirection = document.getElementById('esp_serpentine').options[document.getElementById('esp_serpentine').selectedIndex].getAttribute("data-serpentine").toLowerCase();
 
     }else {
-        // Map values for startX and serpentineDirection
-        startX = (startX === "1") ? "right" : (startX === "0") ? "left" : startX;
-        serpentineDirection = (serpentineDirection === "1") ? "vertical" : (serpentineDirection === "0") ? "horizontal" : serpentineDirection;
+        if (startX == 1) {
+            startX = "right";
+        }
+
+        if (serpentineDirection == 1) {
+            serpentineDirection =  "vertical";
+        }
     }
     columns = parseInt(columns);
     rows = parseInt(rows);
@@ -258,40 +262,61 @@ function handleCellClick(event, mode) {
     let startX = selectEspDropdown.options[selectEspDropdown.selectedIndex].getAttribute("data-esp-start-x").toLowerCase();
     const startY = selectEspDropdown.options[selectEspDropdown.selectedIndex].getAttribute("data-esp-start-y").toLowerCase();
     let serpentineDirection = selectEspDropdown.options[selectEspDropdown.selectedIndex].getAttribute("data-esp-serpentine").toLowerCase();
-    startX = (startX === "1") ? "right" : (startX === "0") ? "left" : startX;
-    serpentineDirection = (serpentineDirection === "1") ? "vertical" : (serpentineDirection === "0") ? "horizontal" : serpentineDirection;
-        canvas = document.getElementById(mode + '-responsive-canvas');
-        const canvasContainer = document.getElementById(mode + '-canvas-container');
-        let lineWidth = 2;
-        let boxSize = (canvas.width - lineWidth) / columns;
-        if(boxSize <= 60) {
-            boxSize = 60;
 
-        }
-        // Get the size and position of the canvas
-        let rect = canvas.getBoundingClientRect();
-        let offsetX = Math.abs(Math.abs(rect.left) - canvasContainer.scrollLeft) ;
-        // Calculate the x and y coordinates of the click relative to the canvas
-        let x = event.clientX - offsetX + canvasContainer.scrollLeft;
-        let y = event.clientY - rect.top;
-        // Calculate which row and column was clicked based on the click coordinates
-        let clickedRow = Math.floor(y / boxSize);
-        let clickedColumn = Math.floor(x / boxSize);
-        const ledNumber = calculateLedNumber(clickedRow, clickedColumn, startX, startY, serpentineDirection, rows, columns);
-        // Find if the clicked cell is already in the clickedCells array
-        let cellIndex = clickedCells.indexOf(ledNumber);
-        // If the clicked cell is not in the array, add it; otherwise, remove it
-        if (cellIndex === -1) {
-            clickedCells.push(ledNumber);
-        } else {
-            clickedCells.splice(cellIndex, 1);
-        }
-        redrawGrid(rows, columns, "item",  startX, startY, serpentineDirection)
+    if (startX == 1) {
+        startX = "right";
+    }
+    //console.log("Processed StartX:", startX);  // Debugging processed startX
+    if (serpentineDirection == 1) {
+        serpentineDirection =  "vertical";
+    }
+
+    const canvas = document.getElementById(mode + '-responsive-canvas');
+    const canvasContainer = document.getElementById(mode + '-canvas-container');
+    let lineWidth = 2;
+    let boxSize = (canvas.width - lineWidth) / columns;
+    if (boxSize <= 60) {
+        boxSize = 60;
+    }
+
+    // Get the size and position of the canvas
+    let rect = canvas.getBoundingClientRect();
+
+    // Calculate the x and y coordinates of the click relative to the canvas
+    let offsetX = rect.left + window.scrollX;  // Ensure offsetX accounts for window scroll
+    let offsetY = rect.top + window.scrollY;   // Ensure offsetY accounts for window scroll
+
+    let x = event.clientX - offsetX;
+    let y = event.clientY - offsetY;
+
+    //console.log("Click coordinates relative to canvas - X:", x, "Y:", y);  // Debugging click coordinates
+
+    // Calculate which row and column was clicked based on the click coordinates
+    let clickedRow = Math.floor(y / boxSize);
+    let clickedColumn = Math.floor(x / boxSize);
+
+    //console.log("ClickedRow:", clickedRow, "ClickedColumn:", clickedColumn);  // Debugging clicked row and column
+
+    const ledNumber = calculateLedNumber(clickedRow, clickedColumn, startX, startY, serpentineDirection, rows, columns);
+
+    // Find if the clicked cell is already in the clickedCells array
+    let cellIndex = clickedCells.indexOf(ledNumber);
+
+    // If the clicked cell is not in the array, add it; otherwise, remove it
+    if (cellIndex === -1) {
+        clickedCells.push(ledNumber);
+    } else {
+        clickedCells.splice(cellIndex, 1);
+    }
+
+    redrawGrid(rows, columns, "item", startX, startY, serpentineDirection);
 }
+
+
 function calculateLedNumber(row, column, startX, startY, serpentineDirection, rows, columns) {
-        if (startX === "right") {
-            column = columns - column;
-        }
+    if (startX === "right") {
+        column = columns - column; // Ensure accurate column reversal
+    }
         if (startY === "bottom") {
             row = rows - row;
         }
@@ -299,7 +324,6 @@ function calculateLedNumber(row, column, startX, startY, serpentineDirection, ro
         if (serpentineDirection === "horizontal") {
             row = startY !== "bottom" ? row + 1 : row;
             column = startX !== "left" ? column - 1 : column;
-
             const isEvenRow = row % 2 === 0;
             return isEvenRow ? row * columns - (columns - (columns - column)) : row * columns - (columns - column) + 1;
         } else {
@@ -396,8 +420,12 @@ function clearAll() {
     let startX = selectEspDropdown.options[selectEspDropdown.selectedIndex].getAttribute("data-esp-start-x").toLowerCase();
     const startY = selectEspDropdown.options[selectEspDropdown.selectedIndex].getAttribute("data-esp-start-y").toLowerCase();
     let serpentineDirection = selectEspDropdown.options[selectEspDropdown.selectedIndex].getAttribute("data-esp-serpentine").toLowerCase();
-    startX = (startX === "1") ? "right" : (startX === "0") ? "left" : startX;
-    serpentineDirection = (serpentineDirection === "1") ? "vertical" : (serpentineDirection === "0") ? "horizontal" : serpentineDirection;
+    if (startX == 1) {
+        startX = "right";
+    }
+    if (serpentineDirection == 1) {
+        serpentineDirection =  "vertical";
+    }
     redrawGrid(parseInt(rows), parseInt(columns), "item", startX, startY, serpentineDirection);
 }
 

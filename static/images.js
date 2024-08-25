@@ -18,84 +18,8 @@ async function uploadImage() {
         return null;
     }
 }
-// Function to generate a hash for the image
-async function generateImageHash(imageBlob) {
-    const arrayBuffer = await imageBlob.arrayBuffer();
-    const hashBuffer = await crypto.subtle.digest('SHA-256', arrayBuffer);
-    const hashArray = Array.from(new Uint8Array(hashBuffer));
-    return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
-}
 
 
-// Function to check if an image exists on the server and is identical
-async function doesImageExistAndIsIdentical(imageURL, localImageBlob) {
-    try {
-        const response = await fetch(`/images/${imageURL}`);
-
-        if (!response.ok) return false;
-
-        const serverImageBlob = await response.blob();
-        const serverImageHash = await generateImageHash(serverImageBlob);
-        const localImageHash = await generateImageHash(localImageBlob);
-
-        return serverImageHash === localImageHash;
-    } catch (error) {
-        console.error('Error checking image existence:', error);
-        return false;
-    }
-}
-
-// Function to get the next available filename if the image already exists
-async function getNextAvailableFilename(baseName, extension) {
-    let index = 1;
-    let newFileName = `${baseName} (${index})${extension}`;
-
-    while (await doesImageExist(newFileName)) {
-        index++;
-        newFileName = `${baseName} (${index})${extension}`;
-    }
-
-    return newFileName;
-}
-
-// Function to check if an image exists on the server
-async function doesImageExist(imageURL) {
-    try {
-        const response = await fetch(`/images/${imageURL}`);
-        if (!response.ok) return false;
-    } catch (error) {
-        console.error('Error checking image existence:', error);
-        return false;
-    }
-}
-
-
-// Function to download an image from a URL
-async function downloadImage(url) {
-    const urlParts = url.split('/');
-    let imageName = urlParts[urlParts.length - 1];
-    const extensionMatch = imageName.match(/(\.[^.]+)$/);
-    const extension = extensionMatch ? extensionMatch[1] : '.jpg';
-    let baseName = extensionMatch ? imageName.slice(0, -extension.length) : imageName;
-    try {
-        const response = await fetch(url);
-        const blob = await response.blob();
-
-        // Check if the image already exists on the server and is identical
-        if (await doesImageExistAndIsIdentical(imageName, blob)) {
-            console.log('Identical image already exists on the server.');
-            return `/images/${imageName}`;
-        } else if (await doesImageExist(imageName)) {
-            console.log('Image with the same name exists but is different.');
-            imageName = await getNextAvailableFilename(baseName, extension);
-        }
-
-        return new File([blob], imageName, { type: 'image/jpeg' });
-    } catch (error) {
-        console.error('Error downloading image:', error);
-        return null;
-    }
-}
 
 async function processCroppedImage(croppedImageFile, item) {
     const formData = new FormData();
@@ -125,20 +49,36 @@ async function processCroppedImage(croppedImageFile, item) {
 
 let cropper = null;  // Store Cropper instance globally
 
+// Function to initialize Cropper.js
 function initializeCropper(imageElement) {
     if (cropper) {
-        cropper.destroy();
+        cropper.destroy(); // Destroy the existing Cropper instance if any
     }
-    cropper = new Cropper(imageElement, {
-        aspectRatio: 1,  // 1:1 aspect ratio
-        viewMode: 1,
-        movable: true,
-        zoomable: true,
-        rotatable: true,
-        scalable: true,
-    });
+
+    if (imageElement.complete) { // Ensure the image has loaded
+        cropper = new Cropper(imageElement, {
+            aspectRatio: 1,  // 1:1 aspect ratio
+            viewMode: 1,
+            movable: true,
+            zoomable: true,
+            rotatable: true,
+            scalable: true,
+        });
+    } else {
+        imageElement.onload = () => {
+            cropper = new Cropper(imageElement, {
+                aspectRatio: 1,
+                viewMode: 1,
+                movable: true,
+                zoomable: true,
+                rotatable: true,
+                scalable: true,
+            });
+        };
+    }
 }
 
+// Function to handle cropping and saving the image
 function handleCropAndSave(item) {
     if (!cropper) return;
 
@@ -147,10 +87,20 @@ function handleCropAndSave(item) {
         height: 300,
     });
 
+    if (!croppedCanvas) {
+        console.error('Cropped canvas could not be generated.');
+        return;
+    }
+
     croppedCanvas.toBlob(async (blob) => {
-        const originalFileName = item.image.split('/').pop(); // Get the file name from the URL
-        const fileExtension = originalFileName.split('.').pop(); // Extract the file extension
-        const baseFileName = originalFileName.substring(0, originalFileName.lastIndexOf('.')); // Extract the file name without extension
+        if (!blob) {
+            console.error('Failed to create Blob from cropped canvas.');
+            return;
+        }
+
+        const originalFileName = item.image.split('/').pop();
+        const fileExtension = originalFileName.split('.').pop();
+        const baseFileName = originalFileName.substring(0, originalFileName.lastIndexOf('.'));
 
         const croppedFileName = `${baseFileName}_cropped.${fileExtension}`;
         const croppedImageFile = new File([blob], croppedFileName, { type: blob.type });
@@ -159,28 +109,24 @@ function handleCropAndSave(item) {
     });
 }
 
-function resetModalAndCropper(modalElement) {
-    if (cropper) {
-        cropper.destroy();
-        cropper = null;
-    }
-    modalElement.hide();
-    document.getElementById('imageToCrop').src = ''; // Clear the image source
+// Event handler for crop and save button
+function onCropAndSave(item, cropImageModal) {
+    handleCropAndSave(item);
+    resetModalAndCropper(cropImageModal);
 }
 
-
+// Function to handle image change in the database
 function handleImageChange(item, url) {
     const itemId = item.id;
     console.log(url);
-    // Create the updated item object
+
     const updatedItem = { image: url };
 
-    // Make a fetch request to update the quantity in the database
     fetch(`/api/items/${itemId}`, {
         method: 'PUT',
         headers: {
             'Content-Type': 'application/json',
-            'Update-Image': 'true'  // Custom header to indicate quantity update
+            'Update-Image': 'true'
         },
         body: JSON.stringify(updatedItem),
     })
@@ -193,4 +139,14 @@ function handleImageChange(item, url) {
         .catch(error => {
             console.error('Error updating image:', error);
         });
+}
+
+// Reset Cropper and close modal
+function resetModalAndCropper(modalElement) {
+    if (cropper) {
+        cropper.destroy();
+        cropper = null;
+    }
+    modalElement.hide();
+    document.getElementById('imageToCrop').src = ''; // Clear the image source
 }

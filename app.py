@@ -323,7 +323,6 @@ def set_leds(led_indices, color, off_color, ip, testing=False):
     app.delSegments = off_payload
 
 
-
 def light(positions, ip, esp, quantity=1, testing=False):
     # Set global settings
     set_global_settings()
@@ -340,24 +339,15 @@ def position_optimization(positions, esp):
     segments = []
     rows = esp['rows']
     columns = esp['cols']
-    start_y = esp['start_top'].lower()  # Convert to lowercase
-    start_x = esp['start_left']
-    serpentine_direction = esp['serpentine_direction']
+    start_y = esp['start_top'].lower()
+    start_x = esp['start_left'].lower()
+    serpentine_direction = esp['serpentine_direction'].lower()
 
-    if isinstance(start_x, str):
-        start_x = start_x.lower()
-    else:
-        # Conditional logic for non-string types
-        start_x = "right" if start_x == "1" else "left" if start_x == "0" else start_x
+    if start_x == "1":
+        start_x = "right"
 
-    # Process serpentine_direction
-
-    if isinstance(serpentine_direction, str):
-        serpentine_direction = serpentine_direction.lower()
-    else:
-        # Conditional logic for non-string types
-        serpentine_direction = "vertical" if serpentine_direction == "1" else "horizontal" if serpentine_direction == "0" else serpentine_direction
-
+    if serpentine_direction == "1":
+        serpentine_direction = "vertical"
 
     for pos in positions:
         i = pos - 1
