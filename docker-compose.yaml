@@ -14,5 +14,6 @@ services:
     volumes:
       - ./data:/data:rw
       - ./images:/images:rw
+      - ./static/translations:/app/static/translations:ro
     command: >
       bash -c "python setup.py && python app.py"
