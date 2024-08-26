@@ -38,7 +38,7 @@ async function addItem(event) {
     const link = document.getElementById("item_url").value || "";
     const image = document.getElementById("item_image").value.replace(window.location.href, "");
     let position = localStorage.getItem('led_positions');
-    const quantity = document.getElementById("item_quantity").value;
+    let quantity = document.getElementById("item_quantity").value;
     const tags = localStorage.getItem('item_tags');
     const selectedEspOption = selectEspDropdown.options[selectEspDropdown.selectedIndex];
 
@@ -52,6 +52,9 @@ async function addItem(event) {
             position = localStorage.getItem('edit_led_positions');
             position = JSON.parse(position);
         }
+    }
+    if(quantity.trim() == ""){
+        quantity = 1;
     }
 
     // Retrieve the IP address of the selected ESP device

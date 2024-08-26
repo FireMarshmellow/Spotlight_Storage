@@ -284,10 +284,8 @@ function handleCellClick(event, mode) {
 
     // Calculate the x and y coordinates of the click relative to the canvas
     let offsetX = rect.left + window.scrollX;  // Ensure offsetX accounts for window scroll
-    let offsetY = rect.top + window.scrollY;   // Ensure offsetY accounts for window scroll
-
     let x = event.clientX - offsetX;
-    let y = event.clientY - offsetY;
+    let y = event.clientY - rect.top ;
 
     //console.log("Click coordinates relative to canvas - X:", x, "Y:", y);  // Debugging click coordinates
 
