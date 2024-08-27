@@ -102,30 +102,9 @@ document.getElementById("save-esp-button").addEventListener('click', () => {
         return ipRegex.test(ip) && ip.split('.').every(octet => parseInt(octet, 10) <= 255);
     };
 
-    const showAlert = (alertId, message) => {
-        const alert = document.getElementById(alertId);
-        alert.classList.remove('d-none');
-        const errorList = document.getElementById('error-list');
-        errorList.innerHTML = message;
-    };
-
-    const handleEmptyFields = () => {
-        if (name.trim() === '') {
-            emptyFields.push('Name');
-        }
-        if (esp_ip.trim() === '') {
-            emptyFields.push('IP Address');
-        }
-        if (emptyFields.length > 0) {
-            showAlert(espId !== null && espId !== '' ? 'edit-esp-error-alert' : 'esp-error-alert', "The following fields are empty:<br>" + emptyFields.map(field => `<li>${field}</li>`).join(''));
-            return true;
-        }
-        return false;
-    };
-
-    if (handleEmptyFields()) return;
+    if (handleEmptyFields('esp')) return;
     if (!isValidIPAddress(esp_ip)) {
-        showAlert(espId !== null && espId !== '' ? 'edit-esp-error-alert' : 'esp-error-alert', "IP Address is not valid.");
+        showAlert( 'esp-error-alert', "IP Address is not valid.", 'esp');
         return;
     }
 

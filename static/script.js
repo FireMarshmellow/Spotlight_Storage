@@ -42,20 +42,9 @@ async function addItem(event) {
     const tags = localStorage.getItem('item_tags');
     const selectedEspOption = selectEspDropdown.options[selectEspDropdown.selectedIndex];
 
-    // If LED positions are not selected, prompt the user
-    if (position === "[]") {
-        if (!isEditingItem) {
-            alert("Please select an LED to light up.");
-            return;
-        } else {
-            // If editing, retrieve the previous LED positions
-            position = localStorage.getItem('edit_led_positions');
-            position = JSON.parse(position);
-        }
-    }
-    if(quantity.trim() == ""){
-        quantity = 1;
-    }
+    // Check if there are any empty fields
+    if (handleEmptyFields('item')) return; // Exit if any fields are empty
+
 
     // Retrieve the IP address of the selected ESP device
     const ip = selectedEspOption.dataset.espIp;
@@ -527,5 +516,68 @@ document.getElementById("search").addEventListener("input", function (e){
         }
     });
 });
+
+
+const showAlert = (alertId, message, formType) => {
+    const alert = document.getElementById(alertId);
+    alert.classList.remove('d-none');
+
+    const errorListId = formType === 'item' ? 'item-error-list' : 'error-list';
+    const errorList = document.getElementById(errorListId);
+    errorList.innerHTML = message;
+
+    // Scroll to the top of the modal or page
+    alert.scrollIntoView({ behavior: 'smooth' });
+};
+
+
+const handleEmptyFields = (formType) => {
+    let emptyFields = [];
+    let alertId = '';
+
+    if (formType === 'esp') {
+        const name = document.getElementById('esp_name').value;
+        const esp_ip = document.getElementById('esp_ip').value;
+
+        if (name.trim() === '') {
+            emptyFields.push('Name');
+        }
+        if (esp_ip.trim() === '') {
+            emptyFields.push('IP Address');
+        }
+
+        alertId ='esp-error-alert';
+    } else if (formType === 'item') {
+        const itemName = document.getElementById('item_name').value;
+        const itemUrl = document.getElementById('item_url').value;
+        const itemQuantity = document.getElementById('item_quantity').value;
+        let position = localStorage.getItem('led_positions');
+
+        if (itemName.trim() === '') {
+            emptyFields.push('Item Name');
+        }
+        if (itemUrl.trim() === '') {
+            emptyFields.push('Item URL');
+        }
+        if (itemQuantity.trim() === '') {
+            emptyFields.push('Item Quantity');
+        }
+        if (position === "[]") {
+            emptyFields.push("LED Positions");
+        }
+
+        alertId = 'item-error-alert';
+    }
+
+    if (emptyFields.length > 0) {
+        const message = "The following fields are empty:<br>" + emptyFields.map(field => `<li>${field}</li>`).join('');
+        showAlert(alertId, message, formType);
+        return true;
+    }
+
+    return false;
+};
+
+
 
 loadItems();

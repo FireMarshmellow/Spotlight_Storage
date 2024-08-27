@@ -219,7 +219,8 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" onclick="resetModal()"> </button>
                 </div>
                 <div class="modal-body">
-
+                    <div class="alert alert-danger d-none" id="item-error-alert">Please enter values in the follow empty fields:<br><span id="item-error-list"></span>
+                    </div>
                     <div class="form-floating mb-3">
                         <input type="text" class="form-control" id="item_name" placeholder="Name" required>
                         <label id="item_name_label" for="item_name">Item name</label>
@@ -288,7 +289,7 @@
                         </span>
                         <span id="item_cancel_btn_label">Cancel</span>
                     </button>
-                    <button type="button" class="btn btn-success pe-3" id="save-item-button" data-bs-dismiss="modal" >
+                    <button type="button" class="btn btn-success pe-3" id="save-item-button">
                         <span class="icon-n4px">
                             <i data-lucide="plus" class="me-2"></i>
                         </span>
