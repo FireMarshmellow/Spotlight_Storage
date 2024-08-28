@@ -174,6 +174,7 @@ document.getElementById('item_esp_select').addEventListener('change', function (
 });
 
 document.getElementById("save-item-button").addEventListener("click", addItem);
+document.getElementById("cropAndSaveBtn").addEventListener("click", addItem);
 function loadItems() {
     fetch("/api/items")
         .then((response) => response.json())
@@ -191,7 +192,7 @@ function loadItems() {
 function createItem(item) {
     // Create a new column element with Bootstrap classes
     const col = document.createElement('div');
-    col.classList.add('col-6', 'col-sm-4', 'col-md-3', 'col-lg-2', 'mb-3');
+    col.classList.add('masonry-item'); // Add class for masonry item
 
     // Set dataset attributes to store item information
     col.dataset.id = item.id;
@@ -216,7 +217,7 @@ function createItem(item) {
         <!-- Card body with item details and buttons -->
         <div class="card-body p-2">
             <!-- Link to the item -->
-            <a href="${item.link}" target="_blank" class="card-title-link" >
+            <a href="${item.link}" target="_blank" class="card-title-link">
                 <h5 id="link-btn-${item.id}" class="card-title" data-bs-toggle="tooltip" title="Shop for more">${item.name}</h5>
             </a>
 
@@ -234,7 +235,7 @@ function createItem(item) {
                     <button class="btn btn-outline-secondary" type="button" id="dropdownMenuButton-${item.id}" data-bs-toggle="dropdown" aria-expanded="false">
                         <span class="icon-n4px"><i data-lucide="more-vertical"></i></span>
                     </button>
-                   <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton-${item.id}">
+                    <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton-${item.id}">
                         <li><a id="copy_item_${item.id}" class="dropdown-item copy-btn" href="#">Copy Item</a></li>
                         <li><a id="delete_item_${item.id}" class="dropdown-item delete-btn" href="#">Delete</a></li>
                         <li><a id="crop_image_${item.id}" class="dropdown-item image-edit-btn" href="#">Crop Image</a></li>
@@ -323,31 +324,38 @@ function createItem(item) {
     });
     col.querySelector('.image-edit-btn').addEventListener('click', () => {
         const imageElement = document.getElementById('imageToCrop');
-        imageElement.src = item.image;
+        const image = item.image;
 
-        initializeCropper(imageElement);
+        const cropImageModal = document.getElementById('cropImageModal');
+        // Set the dataset attributes
+        cropImageModal.dataset.item = JSON.stringify(item);
 
-        const cropImageModal = new bootstrap.Modal(document.getElementById('cropImageModal'));
-        cropImageModal.show();
-
-        const cropAndSaveBtn = document.getElementById('cropAndSaveBtn');
-        const cropCancelBtn = document.getElementById('cropCancel');
-
-        function onCropAndSaveHandler() {
-            onCropAndSave(item, cropImageModal);
-
+        if (isValidUrl(image)) {
+            // Fetch the image from the backend instead of setting the URL directly
+            fetchWithTimeout(`/proxy-image?url=${encodeURIComponent(image)}`)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! Status: ${response.status}`);
+                    }
+                    return response.blob();
+                })
+                .then(blob => {
+                    imageElement.src = URL.createObjectURL(blob);
+                    $(cropImageModal).modal("show");
+                })
+                .catch(error => {
+                    console.error('Error fetching image:', error);
+                    alert('Unable to load image. Please try a different Image URL.');
+                });
+        } else {
+            // Directly use the local image path
+            imageElement.src = image;
+            $(cropImageModal).modal("show");
         }
 
-        function onCropCancelHandler() {
-            resetModalAndCropper(cropImageModal);
-        }
-
-        cropAndSaveBtn.removeEventListener('click', onCropAndSaveHandler);
-        cropCancelBtn.removeEventListener('click', onCropCancelHandler);
-
-        cropAndSaveBtn.addEventListener('click', onCropAndSaveHandler);
-        cropCancelBtn.addEventListener('click', onCropCancelHandler);
     });
+
+
 
 
     col.querySelector('.edit-btn').addEventListener('click', () => {
@@ -581,3 +589,25 @@ const handleEmptyFields = (formType) => {
 
 
 loadItems();
+window.addEventListener('resize', function() {
+    lucide.createIcons(); // This ensures icons are re-rendered if needed
+});
+
+
+// Function to fetch with timeout
+function fetchWithTimeout(url, timeout = 1000) {  // Increase the timeout value to 10 seconds
+    return Promise.race([
+        fetch(url),
+        new Promise((_, reject) =>
+            setTimeout(() => reject(new Error('Request timed out')), timeout)
+        )
+    ]);
+}
+
+// Adding event listener to the cropAndSaveBtn for saving the cropped image
+document.getElementById("cropAndSaveBtn").addEventListener("click", onCropAndSave);
+
+// Event listener for the modal hide event to reset dataset
+document.getElementById('cropImageModal').addEventListener('hidden.bs.modal', function () {
+    resetModalAndCropper(this);
+});

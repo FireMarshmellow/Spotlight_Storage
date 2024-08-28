@@ -34,7 +34,7 @@ function populateEspTable() {
                 // Edit Button
                 const editButton = document.createElement("button");
                 editButton.type = "button";
-                editButton.classList.add("btn", "btn-link", "me-2", "p-0", "icon-n4px");
+                editButton.classList.add("btn", "btn-link", "me-2", "p-0", "icon-n6px");
                 editButton.dataset.bsTarget = "#esp-modal";
                 editButton.dataset.bsMode = "edit";
                 editButton.dataset.bsEspId = esp.id;
@@ -51,7 +51,7 @@ function populateEspTable() {
                 // Delete Button
                 const deleteButton = document.createElement("button");
                 deleteButton.type = "button";
-                deleteButton.classList.add("btn", "btn-link", "me-2", "p-0", "icon-n4px");
+                deleteButton.classList.add("btn", "btn-link", "me-2", "p-0", "icon-n6px");
                 deleteButton.dataset.bsTarget = "#esp-delete-modal";
                 deleteButton.dataset.bsEspId = esp.id;
                 deleteButton.dataset.bsEspIp = esp.esp_ip;
@@ -185,7 +185,7 @@ document.getElementById('esp-modal').addEventListener('show.bs.modal', function 
     const button = event.relatedTarget;
     const mode = button.getAttribute('data-bs-mode');
     if (mode === "edit") {
-        document.getElementById('esp-modal-label').innerHTML = "Edit ESP";
+        document.getElementById('esp-modal-label').innerHTML = "Edit WLED";
         document.getElementById('save-esp-button').innerHTML = "<span class=\"icon-n4px\"><i data-lucide=\"save\" class=\"me-2\"></i>Save</span>";
         lucide.createIcons();
         const espName = button.getAttribute('data-bs-esp-name');
@@ -260,7 +260,7 @@ document.getElementById('esp_serpentine').addEventListener('change', function ()
 });
 document.getElementById('esp-modal').addEventListener('hidden.bs.modal', function () {
 
-    document.getElementById('esp-modal-label').innerHTML = "Add ESP"; // Set the modal label back to its initial state
+    document.getElementById('esp-modal-label').innerHTML = "Add WLED"; // Set the modal label back to its initial state
     document.getElementById('save-esp-button').innerHTML = "<span class=\"icon-n4px\"><i data-lucide=\"save\" class=\"me-2\"></i>Save</span>";
     lucide.createIcons();
 

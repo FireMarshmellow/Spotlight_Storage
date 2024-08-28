@@ -55,7 +55,7 @@
 
 
             <div class="dropdown" data-bs-toggle="tooltip" id="sortingMethods_text" title="Sorting methods">
-                <button class="btn btn-outline-secondary my-2 my-md-0 me-0 me-md-2 dropdown-toggle icon-n4px" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                <button class="btn btn-outline-secondary my-2 my-md-0 me-0 me-md-2 dropdown-toggle icon-n6px" type="button" data-bs-toggle="dropdown" aria-expanded="false">
                     <i data-lucide="arrow-down-up"></i>
                 </button>
                 <ul class="dropdown-menu dropdown-menu-end" id="sort_method">
@@ -68,14 +68,14 @@
                 </ul>
             </div>
             <div class="dropdown" data-bs-toggle="tooltip" id="sortingBytags_text" title="Sorting by Tags">
-                <button class="btn btn-outline-secondary my-2 my-md-0 me-0 me-md-2 dropdown-toggle icon-n4px" type="button" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false">
+                <button class="btn btn-outline-secondary my-2 my-md-0 me-0 me-md-2 dropdown-toggle icon-n6px" type="button" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false">
                     <i data-lucide="filter"></i>
                 </button>
                 <ul class="dropdown-menu dropdown-menu-end" id="sort_tags">
                 </ul>
             </div>
 
-            <button class="btn btn-outline-secondary my-2 my-md-0 icon-n4px" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasSettings" aria-controls="offcanvasExample">
+            <button class="btn btn-outline-secondary my-2 my-md-0 icon-n6px" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasSettings" aria-controls="offcanvasExample">
                 <i data-lucide="settings"></i>
             </button>
 
@@ -92,7 +92,7 @@
             <!-- ESP tabs will be dynamically populated here -->
         </ul>
     </div>
-    <div id="items-container-grid" class="row" style="margin-top: 2rem"></div>
+    <div id="items-container-grid" class="masonry-grid" style="margin-top: 2rem"></div>
     <div id="items-container-list"></div>
     <div class="offcanvas offcanvas-end" tabindex="-1" id="offcanvasSettings" aria-labelledby="offcanvasSettingsLabel">
         <div class="offcanvas-header">
@@ -150,7 +150,7 @@
             </div>
             <hr>
             <div class="row">
-                <h6 id="esp_devices_text">ESP Devices</h6>
+                <h6 id="esp_devices_text">WLED nodes</h6>
                 <div>
                     <table class="table table-sm table-striped overflow-hidden" id="esp_table">
                     </table>
@@ -160,7 +160,7 @@
                         <span class="icon-n4px">
                             <i data-lucide="plus" class="me-2"></i>
                         </span>
-                        <span id="add_esp_button">Add ESP Device</span>
+                        <span id="add_esp_button">Add WLED node</span>
                     </button>
                 </div>
             </div>
@@ -405,14 +405,14 @@
                     <h5 class="modal-title" id="cropImageModalLabel">Crop Image</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-                <div class="modal-body" style="max-height: 45rem; overflow: hidden; padding: 0;">
+                <div class="modal-body" style="max-height: 40rem; overflow: hidden; padding: 0;">
                     <div class="img-container" style="width: 100%; height: 100%; display: flex; justify-content: center; align-items: center; overflow: hidden;">
                         <img id="imageToCrop" src="" alt="Image to Crop" style="max-width: 100%; max-height: 100%; object-fit: contain;">
                     </div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" id="cropCancel" data-bs-dismiss="modal">Cancel</button>
-                    <button type="button" class="btn btn-primary" id="cropAndSaveBtn">Crop and save</button>
+                    <button type="button" class="btn btn-primary" id="cropAndSaveBtn" data-bs-dismiss="modal">Crop and save</button>
                 </div>
             </div>
         </div>
