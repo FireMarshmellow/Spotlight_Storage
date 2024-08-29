@@ -92,7 +92,8 @@
             <!-- ESP tabs will be dynamically populated here -->
         </ul>
     </div>
-    <div id="items-container-grid" class="masonry-grid" style="margin-top: 2rem"></div>
+    <div id="items-container-grid" class="row" style="margin-top: 2rem">
+    </div>
     <div id="items-container-list"></div>
     <div class="offcanvas offcanvas-end" tabindex="-1" id="offcanvasSettings" aria-labelledby="offcanvasSettingsLabel">
         <div class="offcanvas-header">
@@ -412,6 +413,7 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" id="cropCancel" data-bs-dismiss="modal">Cancel</button>
+                    <button id="download-image-btn" class="btn btn-primary">Download Image</button>
                     <button type="button" class="btn btn-primary" id="cropAndSaveBtn" data-bs-dismiss="modal">Crop and save</button>
                 </div>
             </div>
@@ -512,6 +514,8 @@
 <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
 <link  href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.css" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/masonry/4.2.2/masonry.pkgd.min.js"></script>
+
 <script src="../static/images.js"></script>
 <script src="../static/script.js"></script>
 <script src="../static/esp.js"></script>

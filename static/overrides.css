@@ -2,11 +2,7 @@
     --bs-border-radius: 0.7rem;
 }
 
-/* Masonry grid container */
-.masonry-grid {
-    column-count: 8; /* Number of columns, adjust as needed */
-    column-gap: 1rem; /* Space between columns */
-}
+
 .icon-n4px{
     width: 1rem;
     height: 1rem;
@@ -17,23 +13,9 @@
 }
 
 
-/* Masonry grid items */
-.masonry-item {
-    break-inside: avoid; /* Prevents the item from being split across columns */
-    margin-bottom: 1rem; /* Space at the bottom of each item */
-    width: 100%; /* Ensures the item takes full width within its column */
-}
 
-/* Additional styling for the card */
-.masonry-item .card {
-    display: inline-block; /* Allows the item to respect the column layout */
-    width: 100%; /* Ensure the card takes up the full width of the column */
-}
 /* Responsive adjustments */
 @media (max-width: 1400px) {
-    .masonry-grid {
-        column-count: 5; /* Reduce columns for large tablets/small desktops */
-    }
     .icon-n4px{
         width: 0.75rem;
         height: 0.75rem;
@@ -41,9 +23,7 @@
 }
 
 @media (max-width: 992px) {
-    .masonry-grid {
-        column-count: 3; /* Reduce columns for tablets */
-    }
+
     .icon-n4px{
         width: 0.5rem;
         height: 0.5rem;
@@ -51,9 +31,7 @@
 }
 
 @media (max-width: 768px) {
-    .masonry-grid {
-        column-count: 2; /* Reduce columns further for small tablets */
-    }
+
     .icon-n4px{
         width: 0.5rem;
         height: 0.5rem;
@@ -64,9 +42,8 @@
 }
 
 @media (max-width: 576px) {
-    .masonry-grid {
-        column-count: 1; /* Single column for mobile devices */
-    }
+
+
     .icon-n4px{
         width: 0.4rem;
         height: 0.4rem;

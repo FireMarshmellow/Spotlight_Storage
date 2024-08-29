@@ -192,8 +192,7 @@ function loadItems() {
 function createItem(item) {
     // Create a new column element with Bootstrap classes
     const col = document.createElement('div');
-    col.classList.add('masonry-item'); // Add class for masonry item
-
+    col.classList.add('col-8', 'col-sm-5', 'col-md-4', 'col-lg-2', 'mb-1');
     // Set dataset attributes to store item information
     col.dataset.id = item.id;
     col.dataset.name = item.name;
@@ -255,6 +254,11 @@ function createItem(item) {
             </div>
         </div>
     </div>`;
+    // vanilla JS
+    var msnry = new Masonry( '.grid', {
+        columnWidth: 200,
+        itemSelector: '.grid-item'
+    });
     // Add event listeners for quantity change, locating, deleting, and editing
     col.querySelector('.minus-btn').addEventListener('click', () => {
         handleQuantityChange(item, -1); // Decrease quantity by 1
@@ -325,8 +329,9 @@ function createItem(item) {
     col.querySelector('.image-edit-btn').addEventListener('click', () => {
         const imageElement = document.getElementById('imageToCrop');
         const image = item.image;
-
         const cropImageModal = document.getElementById('cropImageModal');
+        const downloadButton = document.getElementById('download-image-btn'); // Get the download button
+
         // Set the dataset attributes
         cropImageModal.dataset.item = JSON.stringify(item);
 
@@ -341,6 +346,27 @@ function createItem(item) {
                 })
                 .then(blob => {
                     imageElement.src = URL.createObjectURL(blob);
+
+                    // Set up the download button
+                    downloadButton.style.display = 'block'; // Make the button visible
+
+                    // Add click event listener for downloading the image
+                    downloadButton.addEventListener('click', function() {
+                        const url = window.URL.createObjectURL(blob);
+                        // Create a temporary link element
+                        const link = document.createElement('a');
+                        link.href = url;
+                        // Extract the filename from the image URL or set a default name
+                        link.download = image.split('/').pop() || 'downloaded_image';
+                        // Append the link to the document body
+                        document.body.appendChild(link);
+                        // Programmatically trigger the download
+                        link.click();
+                        // Clean up by revoking the Blob URL and removing the link element
+                        document.body.removeChild(link);
+                        window.URL.revokeObjectURL(url);
+                    });
+
                     $(cropImageModal).modal("show");
                 })
                 .catch(error => {
@@ -350,9 +376,9 @@ function createItem(item) {
         } else {
             // Directly use the local image path
             imageElement.src = image;
+            downloadButton.style.display = 'none'; // Hide the download button for local images
             $(cropImageModal).modal("show");
         }
-
     });
 
 

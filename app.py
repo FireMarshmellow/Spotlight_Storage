@@ -1,8 +1,8 @@
 # Importing necessary modules and packages
 import json
 import re
-from flask import Flask, render_template, jsonify, request, send_from_directory, redirect, url_for, flash, send_file, abort
-from io import BytesIO
+from flask import Flask, render_template, jsonify, request, send_from_directory, redirect, url_for, flash, Response
+
 from requests import Timeout
 import db
 import requests
@@ -26,23 +26,12 @@ app.request_amount = 0
 
 
 
-@app.route('/proxy-image')
+@app.route('/proxy-image', methods=['GET'])
 def proxy_image():
     image_url = request.args.get('url')
-    if not image_url:
-        abort(400, description="No URL provided")
+    response = requests.get(image_url, stream=True)
+    return Response(response.content, content_type=response.headers['Content-Type'])
 
-    try:
-        # Fetch the image from the provided URL
-        response = requests.get(image_url)
-        response.raise_for_status()
-
-        # Return the image data as a response
-        return send_file(BytesIO(response.content),
-                         mimetype=response.headers['Content-Type'])
-    except requests.RequestException as e:
-        print(f"Error fetching image: {e}")
-        abort(500, description="Failed to fetch image")
 
 # Route to Favicon
 @app.route('/favicon.ico')
