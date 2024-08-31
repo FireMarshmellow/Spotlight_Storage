@@ -9,7 +9,6 @@
     <link href="https://cdn.jsdelivr.net/npm/@yaireo/tagify/dist/tagify.css" rel="stylesheet" type="text/css"/>
     <link rel="stylesheet" type="text/css" href="../static/overrides.css" media="screen"/>
     <link rel="stylesheet" type="text/css" href="../static/bootstrap-negative-margins.css" media="screen"/>
-
 </head>
 <body>
 
@@ -103,7 +102,6 @@
         </div>
         <div class="offcanvas-body">
             <div class="row mb-3">
-                <h6 id="leds_text">LEDs</h6>
                 <div class="btn-group mb-2" role="group">
                     <button id="on-button" class="btn btn-success pe-3">
                         <span class="icon-n4px">
@@ -138,16 +136,14 @@
                 <input type="range" id="settings_timeout" name="timeout" min="0" max="300" step="1" class="form-range">
 
                 <div style="display: flex; align-items: center; margin-top: 10px;">
-                    <span id="locate_led_color_label" >Locate LED-Color:</span>
-                    <span id="picked-color-locate" style="margin-left: 5px;">#00ff00</span>
+                    <span id="locate_led_color_label" >Locate Color:</span>
+                    <input type="color" id="color-locate" name="locate" value="#00ff00" class="form-color" style="margin-left: 0.5rem; width: 2rem; height: 1rem; border: none; padding: 0;">
                 </div>
-                <input type="color" id="color-locate" name="locate" value="#00ff00" class="form-color" style="margin-left: 0.5rem; width: 2rem; height: 1rem; border: none; padding: 0;">
 
                 <div style="display: flex; align-items: center; margin-top: 10px;">
-                    <span id="standby_led_color_label" >Standby LED-Color:</span>
-                    <span id="picked-color-standby" style="margin-left: 5px;">#f0f0f0</span>
+                    <span id="standby_led_color_label" >Standby Color:</span>
+                    <input type="color" id="color-standby" name="standby" value="#f0f0f0" class="form-color" style="margin-left: 0.5rem; width: 2rem; height: 1rem; border: none; padding: 0;">
                 </div>
-                <input type="color" id="color-standby" name="standby" value="#f0f0f0" class="form-color" style="margin-left: 0.5rem; width: 2rem; height: 1rem; border: none; padding: 0;">
 
             </div>
             <hr>

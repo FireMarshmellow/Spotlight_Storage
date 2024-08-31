@@ -15,7 +15,7 @@ function updateBrightnessOutput() {
 function updateTimeoutOutput() {
     const timeoutSlider = document.getElementById("settings_timeout");
     if (timeoutSlider.value < 1) {
-        document.getElementById('timeout-display').textContent = "Off";
+        document.getElementById('timeout-display').textContent = "Toggle";
     } else {
         const minutes = Math.floor(timeoutSlider.value / 60);
         const seconds = timeoutSlider.value % 60;
