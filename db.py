@@ -189,7 +189,6 @@ def write_esp_settings(esp_settings):
 
 
 # Function to update ESP settings in the database
-# Function to update ESP settings in the database
 def update_esp_settings(id, esp_settings):
     conn = create_combined_db()
     try:
@@ -384,21 +383,35 @@ def get_db_connection(database_name):
 def migrate_items():
     """Migrate items from data.db to combined_data.db."""
     conn_data = get_db_connection(DATABASE)
+    conn_combined = sqlite3.connect(COMBINED_DATABASE)
+
+    # Fetch all items from the source database
     items = conn_data.execute('SELECT * FROM items').fetchall()
 
-    conn_combined = sqlite3.connect(COMBINED_DATABASE)
+    # Check if 'tags' column exists in the source database
+    column_names = [description[0] for description in conn_data.execute('PRAGMA table_info(items)').fetchall()]
+    has_tags_column = 'tags' in column_names
+
     for item in items:
-        # Extract only the first 7 columns plus the 'tags' column
+        # Extract the first 6 columns
         columns_to_insert = [
             item['name'], item['link'], item['image'],
-            item['position'], item['quantity'], item['ip'], item['tags']
+            item['position'], item['quantity'], item['ip']
         ]
 
+        # Add 'tags' column if it exists, otherwise, add an empty string
+        if has_tags_column:
+            columns_to_insert.append(item['tags'])
+        else:
+            columns_to_insert.append("")
+
+        # Insert data into the destination database
         conn_combined.execute(
             'INSERT INTO items (name, link, image, position, quantity, ip, tags) VALUES (?, ?, ?, ?, ?, ?, ?)',
             columns_to_insert
         )
 
+    # Commit changes and close connections
     conn_combined.commit()
     conn_data.close()
     conn_combined.close()
