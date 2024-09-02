@@ -17,7 +17,7 @@
 
         <a class="navbar-brand scroll-to-top" href="#">
             <img src="../static/favicon.png" alt="" width="32" height="32" class="d-inline-block align-text-top">
-            Spotlight Storage V4
+            Spotlight Storage
         </a>
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
@@ -102,7 +102,6 @@
         </div>
         <div class="offcanvas-body">
             <div class="row mb-3">
-                <h6 id="leds_text">LEDs</h6>
                 <div class="btn-group mb-2" role="group">
                     <button id="on-button" class="btn btn-success pe-3">
                         <span class="icon-n4px">
@@ -137,16 +136,14 @@
                 <input type="range" id="settings_timeout" name="timeout" min="0" max="300" step="1" class="form-range">
 
                 <div style="display: flex; align-items: center; margin-top: 10px;">
-                    <span id="locate_led_color_label" >Locate LED-Color:</span>
-                    <span id="picked-color-locate" style="margin-left: 5px;">#00ff00</span>
+                    <span id="locate_led_color_label" >Locate Color:</span>
+                    <input type="color" id="color-locate" name="locate" value="#00ff00" class="form-color" style="margin-left: 0.5rem; width: 2rem; height: 1rem; border: none; padding: 0;">
                 </div>
-                <input type="color" id="color-locate" name="locate" value="#00ff00" class="form-color" style="margin-left: 0.5rem; width: 2rem; height: 1rem; border: none; padding: 0;">
 
                 <div style="display: flex; align-items: center; margin-top: 10px;">
-                    <span id="standby_led_color_label" >Standby LED-Color:</span>
-                    <span id="picked-color-standby" style="margin-left: 5px;">#f0f0f0</span>
+                    <span id="standby_led_color_label" >Standby Color:</span>
+                    <input type="color" id="color-standby" name="standby" value="#f0f0f0" class="form-color" style="margin-left: 0.5rem; width: 2rem; height: 1rem; border: none; padding: 0;">
                 </div>
-                <input type="color" id="color-standby" name="standby" value="#f0f0f0" class="form-color" style="margin-left: 0.5rem; width: 2rem; height: 1rem; border: none; padding: 0;">
 
             </div>
             <hr>
@@ -207,6 +204,29 @@
                     <select class="form-select" id="language-selector">
                     </select>
                     <label id="language_selector_label" for="language-selector">Language</label>
+                </div>
+            </div>
+            <hr>
+            <div class="form-floating mb-3">
+                <div class="row">
+                    <div class="col-4">
+                        <a href="https://github.com/FireMarshmellow/M.I.M.O.S.A" target="_blank" class="btn btn-link">GitHub</a>
+                    </div>
+                    <div class="col-4">
+                        <a href="https://github.com/FireMarshmellow/M.I.M.O.S.A/issues" target="_blank" class="btn btn-link">Bug Report</a>
+                    </div>
+                    <div class="col-4">
+                        <a href="https://www.youtube.com/@Mellow_labs" target="_blank" class="btn btn-link">Youtube</a>
+                    </div>
+                    <div class="col-4">
+                        <a href="https://www.paypal.com/paypalme/Mellowfire" target="_blank" class="btn btn-link">Paypal</a>
+                    </div>
+                    <div class="col-4">
+                        <a href="https://www.patreon.com/Mellow_labs" target="_blank" class="btn btn-link">Patreon</a>
+                    </div>
+                    <div class="col-4">
+                        <a href="https://discord.gg/Njcz4QGmfH" target="_blank" class="btn btn-link">Discord</a>
+                    </div>
                 </div>
             </div>
         </div>

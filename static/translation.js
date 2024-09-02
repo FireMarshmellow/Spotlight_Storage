@@ -71,7 +71,6 @@
 
                 //Settings Page
                     document.getElementById('offcanvasSettingsLabel').textContent = translation.offcanvasSettingsLabel;
-                    document.getElementById('leds_text').textContent = translation.leds_text;
                     document.getElementById('on_btn_label').textContent = translation.on_btn_label;
                     document.getElementById('off_btn_label').textContent = translation.off_btn_label;
                     document.getElementById('party_btn_label').textContent = translation.party_btn_label;

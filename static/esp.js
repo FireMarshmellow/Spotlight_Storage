@@ -323,7 +323,7 @@ function createESPTab(name, onClickHandler, ip) {
         anchor.innerHTML = 'All Boxes';
         anchor.classList.add('active');
     } else {
-        anchor.innerHTML = `${name} <span class="esp_ip" style="color: #888;">(${ip})</span>`;
+        anchor.innerHTML = `${name} <span class="esp_ip" style="color: #888;"></span>`;
     }
 
     anchor.onclick = onClickHandler;
