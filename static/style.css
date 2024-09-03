@@ -43,3 +43,8 @@ h1{
     color:var(--text-secondary);
 }
 
+.custom-image-size {
+    width: 100px; /* Adjust the width as needed */
+    height: 100px; /* Adjust the height as needed */
+    object-fit: cover; /* or "contain" based on your preference */
+}

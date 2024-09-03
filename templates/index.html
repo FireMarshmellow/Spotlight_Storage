@@ -2,7 +2,7 @@
 <html data-bs-theme="auto">
 
 <head>
-    <title>MIMOSA Interface</title>
+    <title>Spotlight Storage</title>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
@@ -14,7 +14,11 @@
 
 <nav class="navbar navbar-expand-md navbar-dark fixed-top bg-dark border-bottom border-light">
     <div class="container-fluid">
-        <a class="navbar-brand scroll-to-top" href="#">M.I.M.O.S.A V4 Beta</a>
+
+        <a class="navbar-brand scroll-to-top" href="#">
+            <img src="../static/favicon.png" alt="" width="32" height="32" class="d-inline-block align-text-top">
+            Spotlight Storage
+        </a>
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
         </button>
@@ -22,18 +26,23 @@
             <ul class="navbar-nav me-auto mb-2 mb-md-0">
                 <li class="nav-item">
                     <button type="button" class="btn btn-outline-success pe-3" data-bs-toggle="modal" data-bs-target="#item-modal">
-                        <span class="icon-n4px"><i data-lucide="plus" class="me-2"></i>Add Item</span>
+                        <span class="icon-n4px">
+                            <i data-lucide="plus" class="me-2"></i>
+                        </span>
+                        <span id="add_item">Add Item</span>
                     </button>
                 </li>
-                <li class="nav-item">
+
+
+                <!--<li class="nav-item">
                     <a class="nav-link" href="https://youtu.be/7C4i-2IqSS4" target="_blank">Tutorial<i data-lucide="external-link" class="ms-1" style="height:20px; margin-top:-6px;"></i></a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link" href="https://github.com/FireMarshmellow/M.I.M.O.S.A" target="_blank">GitHub Repo<i data-lucide="external-link" class="ms-1" style="height:20px; margin-top:-6px;"></i></a>
-                </li>
+                </li>-->
             </ul>
 
-            <div class="row">
+            <div class="row ml-4">
                 <div class="col-12">
                     <div class="input-group mb-2 mb-md-0">
                         <div class="d-flex align-items-center position-relative w-100 me-0 me-md-2">
@@ -43,28 +52,30 @@
                     </div>
                 </div>
             </div>
-            <div class="dropdown" data-bs-toggle="tooltip" title="Sorting methods">
-                <button class="btn btn-outline-secondary my-2 my-md-0 me-0 me-md-2 dropdown-toggle icon-n4px" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+
+
+            <div class="dropdown" data-bs-toggle="tooltip" id="sortingMethods_text" title="Sorting methods">
+                <button class="btn btn-outline-secondary my-2 my-md-0 me-0 me-md-2 dropdown-toggle icon-n6px" type="button" data-bs-toggle="dropdown" aria-expanded="false">
                     <i data-lucide="arrow-down-up"></i>
                 </button>
                 <ul class="dropdown-menu dropdown-menu-end" id="sort_method">
-                    <li><a class="dropdown-item" href="#" onclick="sortItems('ip')"><i data-lucide="arrow-down-0-1" class="me-2"></i>Box</a></li>
-                    <li><a class="dropdown-item" href="#" onclick="sortItems('id')"><i data-lucide="arrow-down-0-1" class="me-2"></i>ID</a></li>
-                    <li><a class="dropdown-item" href="#" onclick="sortItems('name')"><i data-lucide="arrow-down-a-z" class="me-2"></i>Name</a></li>
-                    <li><a class="dropdown-item" href="#" onclick="sortItems('quantity')"><i data-lucide="arrow-down-0-1" class="me-2"></i>Quantity</a>
-                    <li><a class="dropdown-item" href="#" onclick="sortItems('position')"><i data-lucide="arrow-down-0-1" class="me-2"></i>Location</a>
+                    <li><a id="sortBybox" class="dropdown-item" href="#" onclick="sortItems('ip')"><i data-lucide="arrow-down-0-1" class="me-2"></i>Box</a></li>
+                    <li><a id="sortByid" class="dropdown-item" href="#" onclick="sortItems('id')"><i data-lucide="arrow-down-0-1" class="me-2"></i>ID</a></li>
+                    <li><a id="sortByname" class="dropdown-item" href="#" onclick="sortItems('name')"><i data-lucide="arrow-down-a-z" class="me-2"></i>Name</a></li>
+                    <li><a id="sortByquantity" class="dropdown-item" href="#" onclick="sortItems('quantity')"><i data-lucide="arrow-down-0-1" class="me-2"></i>Quantity</a>
+                    <li><a id="sortBylocation" class="dropdown-item" href="#" onclick="sortItems('position')"><i data-lucide="arrow-down-0-1" class="me-2"></i>Location</a>
                     </li>
                 </ul>
             </div>
-            <div class="dropdown">
-                <button class="btn btn-outline-secondary my-2 my-md-0 me-0 me-md-2 dropdown-toggle icon-n4px" type="button" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false">
+            <div class="dropdown" data-bs-toggle="tooltip" id="sortingBytags_text" title="Sorting by Tags">
+                <button class="btn btn-outline-secondary my-2 my-md-0 me-0 me-md-2 dropdown-toggle icon-n6px" type="button" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false">
                     <i data-lucide="filter"></i>
                 </button>
                 <ul class="dropdown-menu dropdown-menu-end" id="sort_tags">
                 </ul>
             </div>
 
-            <button class="btn btn-outline-secondary my-2 my-md-0 icon-n4px" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasSettings" aria-controls="offcanvasExample">
+            <button class="btn btn-outline-secondary my-2 my-md-0 icon-n6px" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasSettings" aria-controls="offcanvasExample">
                 <i data-lucide="settings"></i>
             </button>
 
@@ -76,8 +87,13 @@
 </nav>
 
 <div class="container-fluid mt-5 pt-3">
-
-    <div id="items-container-grid" class="row"></div>
+    <div class="row">
+        <ul class="nav nav-tabs" id="espTabs">
+            <!-- ESP tabs will be dynamically populated here -->
+        </ul>
+    </div>
+    <div id="items-container-grid" class="row" style="margin-top: 2rem">
+    </div>
     <div id="items-container-list"></div>
     <div class="offcanvas offcanvas-end" tabindex="-1" id="offcanvasSettings" aria-labelledby="offcanvasSettingsLabel">
         <div class="offcanvas-header">
@@ -86,48 +102,131 @@
         </div>
         <div class="offcanvas-body">
             <div class="row mb-3">
-                <h6>LEDs</h6>
                 <div class="btn-group mb-2" role="group">
                     <button id="on-button" class="btn btn-success pe-3">
-                        <span class="icon-n4px"><i data-lucide="lightbulb" class="me-2"></i>On</span></button>
+                        <span class="icon-n4px">
+                            <i data-lucide="lightbulb" class="me-2"></i>
+                        </span>
+                        <span id="on_btn_label">On</span>
+                    </button>
                     <button id="off-button" class="btn btn-danger pe-3">
-                        <span class="icon-n4px"><i data-lucide="lightbulb-off" class="me-2"></i>Off</span></button>
+                        <span class="icon-n4px">
+                            <i data-lucide="lightbulb-off" class="me-2"></i>
+                        </span>
+                        <span id="off_btn_label">Off</span>
+                    </button>    
                     <button id="party-button" class="btn btn-rainbow pe-3">
-                        <span class="icon-n4px"><i data-lucide="party-popper" class="me-2"></i> Party-Mode</span>
+                        <span class="icon-n4px">
+                            <i data-lucide="party-popper" class="me-2"></i>
+                        </span>
+                        <span id="party_btn_label">Party Mode</span>
                     </button>
                 </div>
 
-                <label id="brightness-title" for="settings_brightness">Brightness:
-                    <span id="brightness-display">50%</span></label>
+                <div style="display: flex; align-items: center;">
+                    <span id="brightness-title" >Brightness:</span>
+                    <span id="brightness-display" style="margin-left: 5px;">50%</span>
+                </div>
                 <input type="range" id="settings_brightness" name="brightness" min="0" max="100" step="1" class="form-range">
 
-                <label id="timeout-title" for="settings_timeout">Timeout:
-                    <span id="timeout-display">0m 0s</span></label>
-                <input type="range" id="settings_timeout" name="brightness" min="0" max="300" step="1" class="form-range">
+                <div style="display: flex; align-items: center; margin-top: 10px;">
+                    <span id="timeout-title" >Timeout:</span>
+                    <span id="timeout-display" style="margin-left: 5px;">0m 0s</span>
+                </div>
+                <input type="range" id="settings_timeout" name="timeout" min="0" max="300" step="1" class="form-range">
+
+                <div style="display: flex; align-items: center; margin-top: 10px;">
+                    <span id="locate_led_color_label" >Locate Color:</span>
+                    <input type="color" id="color-locate" name="locate" value="#00ff00" class="form-color" style="margin-left: 0.5rem; width: 2rem; height: 1rem; border: none; padding: 0;">
+                </div>
+
+                <div style="display: flex; align-items: center; margin-top: 10px;">
+                    <span id="standby_led_color_label" >Standby Color:</span>
+                    <input type="color" id="color-standby" name="standby" value="#f0f0f0" class="form-color" style="margin-left: 0.5rem; width: 2rem; height: 1rem; border: none; padding: 0;">
+                </div>
+
             </div>
             <hr>
             <div class="row">
-                <h6>ESP Devices</h6>
+                <h6 id="esp_devices_text">WLED nodes</h6>
                 <div>
                     <table class="table table-sm table-striped overflow-hidden" id="esp_table">
                     </table>
                 </div>
                 <div>
                     <button type="button" class="btn btn-outline-success me-0 me-md-2 pe-3" data-bs-toggle="modal" data-bs-target="#esp-modal">
-                        <span class="icon-n4px"><i data-lucide="plus" class="me-2"></i>Add ESP Device</span>
+                        <span class="icon-n4px">
+                            <i data-lucide="plus" class="me-2"></i>
+                        </span>
+                        <span id="add_esp_button">Add WLED node</span>
                     </button>
                 </div>
             </div>
             <hr>
             <div class="row">
-                <h6>Web Interface</h6>
+                <h6 id="titile">Web Interface</h6>
                 <div class="btn-group" role="group">
                     <button type="button" class="btn btn-light pe-3" data-bs-theme-value="light">
-                        <span class="icon-n4px"><i data-lucide="sun" class="me-2"></i>Light</span></button>
+                        <span class="icon-n4px">
+                            <i data-lucide="sun" class="me-2"></i>
+                        </span>
+                        <span id="light_mode_label">Light</span>
+                    </button>
                     <button type="button" class="btn btn-dark pe-3" data-bs-theme-value="dark">
-                        <span class="icon-n4px"><i data-lucide="moon" class="me-2"></i>Dark</span></button>
+                        <span class="icon-n4px">
+                            <i data-lucide="moon" class="me-2"></i>
+                        </span>
+                        <span id="dark_mode_label">Dark</span>
+                    </button>
                     <button type="button" class="btn btn-secondary pe-3" data-bs-theme-value="auto">
-                        <span class="icon-n4px"><i data-lucide="sun-moon" class="me-2"></i>Auto</span></button>
+                        <span class="icon-n4px">
+                            <i data-lucide="sun-moon" class="me-2"></i>
+                        </span>
+                        <span id="auto_mode_label">Auto</span>
+                    </button>
+                </div>
+            </div>
+            <hr>
+            <div class="row">
+                <h6 id="inventur_label">Inventur</h6>
+                <div>
+                    <button  id="inventur" type="button" class="btn btn-outline-success pe-3">
+                        <span class="icon-n4px">
+                            <i data-lucide="scroll-text" class="me-2"></i>
+                        </span>
+                        <span id="inventur_btn_label">Inventur</span>
+                    </button>
+                </div>
+            </div>
+            <hr>
+            <div class="col-4">
+                <div class="form-floating mb-3">
+                    <select class="form-select" id="language-selector">
+                    </select>
+                    <label id="language_selector_label" for="language-selector">Language</label>
+                </div>
+            </div>
+            <hr>
+            <div class="form-floating mb-3">
+                <div class="row">
+                    <div class="col-4">
+                        <a href="https://github.com/FireMarshmellow/M.I.M.O.S.A" target="_blank" class="btn btn-link">GitHub</a>
+                    </div>
+                    <div class="col-4">
+                        <a href="https://github.com/FireMarshmellow/M.I.M.O.S.A/issues" target="_blank" class="btn btn-link">Bug Report</a>
+                    </div>
+                    <div class="col-4">
+                        <a href="https://www.youtube.com/@Mellow_labs" target="_blank" class="btn btn-link">Youtube</a>
+                    </div>
+                    <div class="col-4">
+                        <a href="https://www.paypal.com/paypalme/Mellowfire" target="_blank" class="btn btn-link">Paypal</a>
+                    </div>
+                    <div class="col-4">
+                        <a href="https://www.patreon.com/Mellow_labs" target="_blank" class="btn btn-link">Patreon</a>
+                    </div>
+                    <div class="col-4">
+                        <a href="https://discord.gg/Njcz4QGmfH" target="_blank" class="btn btn-link">Discord</a>
+                    </div>
                 </div>
             </div>
         </div>
@@ -141,54 +240,63 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" onclick="resetModal()"> </button>
                 </div>
                 <div class="modal-body">
-
+                    <div class="alert alert-danger d-none" id="item-error-alert">Please enter values in the follow empty fields:<br><span id="item-error-list"></span>
+                    </div>
                     <div class="form-floating mb-3">
                         <input type="text" class="form-control" id="item_name" placeholder="Name" required>
-                        <label for="item_name">Item name</label>
+                        <label id="item_name_label" for="item_name">Item name</label>
                     </div>
                     <div class="form-floating mb-3">
                         <input type="text" class="form-control" id="item_url" placeholder="URL">
-                        <label for="item_url">Item URL</label>
+                        <label id="item_url_label" for="item_url">Item URL</label>
                     </div>
                     <div class="form-floating mb-3">
                         <input type="number" class="form-control" id="item_quantity" placeholder="1" required>
-                        <label for="item_quantity">Item quantity</label>
+                        <label id="item_quantity_label" for="item_quantity">Item quantity</label>
                     </div>
 
                     <div class="row">
                         <div class="col-4 pe-2">
                             <div class="form mb-3">
-                                <label for="item_image">Item image URL</label>
-                                <input type="url" class="form-control" id="item_image" placeholder="https://placehold.co/150x100?text=Hello+World">
+                                <label id="item_imageUrl_label" for="item_image">Item image URL</label>
+                                <input type="url" class="form-control" id="item_image" placeholder="https://placehold.co/150x100">
 
                             </div>
                         </div>
                         <div class="col-1 text-center or-text">
-                            <span>or</span>
+                            <span id="or_text">or</span>
                         </div>
                         <div class="col-7 ps-2">
                             <div class="form">
-                                <label for="item_image_upload">Upload image file</label>
+                                <label id="item_imageUplad_label" for="item_image_upload">Upload image file</label>
                                 <input type="file" class="form-control" id="item_image_upload" name="file">
                             </div>
                         </div>
                     </div>
 
                     <div class="form mb-3">
-                        <label for="item_url">Tags</label>
+                        <label id="item_tag_label" for="item_tags">Tags</label>
                         <input type="text" class="form-control" id="item_tags">
                     </div>
 
-                    <label for="item_esp_select">Select an ESP device</label>
+                    <label for="item_esp_select" id="item_esp_select_label">Select an ESP device</label>
                     <select class="form-select mb-3" id="item_esp_select">
                     </select>
                     <div>
                         <button id="test_led_button" class="btn btn-success pe-3">
-                            <span class="icon-n4px"><i data-lucide="lightbulb" class="me-2"></i>Test LEDs</span></button>
+                            <span class="icon-n4px">
+                                <i data-lucide="lightbulb" class="me-2"></i>
+                            </span>
+                            <span id="test_led_btn_label">Test LEDs</span>
+                        </button>
                         <button id="clear_led_button" class="btn btn-danger pe-3">
-                            <span class="icon-n4px"><i data-lucide="x" class="me-2"></i>Clear Grid</span></button>
+                            <span class="icon-n4px">
+                                <i data-lucide="x" class="me-2"></i>
+                            </span>
+                            <span id="clear_grid_btn_label">Clear Grid</span>
+                        </button>
                     </div>
-                    <label for="item-canvas-container">Select LEDs to assign to item</label>
+                    <p id="item_select_leds_label">Select LEDs to assign to item</p>
 
                     <div id="item-canvas-container" class="col-10 mx-auto">
                         <canvas id="item-responsive-canvas"></canvas>
@@ -197,13 +305,99 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary pe-3" id="cancel-item-button" data-bs-dismiss="modal"  onclick="resetModal()">
-                        <span class="icon-n4px"><i data-lucide="x" class="me-2"></i>Cancel</span></button>
-                    <button type="button" class="btn btn-success pe-3" id="save-item-button" data-bs-dismiss="modal" >
-                        <span class="icon-n4px"><i data-lucide="plus" class="me-2"></i>Add</span></button>
+                        <span class="icon-n4px">
+                            <i data-lucide="x" class="me-2"></i>
+                        </span>
+                        <span id="item_cancel_btn_label">Cancel</span>
+                    </button>
+                    <button type="button" class="btn btn-success pe-3" id="save-item-button">
+                        <span class="icon-n4px">
+                            <i data-lucide="plus" class="me-2"></i>
+                        </span>
+                        <span id="item_add_btn_label">Add</span>
+                    </button>
                 </div>
             </div>
         </div>
     </div>
+
+
+    <div class="modal fade" id="inventur-modal" tabindex="-1" aria-labelledby="inventur-modal-label" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h1 id="inventur_box_label" class="modal-title fs-5" >Inventur</h1>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body text-center">
+                    <!-- Display the text of the current item -->
+                    <p id="current-item-text" class="h5 mb-2"></p>
+                    <div class="d-flex justify-content-center align-items-center mb-4">
+                        <button id="minus-btn-inventur" class="btn btn-outline-danger me-2 minus-btn" data-bs-toggle="tooltip" title="-1 from stock">
+                            <i data-lucide="minus"></i>
+                        </button>
+                        <span id="current-item-amount" class="h6 text-muted"></span>
+                        <button id="plus-btn-inventur" class="btn btn-outline-success ms-2 plus-btn" data-bs-toggle="tooltip" title="+1 to stock">
+                            <i data-lucide="plus"></i>
+                        </button>
+                    </div>
+                    <img id="current-item-img" class="img-fluid rounded mb-4" style="height: 15rem; width: auto; min-width: 10rem; max-width: 50rem;">
+                    <!-- Add buttons with better styling -->
+                    <div class="d-flex justify-content-center">
+                        <button id="edit-btn-inventur" class="btn btn-outline-primary me-2" data-bs-toggle="tooltip" title="Edit">
+                            <i data-lucide="file-edit"></i>
+                            <span id="edit_inventur_btn_label">Edit</span>
+                        </button>
+                        <button id="continue-btn-inventur" class="btn btn-outline-success" data-bs-toggle="tooltip" title="Continue">
+                            <i data-lucide="step-forward"></i>
+                            <span id="continue_inventur_btn_label">Continue</span>
+                        </button>
+                    </div>
+                </div>
+
+
+                <div class="modal-footer">
+                    <!-- Add a button to continue -->
+                    <button type="button" class="btn btn-secondary pe-3" id="cancel-inventur-button" data-bs-dismiss="modal">
+                        <span class="icon-n4px">
+                            <i data-lucide="x" class="me-2"></i>
+                        </span>
+                        <span id="cancel_inventur_btn_label">Cancel</span>
+                    </button>
+                    <!-- Add a button to save the item -->
+                    <button type="button" class="btn btn-success pe-3" id="save-inventur-button" data-bs-dismiss="modal">
+                        <span class="icon-n4px">
+                            <i data-lucide="save" class="me-2"></i>
+                        </span>
+                        <span id="save_inventur_btn_label">Save</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+
+
+    <div class="modal fade" id="esp-override-modal" tabindex="-1" aria-labelledby="espOverrideModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="espOverrideModalLabel">Confirmation</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Are you sure you want to override an existing ESP device: <span id="deviceNameSpan"></span> with IP address
+                        <span id="ipAddressSpan"></span>?</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">No</button>
+                    <button type="button" class="btn btn-danger" id="confirmOverride">Yes</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
 
     <div class="modal fade" id="esp-delete-modal" tabindex="-1" aria-labelledby="espDeleteModalLabel" aria-hidden="true">
         <div class="modal-dialog">
@@ -224,6 +418,30 @@
         </div>
     </div>
 
+    <!-- Crop Image Modal -->
+    <div class="modal fade" id="cropImageModal" tabindex="-1" aria-labelledby="cropImageModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="cropImageModalLabel">Crop Image</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body" style="max-height: 40rem; overflow: hidden; padding: 0;">
+                    <div class="img-container" style="width: 100%; height: 100%; display: flex; justify-content: center; align-items: center; overflow: hidden;">
+                        <img id="imageToCrop" src="" alt="Image to Crop" style="max-width: 100%; max-height: 100%; object-fit: contain;">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" id="cropCancel" data-bs-dismiss="modal">Cancel</button>
+                    <button id="download-image-btn" class="btn btn-primary">Download Image</button>
+                    <button type="button" class="btn btn-primary" id="cropAndSaveBtn" data-bs-dismiss="modal">Crop and save</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+
     <div class="modal fade" id="esp-modal" tabindex="-1" aria-labelledby="esp-modal-label" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
@@ -236,23 +454,23 @@
                     </div>
                     <div class="form-floating mb-3">
                         <input type="text" class="form-control" id="esp_name" placeholder="Name" required>
-                        <label for="esp_name">Name</label>
+                        <label id="esp_name_text" for="esp_name">Name</label>
                     </div>
                     <div class="form-floating mb-3">
                         <input type="text" class="form-control" id="esp_ip" placeholder="IP">
-                        <label for="esp_ip">IP address</label>
+                        <label id="esp_ip_text" for="esp_ip">IP address</label>
                     </div>
                     <div class="row">
                         <div class="col-6 pe-2">
                             <div class="form-floating mb-3">
                                 <input type="number" class="form-control" id="esp_rows" placeholder="4" min="1" value="4" required>
-                                <label for="esp_rows">Rows</label>
+                                <label id="esp_rows_text" for="esp_rows">Rows</label>
                             </div>
                         </div>
                         <div class="col-6 ps-2">
                             <div class="form-floating mb-3">
                                 <input type="number" class="form-control" id="esp_columns" placeholder="4" min="1" value="4" required>
-                                <label for="esp_columns">Columns</label>
+                                <label id="esp_columns_text" for="esp_columns">Columns</label>
                             </div>
                         </div>
                     </div>
@@ -260,29 +478,29 @@
                         <div class="col-4 pe-0">
                             <div class="form-floating mb-3">
                                 <select class="form-select" id="esp_startx">
-                                    <option selected data-startx="Left">Left</option>
-                                    <option value="1" data-startx="Right">Right</option>
+                                    <option id="left_label" selected data-startx="Left">Left</option>
+                                    <option id="right_label"  data-startx="Right">Right</option>
                                 </select>
-                                <label for="esp_startx">Start Left</label>
+                                <label id="start_left_label" for="esp_startx">Start Left</label>
                             </div>
                         </div>
                         <div class="col-4">
                             <div class="form-floating mb-3">
                                 <select class="form-select" id="esp_starty">
-                                    <option selected data-starty="Top">Top</option>
-                                    <option data-starty="Bottom">Bottom</option>
+                                    <option id="top_label" selected data-starty="Top">Top</option>
+                                    <option id="bottom_label"  data-starty="Bottom">Bottom</option>
                                 </select>
-                                <label for="esp_starty">Start Top</label>
+                                <label id="start_top_label" for="esp_starty">Start Top</label>
                             </div>
 
                         </div>
                         <div class="col-4 ps-0">
                             <div class="form-floating mb-3">
                                 <select class="form-select" id="esp_serpentine">
-                                    <option selected data-serpentine="Horizontal">Horizontal</option>
-                                    <option value="1" data-serpentine="Vertical">Vertical</option>
+                                    <option id="horizontal_label" selected data-serpentine="Horizontal">Horizontal</option>
+                                    <option id="vertical_label"  data-serpentine="Vertical">Vertical</option>
                                 </select>
-                                <label for="esp_serpentine">Serpentine Direction</label>
+                                <label id="serpentine_dir_label" for="esp_serpentine">Serpentine Direction</label>
                             </div>
                         </div>
                     </div>
@@ -292,9 +510,17 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary pe-3" data-bs-dismiss="modal">
-                        <span class="icon-n4px"><i data-lucide="x" class="me-2"></i>Cancel</span></button>
+                        <span class="icon-n4px">
+                            <i data-lucide="x" class="me-2"></i>
+                        </span>
+                        <span id="cancel_esp_btn_label">Cancel</span>
+                    </button>
                     <button type="button" class="btn btn-success pe-3" id="save-esp-button">
-                        <span class="icon-n4px"><i data-lucide="plus" class="me-2"></i>Add</span></button>
+                        <span class="icon-n4px">
+                            <i data-lucide="plus" class="me-2"></i>
+                        </span>
+                        <span id="add_esp_btn_label">Add</span>
+                    </button>
                 </div>
             </div>
         </div>
@@ -306,16 +532,21 @@
 <script src="https://unpkg.com/lucide@latest"></script>
 <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
 <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+<link  href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.css" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/masonry/4.2.2/masonry.pkgd.min.js"></script>
+
+<script src="../static/images.js"></script>
 <script src="../static/script.js"></script>
 <script src="../static/esp.js"></script>
 <script src="../static/tags.js"></script>
 <script src="../static/settings.js"></script>
 <script src="../static/gen_grid.js"></script>
 <script src="../static/color-modes.js"></script>
-
+<script src="../static/translation.js"></script>
 
 <script>
-        lucide.createIcons();
+    lucide.createIcons();
 </script>
 </body>
 

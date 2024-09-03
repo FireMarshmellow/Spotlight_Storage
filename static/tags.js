@@ -86,7 +86,7 @@ function sortItemsByTag(filter) {
             filterTags.splice(filterTags.indexOf(filter), 1);
         }
     }
-    toggleSelectedClass();
+    toggleSelectedTag();
     Array.from(items).forEach((item) => {
         const itemTags = item.dataset.tags;
         const cleanedTags = itemTags.replace(/[\[\]'"`]/g, ''); // Remove square brackets, single quotes, double quotes, and backticks
@@ -149,7 +149,7 @@ function populateSortTagsMenu(tagDataArray) {
 
 
 // Function to toggle a class on selected options
-function toggleSelectedClass() {
+function toggleSelectedTag() {
 
     // Get all list items under sortTagsDropdown
     const listItems = Array.from(sortTagsDropdown.querySelectorAll('li'));
