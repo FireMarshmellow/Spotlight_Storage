@@ -159,4 +159,3 @@
             loadTranslation(language);
             addSettings();
         });
-
