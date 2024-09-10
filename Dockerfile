@@ -1,18 +1,35 @@
-FROM python:3.13
+FROM python:alpine3.20
 
-COPY static static
-COPY app.py  app.py
-COPY db.py db.py
-COPY favicon.ico favicon.ico
-COPY requirements.txt requirements.txt
-COPY templates templates
-COPY setup.py setup.py
-ENV TRANSLATIONS_DIR=/app/static/translations
+# Metadata params
+ARG VCS_REF
+ARG BUILD_DATE
+
+ENV MIMOSA_VERSION=V4-2024.09.1dev
+ENV MIMOSA_DOCKER_VERSION=2024.09.2dev
+WORKDIR /app
+EXPOSE 5000 
+COPY /setup.sh /setup.sh
+RUN  chmod +x /setup.sh 
+COPY requirements.txt ./
+
+RUN apk add --no-cache bash git curl && \
+    apk upgrade && \
+    cd /app && \
+    pip install --upgrade pip && \
+    pip install waitress && \
+    pip install --no-cache-dir -r requirements.txt
+
+COPY . .
+
+RUN /setup.sh
+
+RUN rm -rf /setup.sh /app/setup.sh
+RUN echo "$(date "+%d.%m.%Y %T") Spotlight Storage Docker ${MIMOSA_DOCKER_VERSION} Built from Spotlight Storage ${MIMOSA_VERSION}" >> /build_date.info
 
 
-RUN pip install -r requirements.txt
-RUN python setup.py
+COPY /entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
 
-EXPOSE 5000
-EXPOSE 5001
-ENTRYPOINT python app.py
+#HEALTHCHECK CMD curl --fail http://localhost:5000 || exit 1
+
+ENTRYPOINT ["/entrypoint.sh"]

@@ -1,0 +1,16 @@
+node_modules
+.git
+.gitignore
+dist
+data
+**/node_modules
+client/build
+examples
+.env
+docker-compose.*
+.github
+.gitea
+**/*.test.ts*
+renovate.json
+Dockerfile*
+*.bat
