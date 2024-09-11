@@ -8,7 +8,7 @@ body:
 
         If you have a feature or enhancement request, please use the [feature request][fr] section of our [GitHub Discussions][fr].
 
-        [fr]: https://github.com/devzwf/Spotlight_Storage/discussions/new?category=feature-request
+        [fr]: https://github.com/FireMarshmellow/Spotlight_Storage/discussions/new?category=feature-request
 
   - type: textarea
     validations:
