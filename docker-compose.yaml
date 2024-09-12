@@ -1,19 +1,13 @@
-version: '3.8'
-
 services:
   spotlight-storage:
-    build:
-      context: .
     environment:
       - TRANSLATIONS_DIR=/app/static/translations
-    image: spotlight_storage_v4
+    image: mellowlabs/spotlight_storage:dev
     ports:
       - "5000:5000"
-      - "5001:5001"
-    restart: always
+    restart: on-failure
     volumes:
-      - ./data:/data:rw
-      - ./images:/images:rw
+      - ./data:/app/data
+      - ./images:/app/images
+      - ./logs:/app/logs
       - ./static/translations:/app/static/translations:ro
-    command: >
-      bash -c "python setup.py && python app.py"
