@@ -50,6 +50,38 @@ The videos are not up to date and the content in them do not match the current S
 
 - Remove or turn off Spotlight Storage System with the `uninstall.bat`, no data will be lost. It just turns off docker container and removes it. If you hit `install.bat` after the `uninstall.bat` it will turn on docker container, build it and you can reach the same page and data as before.
 
+## Installation of Spotlight Storage with docker-compose
+
+The easiest way to install Spotlight Storage is to use Docker Compose.
+Below are the steps to get started.
+Spotlight Storage requires Docker Compose version 2.x or higher.
+
+### Step 1: Download the required files
+
+Create a new directory to hold the `docker-compose.yml` file.
+
+```bash
+mkdir Spotlight_Storage
+cd Spotlight_Storage
+```
+
+Download the [docker-compose.yml](https://raw.githubusercontent.com/FireMarshmellow/Spotlight_Storage/main/docker-compose.yml) file.
+
+```bash
+wget -O docker-compose.yml https://raw.githubusercontent.com/FireMarshmellow/Spotlight_Storage/main/docker-compose.yml
+```
+
+or download the files manually from the repository.
+
+### Step 2: Start the application
+
+From the directory where the `docker-compose.yml` file is located, run the following command:
+
+```bash
+docker compose up -d
+```
+
+
 ## dependencies:
 
 - python 3.6
