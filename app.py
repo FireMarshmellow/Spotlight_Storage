@@ -1,14 +1,16 @@
 # Importing necessary modules and packages
-import json
-import re
-from flask import Flask, render_template, jsonify, request, send_from_directory, redirect, url_for, flash, Response
-
-from requests import Timeout
 import db
+
+import json
+import os
+import re
 import requests
 import time
-import os
+
+from flask import Flask, render_template, jsonify, request, send_from_directory, redirect, url_for, flash, Response
+from requests import Timeout
 from werkzeug.utils import secure_filename
+
 
 # Creating a Flask application instance
 app = Flask(__name__)
@@ -20,7 +22,7 @@ app.delSegments = ""
 app.timeout = 5
 app.standbyColor = "#00ff00"
 app.locateColor = "#00ff00"
-app.config['UPLOAD_FOLDER'] = './images'
+app.config['UPLOAD_FOLDER'] =  os.path.join('.','images')
 app.previous_positions = []
 app.request_amount = 0
 

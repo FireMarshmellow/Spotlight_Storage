@@ -1,5 +1,7 @@
 services:
   spotlight-storage:
+    read_only: true
+    stop_signal: SIGINT # https://github.com/docker/compose/issues/4199#issuecomment-426109482
     environment:
       - TRANSLATIONS_DIR=/app/static/translations
     image: mellowlabs/spotlight_storage:dev
@@ -7,7 +9,7 @@ services:
       - "5000:5000"
     restart: on-failure
     volumes:
-      - ./data:/app/data
-      - ./images:/app/images
-      - ./logs:/app/logs
+      - ./data:/app/data:rw
+      - ./images:/app/images:rw
+      - ./logs:/app/logs:rw
       - ./static/translations:/app/static/translations:ro
