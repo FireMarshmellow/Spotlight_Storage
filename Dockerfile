@@ -1,11 +1,20 @@
-FROM python:alpine3.20 as build
+ARG BASE_IMAGE=docker.io/library/python:alpine3.20
+FROM ${BASE_IMAGE}
 
 # Metadata params
 ARG VCS_REF
 ARG BUILD_DATE
-
+ARG GIT_COMMIT=${GITHUB_HEAD_REF}
+ARG GIT_SOURCE=${GITHUB_REPOSITORY}
 ENV MIMOSA_VERSION=V4-2024.09.1dev
 ENV MIMOSA_DOCKER_VERSION=2024.09.2dev
+
+LABEL org.opencontainers.image.description="Mellow_Labs Inventory Management and Organization System Apparatus"
+LABEL org.opencontainers.image.revision="${GIT_COMMIT}"
+LABEL org.opencontainers.image.source="${GIT_SOURCE}"
+LABEL org.opencontainers.image.url="https://github.com/FireMarshmellow/Spotlight_Storage"
+LABEL org.opencontainers.image.licenses="MIT"
+LABEL org.opencontainers.image.authors="Tomasz Burzy"
 
 # hadolint ignore=DL3013,DL3018
 RUN apk upgrade && \
