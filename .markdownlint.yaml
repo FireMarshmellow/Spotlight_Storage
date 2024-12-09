@@ -1,0 +1,27 @@
+# Example markdownlint configuration with all properties set to their default value
+
+# Default state for all rules
+default: true
+
+# Path to configuration file to extend
+extends: null
+
+# MD013/line-length : Line length : https://github.com/DavidAnson/markdownlint/blob/v0.37.0/doc/md013.md
+MD013:
+  # Number of characters
+  line_length: 140
+  # Number of characters for headings
+  heading_line_length: 140
+  # Number of characters for code blocks
+  code_block_line_length: 140
+  # Include code blocks
+  code_blocks: true
+  # Include tables
+  tables: true
+  # Include headings
+  headings: true
+  # Strict length checking
+  strict: false
+  # Stern length checking
+  stern: false
+
