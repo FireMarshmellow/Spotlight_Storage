@@ -5,7 +5,7 @@ import sqlite3
 from collections import Counter
 
 # Define the path for the combined database
-COMBINED_DATABASE = 'data/combined_data.db'
+COMBINED_DATABASE = os.path.join('data','combined_data.db')
 
 
 def create_combined_db():
@@ -492,7 +492,7 @@ def perform_migration():
 
 def move_db_to_data_dir():
     main_dir_db = 'combined_data.db'  # The original path in the main directory
-    data_dir_db = 'data/combined_data.db'  # The new path inside the data directory
+    data_dir_db =  os.path.join('data', 'combined_data.db')  # The new path inside the data directory
 
     # Check if the database exists in the main directory
     if os.path.exists(main_dir_db):

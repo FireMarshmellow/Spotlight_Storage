@@ -200,3 +200,12 @@ $RECYCLE.BIN/
 *.sqlite
 *.jpg
 *.webp
+
+
+# project files
+data/
+
+!data/.gitkeep
+
+images/
+!images/demo.*

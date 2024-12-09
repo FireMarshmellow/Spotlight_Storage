@@ -14,3 +14,9 @@ docker-compose.*
 renovate.json
 Dockerfile*
 *.bat
+.idea
+.vscode
+
+
+!data/.gitignore
+!images/.gitignore
