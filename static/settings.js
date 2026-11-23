@@ -272,3 +272,34 @@ document.addEventListener('DOMContentLoaded', function() {
     loadSettings();
     populateEspTable();
 });
+
+// Backup import: upload a JSON file exported via /api/export
+document.getElementById('import-button').addEventListener('click', function () {
+    document.getElementById('import-file').click();
+});
+
+document.getElementById('import-file').addEventListener('change', function () {
+    const file = this.files[0];
+    if (!file) return;
+    const replace = document.getElementById('import-replace').checked;
+    if (replace && !confirm("Replace mode deletes your current WLED nodes and items before importing. Continue?")) {
+        this.value = "";
+        return;
+    }
+    const formData = new FormData();
+    formData.append('file', file);
+    fetch(`/api/import?mode=${replace ? 'replace' : 'merge'}`, { method: 'POST', body: formData })
+        .then(response => response.json().then(data => ({ ok: response.ok, data })))
+        .then(({ ok, data }) => {
+            if (!ok) {
+                alert(`Import failed: ${data.error}`);
+                return;
+            }
+            alert(`Import complete.\nWLED nodes: ${data.esps_added} added, ${data.esps_updated} updated\n` +
+                  `Items: ${data.items_added} added, ${data.items_updated} updated`);
+            // Reload so settings, nodes and items all reflect the imported data
+            window.location.reload();
+        })
+        .catch(error => alert(`Import failed: ${error}`))
+        .finally(() => { this.value = ""; });
+});

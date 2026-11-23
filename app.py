@@ -8,6 +8,7 @@ import db
 import requests
 import time
 import os
+import threading
 from werkzeug.utils import secure_filename
 
 # Creating a Flask application instance
@@ -130,6 +131,38 @@ def settings():
         return jsonify({'success': True})
 
 
+@app.route('/api/export', methods=['GET'])
+def export_backup():
+    """Download a JSON backup. ?include=settings,esps,items (default: all)."""
+    include = [s.strip() for s in request.args.get('include', 'settings,esps,items').split(',') if s.strip()]
+    unknown = set(include) - {'settings', 'esps', 'items'}
+    if unknown or not include:
+        return jsonify({'error': f"Unknown section(s): {', '.join(sorted(unknown)) or 'none given'}"}), 400
+    data = db.export_data(include)
+    filename = f"spotlight-storage-backup-{time.strftime('%Y%m%d-%H%M%S')}.json"
+    return Response(json.dumps(data, indent=2), mimetype='application/json',
+                    headers={'Content-Disposition': f'attachment; filename="{filename}"'})
+
+
+@app.route('/api/import', methods=['POST'])
+def import_backup():
+    """Import a backup. Accepts a JSON body or a multipart 'file'.
+    ?mode=merge (default, nothing deleted) or ?mode=replace."""
+    mode = request.args.get('mode') or request.form.get('mode') or 'merge'
+    try:
+        if 'file' in request.files:
+            data = json.load(request.files['file'].stream)
+        else:
+            data = request.get_json(silent=False)
+    except Exception:
+        return jsonify({'error': 'File is not valid JSON'}), 400
+    try:
+        stats = db.import_data(data, mode)
+    except db.BackupError as e:
+        return jsonify({'error': str(e)}), 400
+    return jsonify({'success': True, 'mode': mode, **stats}), 200
+
+
 @app.route('/api/esp/', methods=['GET', 'POST'])
 def esps():
     if request.method == 'GET':
@@ -217,16 +250,150 @@ def item(id):
     elif request.method == 'POST':
 
         if request.form.get('action') == 'locate':
-            if is_valid_url_or_ip(item['ip']):
-                ip = item['ip']
-            else:
-                ip = db.get_ip_by_name(item['ip'])
-            esp = db.get_esp_settings_by_ip(ip)
-            light(item['position'], ip, esp, item['quantity'])
-
+            if item is None:
+                return jsonify({'error': 'Item not found'}), 404
+            error = locate_item(item)
+            if error:
+                return jsonify({'error': error}), 404
             return jsonify({'success': True})
         else:
             return jsonify({'error': 'Invalid action'}), 400
+
+
+def resolve_esp(item):
+    """Return (ip, esp_settings) for an item; esp_settings is None if not found."""
+    ip = item['ip'] if is_valid_url_or_ip(item['ip'] or '') else db.get_ip_by_name(item['ip'])
+    return ip, (db.get_esp_settings_by_ip(ip) if ip else None)
+
+
+def locate_item(item, background=False):
+    """Light up an item's LEDs. Returns an error message, or None on success.
+
+    With background=True the (blocking) light/timeout cycle runs in a thread so
+    API callers such as Home Assistant get an immediate response.
+    """
+    ip, esp = resolve_esp(item)
+    if esp is None:
+        return 'No ESP configured for this item. Edit the item and select an ESP.'
+    if background:
+        threading.Thread(target=light, args=(item['position'], ip, esp, item['quantity']), daemon=True).start()
+    else:
+        light(item['position'], ip, esp, item['quantity'])
+    return None
+
+
+def item_to_api(item):
+    """Public JSON shape for the REST API (Home Assistant, scripts, ...)."""
+    try:
+        bins = json.loads(item['position']) if isinstance(item['position'], str) else item['position']
+    except (TypeError, ValueError):
+        bins = []
+    _, esp = resolve_esp(item)
+    return {
+        'item_number': item['id'],
+        'item_name': item['name'],
+        'quantity': item['quantity'],
+        'bin_number': bins,
+        'article_number': item.get('article_number') or '',
+        'storage_location': item.get('storage_location') or '',
+        'box': esp['name'] if esp else None,
+        'link': item.get('link') or '',
+    }
+
+
+def _wants_locate():
+    return str(request.args.get('locate', 'true')).lower() not in ('0', 'false', 'no', 'off')
+
+
+# ---------------------------------------------------------------------------
+# REST API for automations / voice assistants (e.g. Home Assistant)
+# ---------------------------------------------------------------------------
+
+@app.route('/api/find', methods=['GET'])
+@app.route('/api/findItem', methods=['GET'])
+def api_find_item():
+    """Find the best match for ?q= (name, article number, location, tags; fuzzy)
+    and light it up. Pass ?locate=false to only look it up."""
+    query = request.args.get('q') or request.args.get('name') or request.args.get('article_number') or ''
+    if not query.strip():
+        return jsonify({'error': "Missing query parameter 'q'"}), 400
+    matches = db.search_items(query)
+    if not matches:
+        return jsonify({'error': f"No item matching '{query}'"}), 404
+    item = matches[0]
+    result = item_to_api(item)
+    if _wants_locate():
+        error = locate_item(item, background=True)
+        result['located'] = error is None
+        if error:
+            result['locate_error'] = error
+    return jsonify(result), 200
+
+
+@app.route('/api/search', methods=['GET'])
+def api_search_items():
+    """List all items matching ?q= (best first) without lighting anything."""
+    query = request.args.get('q', '')
+    limit = request.args.get('limit', default=10, type=int)
+    return jsonify([item_to_api(i) for i in db.search_items(query)[:max(limit, 1)]]), 200
+
+
+@app.route('/api/items/<int:item_id>/locate', methods=['POST', 'GET'])
+def api_locate_item(item_id):
+    item = db.get_item(item_id)
+    if item is None:
+        return jsonify({'error': 'Item not found'}), 404
+    error = locate_item(item, background=True)
+    if error:
+        return jsonify({'error': error}), 404
+    return jsonify(item_to_api(item)), 200
+
+
+@app.route('/api/items/<int:item_id>/quantity', methods=['POST', 'PUT'])
+def api_item_quantity(item_id):
+    """Set ({"quantity": 5}) or adjust ({"delta": 3} / {"delta": -1}) stock."""
+    item = db.get_item(item_id)
+    if item is None:
+        return jsonify({'error': 'Item not found'}), 404
+    return _apply_quantity_change(item, request.get_json(silent=True) or {})
+
+
+@app.route('/api/addItem', methods=['POST', 'PUT'])
+@app.route('/api/quantity', methods=['POST', 'PUT'])
+def api_quantity_by_reference():
+    """Adjust stock by item_number or article_number, e.g. after buying parts:
+    {"item_number": 12, "quantity": 3} adds 3; {"article_number": "4006381333931", "delta": -1}.
+    Use {"set_quantity": n} to set an absolute value."""
+    data = request.get_json(silent=True) or {}
+    item = None
+    if data.get('item_number') is not None:
+        item = db.get_item(data['item_number'])
+    elif data.get('article_number'):
+        article = str(data['article_number']).strip().lower()
+        item = next((i for i in db.read_items() if (i.get('article_number') or '').strip().lower() == article), None)
+    if item is None:
+        return jsonify({'error': 'Item not found (pass item_number or article_number)'}), 404
+    if 'set_quantity' in data:
+        change = {'quantity': data['set_quantity']}
+    else:
+        change = {'delta': data.get('delta', data.get('quantity', 1))}
+    return _apply_quantity_change(item, change)
+
+
+def _apply_quantity_change(item, data):
+    try:
+        if 'quantity' in data:
+            new_quantity = int(data['quantity'])
+        elif 'delta' in data:
+            new_quantity = int(item['quantity']) + int(data['delta'])
+        else:
+            return jsonify({'error': "Provide 'quantity' or 'delta'"}), 400
+    except (TypeError, ValueError):
+        return jsonify({'error': 'Quantity must be an integer'}), 400
+    new_quantity = max(new_quantity, 0)
+    db.update_item_quantity(item['id'], {'quantity': new_quantity})
+    item['quantity'] = new_quantity
+    return jsonify(item_to_api(item)), 200
 
 
 def send_request(target_ip, data, timeout=0.2):
@@ -299,9 +466,12 @@ def set_leds(led_indices, color, off_color, ip, testing=False):
             "seg": {"i": []}
         }
 
-        # Light up the current LEDs with the desired color
-        for i in led_indices_new:
-            on_payload["seg"]["i"].extend([i, color[1:]])
+        # Light up the current LEDs with the desired color. `color` may be a
+        # list (per-box mark colours): LEDs are coloured in strip order,
+        # cycling through the list, e.g. front of drawer green, back red.
+        colors = color if isinstance(color, (list, tuple)) and color else [color]
+        for n, i in enumerate(led_indices_new):
+            on_payload["seg"]["i"].extend([i, colors[n % len(colors)][1:]])
 
         # Send the API request to set the colors of the LEDs
         send_request(ip, on_payload)
@@ -334,56 +504,28 @@ def light(positions, ip, esp, quantity=1, testing=False):
     # Set global settings
     set_global_settings()
     positions_list = position_optimization(sorted(json.loads(positions)), esp)
+    # Per-box mark colours override the global locate colour
+    locate_colors = db.parse_colors(esp.get('locate_colors')) if esp else []
+    locate_color = locate_colors or app.locateColor
     if testing:
-        set_leds(positions_list, app.locateColor, app.standbyColor, ip, testing)
-    elif quantity <= 0:
+        set_leds(positions_list, locate_color, app.standbyColor, ip, testing)
+    elif int(quantity) <= 0:
         set_leds(positions_list, "#FF0000", app.standbyColor, ip, testing)
     else:
-        set_leds(positions_list, app.locateColor, app.standbyColor, ip, testing)
+        set_leds(positions_list, locate_color, app.standbyColor, ip, testing)
 
 
 def position_optimization(positions, esp):
+    total = None
+    if esp:
+        layout = db.parse_row_layout(esp.get('row_layout'))
+        total = sum(layout) if layout else int(esp['rows']) * int(esp['cols'])
     segments = []
-    rows = esp['rows']
-    columns = esp['cols']
-    start_y = esp['start_top'].lower()
-    start_x = esp['start_left'].lower()
-    serpentine_direction = esp['serpentine_direction'].lower()
-
-    if start_x == "1":
-        start_x = "right"
-
-    if serpentine_direction == "1":
-        serpentine_direction = "vertical"
-
     for pos in positions:
-        i = pos - 1
-
-        if serpentine_direction == "horizontal":
-            # Handle horizontal serpentine direction
-            row = i // columns
-            column = i % columns if row % 2 == 0 else columns - 1 - (i % columns)
-        else:  # serpentine_direction == "vertical"
-            # Handle vertical serpentine direction
-            column = i // rows
-            row = i % rows if column % 2 == 0 else rows - 1 - (i % rows)
-
-        # Adjust for starting positions
-        if start_x == "right":
-            column = columns - 1 - column
-        if start_y == "bottom":
-            row = rows - 1 - row
-
-        # Calculate the LED number
-        if row % 2 == 0:
-            # Even rows - normal left to right
-            led_number = row * columns + column
-        else:
-            # Odd rows - right to left
-            led_number = row * columns + (columns - 1 - column)
-        # Append the last segment
-        segments.append(led_number)
-
+        index = int(pos) - 1
+        if index < 0 or (total is not None and index >= total):
+            continue
+        segments.append(index)
     return segments
 
 

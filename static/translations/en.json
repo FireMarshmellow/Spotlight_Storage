@@ -2,7 +2,7 @@
     "add_item": "Add Item",
     "search": "Search items...",
     "sortingBytags_text": "Sorting by Tags",
-    "sortingMethods_text": "Sorting methodes",
+    "sortingMethods_text": "Sorting methods",
     "add_esp_button": "Add WLED node",
     "esp_devices_text": "WLED nodes",
     "offcanvasSettingsLabel": "Settings",
@@ -65,5 +65,17 @@
     "copy_item": "Copy Item",
     "delete_item": "Delete",
     "crop_image": "Crop Image",
-    "link_btn_label": "Shop for more"
+    "link_btn_label": "Shop for more",
+    "item_article_number_label": "Article number / barcode",
+    "item_storage_location_label": "Storage location",
+    "esp_row_layout_label": "Drawers per row (optional)",
+    "esp_row_layout_help": "For boxes with uneven rows: one number per row, top to bottom (per column, left to right, for vertical serpentine), e.g. 6,6,6,6,6,3,3. Leave empty for a regular grid.",
+    "esp_locate_colors_label": "Mark colours (optional):",
+    "esp_add_color_label": "+ Colour",
+    "esp_locate_colors_help": "Overrides the global locate colour for this box. With several colours, an item's LEDs cycle through them in order (e.g. front of drawer green, back red). Click a colour's × to remove it.",
+    "backup_title": "Backup",
+    "export_btn_label": "Export",
+    "import_btn_label": "Import",
+    "import_replace_label": "Replace existing data on import (otherwise merge)",
+    "backup_help": "Exports settings, WLED nodes and items as a JSON file. Uploaded images are not included."
 }

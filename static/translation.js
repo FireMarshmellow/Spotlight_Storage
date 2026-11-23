@@ -143,7 +143,18 @@
                     document.getElementById('sortByname').textContent = translation.sortByname;
                     document.getElementById('sortByquantity').textContent = translation.sortByquantity;
                     document.getElementById('sortBylocation').textContent = translation.sortBylocation;
-                    
+
+                    // Generic hook for newer labels: <el data-i18n="key">. Keeps the
+                    // English default from the HTML when a language lacks the key.
+                    document.querySelectorAll('[data-i18n]').forEach(el => {
+                        const value = translation[el.dataset.i18n];
+                        if (value) el.textContent = value;
+                    });
+                    document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+                        const value = translation[el.dataset.i18nPlaceholder];
+                        if (value) el.setAttribute('placeholder', value);
+                    });
+
 
 
 

@@ -40,6 +40,8 @@ async function addItem(event) {
     let position = localStorage.getItem('led_positions');
     let quantity = document.getElementById("item_quantity").value;
     const tags = localStorage.getItem('item_tags');
+    const article_number = document.getElementById("item_article_number").value.trim();
+    const storage_location = document.getElementById("item_storage_location").value.trim();
     const selectedEspOption = selectEspDropdown.options[selectEspDropdown.selectedIndex];
 
     // Check if there are any empty fields
@@ -58,6 +60,8 @@ async function addItem(event) {
         quantity,
         ip,
         tags,
+        article_number,
+        storage_location,
     };
 
     // Check if editing an existing item or adding a new one
@@ -129,6 +133,7 @@ function populateEspDropdown() {
                 option.dataset.espSerpentine = esp.serpentine_direction;
                 option.dataset.espIp = esp.esp_ip;
                 option.dataset.espName = esp.name;
+                option.dataset.espLayout = esp.row_layout || "";
                 option.textContent = esp.name + " (" + esp.esp_ip + ")";
                 selectEspDropdown.appendChild(option);
 
@@ -204,6 +209,12 @@ function createItem(item) {
     }
     col.dataset.position = item.position;
     col.dataset.tags = item.tags;
+    col.dataset.articleNumber = item.article_number || "";
+    col.dataset.storageLocation = item.storage_location || "";
+    const metaParts = [];
+    if (item.article_number) metaParts.push(`<span title="Article number"># ${escapeHtml(item.article_number)}</span>`);
+    if (item.storage_location) metaParts.push(`<span title="Storage location">&#128205; ${escapeHtml(item.storage_location)}</span>`);
+    const metaHtml = metaParts.length ? `<div class="small text-muted mb-2 d-flex flex-wrap gap-2 item-meta">${metaParts.join('')}</div>` : '';
 
     // Set inner HTML for the created column
     col.innerHTML = `
@@ -219,6 +230,7 @@ function createItem(item) {
             <a href="${item.link}" target="_blank" class="card-title-link">
                 <h5 id="link-btn-${item.id}" class="card-title" data-bs-toggle="tooltip" title="Shop for more">${item.name}</h5>
             </a>
+            ${metaHtml}
 
             <!-- Buttons for locating, editing, and dropdown menu -->
             <div class="d-flex justify-content-between align-items-center mb-2">
@@ -312,6 +324,8 @@ function createItem(item) {
         document.getElementById("item_url").value = item.link;
         document.getElementById("item_image").value = item.image;
         document.getElementById("item_quantity").value = item.quantity;
+        document.getElementById("item_article_number").value = item.article_number || "";
+        document.getElementById("item_storage_location").value = item.storage_location || "";
         // Set LED positions for editing
         localStorage.setItem('led_positions', JSON.stringify(item.position))
         clickedCells = JSON.parse(localStorage.getItem('led_positions'));
@@ -393,6 +407,8 @@ function createItem(item) {
         document.getElementById("item_url").value = item.link;
         document.getElementById("item_image").value = item.image;
         document.getElementById("item_quantity").value = item.quantity;
+        document.getElementById("item_article_number").value = item.article_number || "";
+        document.getElementById("item_storage_location").value = item.storage_location || "";
 
         // Set LED positions for editing
         localStorage.setItem('led_positions', JSON.stringify(item.position))
@@ -494,6 +510,8 @@ function resetModal() {
     document.getElementById("item_url").value = "";
     document.getElementById("item_image").value = "";
     document.getElementById("item_quantity").value = "";
+    document.getElementById("item_article_number").value = "";
+    document.getElementById("item_storage_location").value = "";
     document.getElementById("item_image_upload").value = "";
     document.getElementById("item_tags").value = "";
     removeLocalStorage();
@@ -542,14 +560,41 @@ document.getElementById("search").addEventListener("input", function (e){
     const items = Array.from(itemsContainer.children);
 
     Array.from(items).forEach((item) => {
-        const itemName = item.dataset["name"];
-        if (itemName.toLowerCase().indexOf(searchText) !== -1) {
-            item.style.display = "flex";
-        } else {
-            item.style.display = "none";
-        }
+        // Match on name, article number (barcode) and storage location
+        const haystack = [
+            item.dataset.name || "",
+            item.dataset.articleNumber || "",
+            item.dataset.storageLocation || "",
+        ].join(" ").toLowerCase();
+        item.style.display = haystack.indexOf(searchText) !== -1 ? "flex" : "none";
     });
 });
+
+// Barcode scanners type the code and press Enter: locate the item right away
+// when the code matches an article number exactly, or when only one item is left.
+document.getElementById("search").addEventListener("keydown", function (e) {
+    if (e.key !== "Enter") return;
+    e.preventDefault();
+    const searchText = e.target.value.trim().toLowerCase();
+    if (!searchText) return;
+    const items = Array.from(document.getElementById('items-container-grid').children);
+    const exact = items.filter(item => (item.dataset.articleNumber || "").toLowerCase() === searchText);
+    const visible = items.filter(item => item.style.display !== "none");
+    const target = exact.length === 1 ? exact[0] : (visible.length === 1 ? visible[0] : null);
+    if (target) {
+        fetch(`/api/items/${target.dataset.id}`, {
+            method: "POST",
+            headers: { "Content-Type": "application/x-www-form-urlencoded" },
+            body: new URLSearchParams({ action: "locate" }),
+        }).catch((error) => console.error(error));
+    }
+});
+
+function escapeHtml(value) {
+    return String(value).replace(/[&<>"']/g, c => ({
+        '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+    })[c]);
+}
 
 
 const showAlert = (alertId, message, formType) => {

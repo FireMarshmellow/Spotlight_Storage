@@ -46,7 +46,7 @@
                 <div class="col-12">
                     <div class="input-group mb-2 mb-md-0">
                         <div class="d-flex align-items-center position-relative w-100 me-0 me-md-2">
-                            <input type="text" class="form-control flex-grow-1" placeholder="Search items..." id="search">
+                            <input type="text" class="form-control flex-grow-1" placeholder="Search items..." id="search" style="padding-right: 2.25rem; text-overflow: ellipsis;">
                             <i data-lucide="search" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%);"></i>
                         </div>
                     </div>
@@ -199,6 +199,26 @@
                 </div>
             </div>
             <hr>
+            <div class="row">
+                <h6 data-i18n="backup_title">Backup</h6>
+                <div class="d-flex flex-wrap gap-2 mb-2">
+                    <a href="/api/export" class="btn btn-outline-primary pe-3" id="export-button" download>
+                        <span class="icon-n4px"><i data-lucide="download" class="me-2"></i></span>
+                        <span data-i18n="export_btn_label">Export</span>
+                    </a>
+                    <button type="button" class="btn btn-outline-secondary pe-3" id="import-button">
+                        <span class="icon-n4px"><i data-lucide="upload" class="me-2"></i></span>
+                        <span data-i18n="import_btn_label">Import</span>
+                    </button>
+                    <input type="file" id="import-file" accept=".json,application/json" class="d-none">
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" id="import-replace">
+                    <label class="form-check-label" for="import-replace" data-i18n="import_replace_label">Replace existing data on import (otherwise merge)</label>
+                </div>
+                <div class="form-text" data-i18n="backup_help">Exports settings, WLED nodes and items as a JSON file. Uploaded images are not included.</div>
+            </div>
+            <hr>
             <div class="col-4">
                 <div class="form-floating mb-3">
                     <select class="form-select" id="language-selector">
@@ -253,6 +273,20 @@
                     <div class="form-floating mb-3">
                         <input type="number" class="form-control" id="item_quantity" placeholder="1" required>
                         <label id="item_quantity_label" for="item_quantity">Item quantity</label>
+                    </div>
+                    <div class="row">
+                        <div class="col-6 pe-2">
+                            <div class="form-floating mb-3">
+                                <input type="text" class="form-control" id="item_article_number" placeholder="Article number" autocomplete="off">
+                                <label data-i18n="item_article_number_label" for="item_article_number">Article number / barcode</label>
+                            </div>
+                        </div>
+                        <div class="col-6 ps-2">
+                            <div class="form-floating mb-3">
+                                <input type="text" class="form-control" id="item_storage_location" placeholder="A02.014" autocomplete="off">
+                                <label data-i18n="item_storage_location_label" for="item_storage_location">Storage location</label>
+                            </div>
+                        </div>
                     </div>
 
                     <div class="row">
@@ -502,6 +536,23 @@
                                 </select>
                                 <label id="serpentine_dir_label" for="esp_serpentine">Serpentine Direction</label>
                             </div>
+                        </div>
+                    </div>
+                    <div class="form-floating mb-1">
+                        <input type="text" class="form-control" id="esp_row_layout" placeholder="6,6,6,6,6,3,3" autocomplete="off">
+                        <label data-i18n="esp_row_layout_label" for="esp_row_layout">Drawers per row (optional)</label>
+                    </div>
+                    <div class="form-text mb-3" data-i18n="esp_row_layout_help">
+                        For boxes with uneven rows: one number per row, top to bottom (per column, left to right, for vertical serpentine), e.g. 6,6,6,6,6,3,3. Leave empty for a regular grid.
+                    </div>
+                    <div class="mb-3">
+                        <div class="d-flex align-items-center flex-wrap gap-2" id="esp_locate_colors">
+                            <span data-i18n="esp_locate_colors_label">Mark colours (optional):</span>
+                            <span id="esp_locate_colors_list" class="d-flex flex-wrap gap-2"></span>
+                            <button type="button" class="btn btn-sm btn-outline-secondary" id="esp_add_color" data-i18n="esp_add_color_label">+ Colour</button>
+                        </div>
+                        <div class="form-text" data-i18n="esp_locate_colors_help">
+                            Overrides the global locate colour for this box. With several colours, an item's LEDs cycle through them in order (e.g. front of drawer green, back red). Click a colour's × to remove it.
                         </div>
                     </div>
                     <div id="esp-canvas-container" class="col-10 mx-auto">
