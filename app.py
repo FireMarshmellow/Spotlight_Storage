@@ -1,18 +1,21 @@
 # Importing necessary modules and packages
 import json
-import re
-from flask import Flask, render_template, jsonify, request, send_from_directory, redirect, url_for, flash, Response
+import queue
+import uuid
+from flask import Flask, render_template, jsonify, request, send_from_directory, url_for, Response
 
 from requests import Timeout
 import db
 import requests
+import security
 import time
 import os
-from werkzeug.utils import secure_filename
+import threading
 
 # Creating a Flask application instance
 app = Flask(__name__)
-app.config['JSON_SORT_KEYS'] = False
+app.json.sort_keys = False
+app.config['MAX_CONTENT_LENGTH'] = security.MAX_UPLOAD_BYTES
 
 # Default Values
 app.brightness = 1
@@ -24,13 +27,46 @@ app.config['UPLOAD_FOLDER'] = './images'
 app.previous_positions = []
 app.request_amount = 0
 
+WLED_TIMEOUT = 2  # seconds for any request to a WLED controller
+
+
+# ---------------------------------------------------------------------------
+# Request / response security
+# ---------------------------------------------------------------------------
+
+@app.before_request
+def enforce_security():
+    error = security.check_host(request)
+    if error:
+        return jsonify({'error': error}), 400
+    # Block requests a malicious website makes through a visitor's browser (CSRF)
+    if security.needs_csrf_check(request) and security.is_cross_site(request):
+        return jsonify({'error': 'Cross-site request blocked'}), 403
+    # Optional API token (SPOTLIGHT_API_TOKEN)
+    if not security.check_token(request):
+        return jsonify({'error': 'Missing or invalid API token'}), 401
+
+
+@app.after_request
+def add_security_headers(response):
+    for header, value in security.SECURITY_HEADERS.items():
+        response.headers.setdefault(header, value)
+    return response
+
+
+@app.errorhandler(413)
+def too_large(_error):
+    return jsonify({'error': f'Upload too large (max {security.MAX_UPLOAD_BYTES // (1024 * 1024)} MB)'}), 413
 
 
 @app.route('/proxy-image', methods=['GET'])
 def proxy_image():
-    image_url = request.args.get('url')
-    response = requests.get(image_url, stream=True)
-    return Response(response.content, content_type=response.headers['Content-Type'])
+    """Fetch an external image for the cropper. Only public http(s) image URLs."""
+    try:
+        body, content_type = security.fetch_public_image(request.args.get('url', ''))
+    except security.ProxyError as e:
+        return jsonify({'error': e.message}), e.status
+    return Response(body, content_type=content_type, headers={'Cache-Control': 'private, max-age=300'})
 
 
 # Route to Favicon
@@ -52,21 +88,24 @@ def download_image(name):
 
 @app.route('/upload', methods=['POST'])
 def upload_file():
-    # check if the post request has the file part
-    if 'file' not in request.files:
-        flash('No file part')
-        return
-    file = request.files['file']
-    # If the user does not select a file, the browser submits an
-    # empty file without a filename.
-    if file.filename == '':
-        flash('No selected file')
-        return
-    if file:
-        filename = secure_filename(file.filename)
+    """Store an uploaded image under a random name.
 
-        file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-        return url_for('download_image', name=filename)
+    The type is taken from the file content (PNG, JPEG, GIF, WebP only), never
+    from the client's file name, so HTML/SVG cannot be uploaded and existing
+    files cannot be overwritten. Size is capped by MAX_CONTENT_LENGTH.
+    """
+    file = request.files.get('file')
+    if file is None or file.filename == '':
+        return jsonify({'error': 'No file selected'}), 400
+    head = file.stream.read(16)
+    file.stream.seek(0)
+    extension = security.detect_image_type(head)
+    if extension is None:
+        return jsonify({'error': 'Only PNG, JPEG, GIF and WebP images can be uploaded'}), 400
+    os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
+    filename = f'{uuid.uuid4().hex}.{extension}'
+    file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+    return url_for('download_image', name=filename)
 
 
 @app.route('/api/tags', methods=['GET', 'POST'])
@@ -96,16 +135,6 @@ def get_unique_ips_from_database():
     return unique_ips_list
 
 
-def is_valid_url_or_ip(input_str):
-    ip_pattern = re.compile(r"\b(?:\d{1,3}\.){3}\d{1,3}\b")  # Simple IP address regex
-    url_pattern = re.compile(r"([a-zA-Z0-9-]+)\.([a-zA-Z]{2,})")
-
-    if ip_pattern.match(input_str):
-        return True
-
-    return bool(url_pattern.match(input_str))
-
-
 def set_global_settings():
     settings = db.read_settings()
 
@@ -126,8 +155,55 @@ def settings():
         # If the request method is GET, read data from the database and return as JSON
         return jsonify(db.read_settings())
     elif request.method == 'POST':
-        db.update_settings(request.get_json())  # Update settings in the database
+        data = request.get_json(silent=True)
+        if not isinstance(data, dict):
+            return jsonify({'error': 'Invalid settings'}), 400
+        try:
+            data['brightness'] = min(max(int(data.get('brightness', 100)), 0), 100)
+            data['timeout'] = min(max(int(data.get('timeout', 5)), 0), 3600)
+        except (TypeError, ValueError):
+            return jsonify({'error': 'brightness and timeout must be numbers'}), 400
+        if not isinstance(data.get('colors'), list) or not all(db.parse_colors([c]) for c in data['colors']):
+            return jsonify({'error': 'colors must be a list of #rrggbb values'}), 400
+        data.setdefault('lightMode', 'light')
+        data.setdefault('language', 'en')
+        db.update_settings(data)  # Update settings in the database
         return jsonify({'success': True})
+
+
+@app.route('/api/export', methods=['GET'])
+def export_backup():
+    """Download a JSON backup. ?include=settings,esps,items (default: all)."""
+    include = [s.strip() for s in request.args.get('include', 'settings,esps,items').split(',') if s.strip()]
+    unknown = set(include) - {'settings', 'esps', 'items'}
+    if unknown or not include:
+        return jsonify({'error': f"Unknown section(s): {', '.join(sorted(unknown)) or 'none given'}"}), 400
+    data = db.export_data(include)
+    filename = f"spotlight-storage-backup-{time.strftime('%Y%m%d-%H%M%S')}.json"
+    return Response(json.dumps(data, indent=2), mimetype='application/json',
+                    headers={'Content-Disposition': f'attachment; filename="{filename}"'})
+
+
+@app.route('/api/import', methods=['POST'])
+def import_backup():
+    """Import a backup. Accepts a JSON body or a multipart 'file'.
+    ?mode=merge (default, nothing deleted) or ?mode=replace."""
+    mode = request.args.get('mode') or request.form.get('mode') or 'merge'
+    confirm = request.args.get('confirm') or request.form.get('confirm')
+    if mode == 'replace' and confirm != 'replace':
+        return jsonify({'error': "Replace mode deletes existing data; repeat the request with confirm=replace"}), 400
+    try:
+        if 'file' in request.files:
+            data = json.load(request.files['file'].stream)
+        else:
+            data = request.get_json(silent=False)
+    except Exception:
+        return jsonify({'error': 'File is not valid JSON'}), 400
+    try:
+        stats = db.import_data(data, mode)
+    except db.BackupError as e:
+        return jsonify({'error': str(e)}), 400
+    return jsonify({'success': True, 'mode': mode, **stats}), 200
 
 
 @app.route('/api/esp/', methods=['GET', 'POST'])
@@ -142,9 +218,12 @@ def esps():
 
     elif request.method == 'POST':
         try:
-            esp_data = request.get_json()
+            esp_data = request.get_json(silent=True)
             if not esp_data:
                 return jsonify({"error": "No data provided"}), 400
+            error = validate_esp_payload(esp_data)
+            if error:
+                return jsonify({"error": error}), 400
 
             id = db.write_esp_settings(esp_data)
             if id is None:
@@ -170,13 +249,51 @@ def handle_esp(id):
             return jsonify({'error': 'ESP not found'}), 404
 
     elif request.method == 'PUT':
-        esp_data = request.get_json()
+        esp_data = request.get_json(silent=True) or {}
+        error = validate_esp_payload(esp_data)
+        if error:
+            return jsonify({"error": error}), 400
         db.update_esp_settings(id, esp_data)
         return jsonify({'success': True})
 
     elif request.method == 'DELETE':
         db.delete_esp_settings(id)
         return jsonify({'success': True})
+
+
+def validate_esp_payload(esp_data):
+    """Return an error message for an invalid ESP payload, normalising the address in place."""
+    host = security.normalize_device_host(esp_data.get('esp_ip'))
+    if host is None:
+        return 'esp_ip must be a plain IP address or host name (e.g. 192.168.1.50 or wled-box.local)'
+    esp_data['esp_ip'] = host
+    if not str(esp_data.get('name') or '').strip():
+        return 'name is required'
+    try:
+        if int(esp_data.get('rows')) < 1 or int(esp_data.get('cols')) < 1:
+            raise ValueError
+    except (TypeError, ValueError):
+        return 'rows and cols must be positive numbers'
+    return None
+
+
+def validate_item_payload(item):
+    """Return an error message for an invalid item payload."""
+    if not isinstance(item, dict) or not str(item.get('name') or '').strip():
+        return 'name is required'
+    if not security.is_safe_link(item.get('link')):
+        return 'link must be an http(s) URL'
+    if not security.is_safe_image_ref(item.get('image')):
+        return 'image must be an http(s) URL or an uploaded image path'
+    return _validate_quantity(item)
+
+
+def _validate_quantity(data):
+    try:
+        data['quantity'] = max(int(data.get('quantity')), 0)
+    except (TypeError, ValueError):
+        return 'quantity must be a whole number'
+    return None
 
 
 # Route to handle GET and POST requests for items
@@ -186,7 +303,10 @@ def items():
         items = db.read_items()
         return jsonify(items)
     elif request.method == 'POST':
-        item = request.get_json()
+        item = request.get_json(silent=True)
+        error = validate_item_payload(item)
+        if error:
+            return jsonify({'error': error}), 400
         id = db.write_item(item)
         item['id'] = id
         return jsonify(item)
@@ -203,12 +323,23 @@ def item(id):
             return jsonify({'error': 'Item not found'}), 404
 
     elif request.method == 'PUT':
+        if item is None:
+            return jsonify({'error': 'Item not found'}), 404
+        data = request.get_json(silent=True) or {}
         if request.headers.get('Update-Quantity') == 'true':
-            db.update_item_quantity(id, request.get_json())
+            error = _validate_quantity(data)
+            if error:
+                return jsonify({'error': error}), 400
+            db.update_item_quantity(id, data)
         elif request.headers.get('Update-Image') == 'true':
-            db.update_item_image(id, request.get_json())
+            if not security.is_safe_image_ref(data.get('image')):
+                return jsonify({'error': 'image must be an http(s) URL or an uploaded image path'}), 400
+            db.update_item_image(id, data)
         else:
-            db.update_item(id, request.get_json())
+            error = validate_item_payload(data)
+            if error:
+                return jsonify({'error': error}), 400
+            db.update_item(id, data)
         return jsonify(dict(item))
 
     elif request.method == 'DELETE':
@@ -217,20 +348,217 @@ def item(id):
     elif request.method == 'POST':
 
         if request.form.get('action') == 'locate':
-            if is_valid_url_or_ip(item['ip']):
-                ip = item['ip']
-            else:
-                ip = db.get_ip_by_name(item['ip'])
-            esp = db.get_esp_settings_by_ip(ip)
-            light(item['position'], ip, esp, item['quantity'])
-
+            if item is None:
+                return jsonify({'error': 'Item not found'}), 404
+            error = locate_item(item)
+            if error:
+                return jsonify({'error': error}), 429 if error == LOCATE_BUSY else 404
             return jsonify({'success': True})
         else:
             return jsonify({'error': 'Invalid action'}), 400
 
 
+def resolve_esp(item):
+    """Return (ip, esp_settings) for an item; esp_settings is None if not found.
+
+    Items reference their ESP by IP or by name, and only configured ESPs are
+    ever contacted, so a crafted item cannot make the server call arbitrary hosts.
+    """
+    reference = item.get('ip') or ''
+    esp = db.get_esp_settings_by_ip(reference)
+    if esp is None:
+        ip = db.get_ip_by_name(reference)
+        esp = db.get_esp_settings_by_ip(ip) if ip else None
+    if esp is None or security.normalize_device_host(esp['esp_ip']) is None:
+        return None, None
+    return esp['esp_ip'], esp
+
+
+# All LED animations run on one worker thread, one at a time. A bounded queue
+# stops floods of locate requests from piling up threads; a new job interrupts
+# the running job's "stay lit" timeout so the latest request shows right away.
+LOCATE_QUEUE_SIZE = 8
+LOCATE_BUSY = 'Too many locate requests queued, try again shortly'
+_locate_queue = queue.Queue(maxsize=LOCATE_QUEUE_SIZE)
+_new_job = threading.Event()
+_worker_lock = threading.Lock()
+_worker = None
+
+
+def _locate_worker():
+    while True:
+        func, args = _locate_queue.get()
+        _new_job.clear()
+        try:
+            func(*args)
+        except Exception as e:  # keep the worker alive whatever happens
+            print(f"LED job failed: {e}")
+        finally:
+            _locate_queue.task_done()
+
+
+def submit_locate(func, *args):
+    """Queue an LED job. Returns False when the queue is full."""
+    global _worker
+    with _worker_lock:
+        if _worker is None or not _worker.is_alive():
+            _worker = threading.Thread(target=_locate_worker, name='led-worker', daemon=True)
+            _worker.start()
+    try:
+        _locate_queue.put_nowait((func, args))
+    except queue.Full:
+        return False
+    _new_job.set()
+    return True
+
+
+def wait_or_interrupt(seconds):
+    """Sleep for the LED timeout, but wake early when a newer job is queued."""
+    _new_job.wait(seconds)
+
+
+def locate_item(item, background=True):
+    """Light up an item's LEDs. Returns an error message, or None on success.
+
+    Jobs run on the LED worker so callers (UI, Home Assistant) get an immediate
+    response. background=False runs inline (used by tools/tests).
+    """
+    ip, esp = resolve_esp(item)
+    if esp is None:
+        return 'No ESP configured for this item. Edit the item and select an ESP.'
+    if not background:
+        light(item['position'], ip, esp, item['quantity'])
+        return None
+    if not submit_locate(light, item['position'], ip, esp, item['quantity']):
+        return LOCATE_BUSY
+    return None
+
+
+def item_to_api(item):
+    """Public JSON shape for the REST API (Home Assistant, scripts, ...)."""
+    try:
+        bins = json.loads(item['position']) if isinstance(item['position'], str) else item['position']
+    except (TypeError, ValueError):
+        bins = []
+    _, esp = resolve_esp(item)
+    return {
+        'item_number': item['id'],
+        'item_name': item['name'],
+        'quantity': item['quantity'],
+        'bin_number': bins,
+        'article_number': item.get('article_number') or '',
+        'storage_location': item.get('storage_location') or '',
+        'box': esp['name'] if esp else None,
+        'link': item.get('link') or '',
+    }
+
+
+def _wants_locate():
+    value = request.args.get('locate', (request.get_json(silent=True) or {}).get('locate', 'true'))
+    return str(value).lower() not in ('0', 'false', 'no', 'off')
+
+
+# ---------------------------------------------------------------------------
+# REST API for automations / voice assistants (e.g. Home Assistant)
+# ---------------------------------------------------------------------------
+
+@app.route('/api/find', methods=['GET', 'POST'])
+@app.route('/api/findItem', methods=['GET', 'POST'])
+def api_find_item():
+    """Find the best match for ?q= (name, article number, location, tags; fuzzy)
+    and light it up. Pass ?locate=false to only look it up. POST accepts the same
+    fields as a JSON body."""
+    body = request.get_json(silent=True) if request.method == 'POST' else None
+    params = body if isinstance(body, dict) else request.args
+    query = str(params.get('q') or params.get('name') or params.get('article_number') or '')
+    if not query.strip():
+        return jsonify({'error': "Missing query parameter 'q'"}), 400
+    matches = db.search_items(query)
+    if not matches:
+        return jsonify({'error': f"No item matching '{query}'"}), 404
+    item = matches[0]
+    result = item_to_api(item)
+    if _wants_locate():
+        error = locate_item(item, background=True)
+        result['located'] = error is None
+        if error:
+            result['locate_error'] = error
+    return jsonify(result), 200
+
+
+@app.route('/api/search', methods=['GET'])
+def api_search_items():
+    """List all items matching ?q= (best first) without lighting anything."""
+    query = request.args.get('q', '')
+    limit = request.args.get('limit', default=10, type=int)
+    limit = min(max(limit or 10, 1), 100)
+    return jsonify([item_to_api(i) for i in db.search_items(query)[:limit]]), 200
+
+
+@app.route('/api/items/<int:item_id>/locate', methods=['POST'])
+def api_locate_item(item_id):
+    item = db.get_item(item_id)
+    if item is None:
+        return jsonify({'error': 'Item not found'}), 404
+    error = locate_item(item, background=True)
+    if error:
+        return jsonify({'error': error}), 429 if error == LOCATE_BUSY else 404
+    return jsonify(item_to_api(item)), 200
+
+
+@app.route('/api/items/<int:item_id>/quantity', methods=['POST', 'PUT'])
+def api_item_quantity(item_id):
+    """Set ({"quantity": 5}) or adjust ({"delta": 3} / {"delta": -1}) stock."""
+    item = db.get_item(item_id)
+    if item is None:
+        return jsonify({'error': 'Item not found'}), 404
+    return _apply_quantity_change(item, request.get_json(silent=True) or {})
+
+
+@app.route('/api/addItem', methods=['POST', 'PUT'])
+@app.route('/api/quantity', methods=['POST', 'PUT'])
+def api_quantity_by_reference():
+    """Adjust stock by item_number or article_number, e.g. after buying parts:
+    {"item_number": 12, "quantity": 3} adds 3; {"article_number": "4006381333931", "delta": -1}.
+    Use {"set_quantity": n} to set an absolute value."""
+    data = request.get_json(silent=True) or {}
+    item = None
+    if data.get('item_number') is not None:
+        item = db.get_item(data['item_number'])
+    elif data.get('article_number'):
+        article = str(data['article_number']).strip().lower()
+        item = next((i for i in db.read_items() if (i.get('article_number') or '').strip().lower() == article), None)
+    if item is None:
+        return jsonify({'error': 'Item not found (pass item_number or article_number)'}), 404
+    if 'set_quantity' in data:
+        change = {'quantity': data['set_quantity']}
+    else:
+        change = {'delta': data.get('delta', data.get('quantity', 1))}
+    return _apply_quantity_change(item, change)
+
+
+def _apply_quantity_change(item, data):
+    try:
+        if 'quantity' in data:
+            new_quantity = int(data['quantity'])
+        elif 'delta' in data:
+            new_quantity = int(item['quantity']) + int(data['delta'])
+        else:
+            return jsonify({'error': "Provide 'quantity' or 'delta'"}), 400
+    except (TypeError, ValueError):
+        return jsonify({'error': 'Quantity must be an integer'}), 400
+    new_quantity = max(new_quantity, 0)
+    db.update_item_quantity(item['id'], {'quantity': new_quantity})
+    item['quantity'] = new_quantity
+    return jsonify(item_to_api(item)), 200
+
+
 def send_request(target_ip, data, timeout=0.2):
-    url = f"http://{target_ip}/json/state"
+    host = security.normalize_device_host(target_ip)
+    if host is None:
+        print(f"Refusing to contact invalid WLED address: {target_ip!r}")
+        return
+    url = f"http://{host}/json/state"
 
     try:
         response = requests.post(url, json=data, timeout=timeout)
@@ -242,21 +570,24 @@ def send_request(target_ip, data, timeout=0.2):
         else:
             # Handle other status codes (e.g., 404, 500, etc.) as needed
             print(f"Request failed with status code {response.status_code}")
-    except ConnectionError as e:
-        # Handle connection errors
-        print(f"Connection error: {e}")
     except Timeout as e:
         # Handle timeout errors
         print(f"Timeout error: {e}")
+    except requests.RequestException as e:
+        # Connection refused, DNS failure, ...
+        print(f"Connection error: {e}")
 
 
 def get_total_leds(ip):
+    host = security.normalize_device_host(ip)
+    if host is None:
+        return 0
     try:
-        response = requests.get(f"http://{ip}/json/info")
+        response = requests.get(f"http://{host}/json/info", timeout=WLED_TIMEOUT)
         response.raise_for_status()
         info = response.json()
         return info['leds']['count']
-    except requests.RequestException as e:
+    except (requests.RequestException, ValueError, KeyError, TypeError) as e:
         print(f"Error fetching total LEDs: {e}")
         return 1000  # Default value if the request fails
 
@@ -299,9 +630,12 @@ def set_leds(led_indices, color, off_color, ip, testing=False):
             "seg": {"i": []}
         }
 
-        # Light up the current LEDs with the desired color
-        for i in led_indices_new:
-            on_payload["seg"]["i"].extend([i, color[1:]])
+        # Light up the current LEDs with the desired color. `color` may be a
+        # list (per-box mark colours): LEDs are coloured in strip order,
+        # cycling through the list, e.g. front of drawer green, back red.
+        colors = color if isinstance(color, (list, tuple)) and color else [color]
+        for n, i in enumerate(led_indices_new):
+            on_payload["seg"]["i"].extend([i, colors[n % len(colors)][1:]])
 
         # Send the API request to set the colors of the LEDs
         send_request(ip, on_payload)
@@ -318,13 +652,13 @@ def set_leds(led_indices, color, off_color, ip, testing=False):
 
     # Handle timeout and turn off LEDs after delay if needed
     if app.timeout > 0 and not testing:
-        time.sleep(app.timeout)
+        wait_or_interrupt(app.timeout)
         for i in range(total_leds):
             off_payload["seg"]["i"].extend([i, off_color[1:]])
         send_request(ip, off_payload)
         app.previous_positions = []  # Reset previous positions
     elif testing:
-        time.sleep(app.timeout + 3)  # Ensure a minimum delay during testing
+        wait_or_interrupt(app.timeout + 3)  # Ensure a minimum delay during testing
 
     # Update global delSegments to include the off_payload segment
     app.delSegments = off_payload
@@ -334,70 +668,50 @@ def light(positions, ip, esp, quantity=1, testing=False):
     # Set global settings
     set_global_settings()
     positions_list = position_optimization(sorted(json.loads(positions)), esp)
+    # Per-box mark colours override the global locate colour
+    locate_colors = db.parse_colors(esp.get('locate_colors')) if esp else []
+    locate_color = locate_colors or app.locateColor
     if testing:
-        set_leds(positions_list, app.locateColor, app.standbyColor, ip, testing)
-    elif quantity <= 0:
+        set_leds(positions_list, locate_color, app.standbyColor, ip, testing)
+    elif int(quantity) <= 0:
         set_leds(positions_list, "#FF0000", app.standbyColor, ip, testing)
     else:
-        set_leds(positions_list, app.locateColor, app.standbyColor, ip, testing)
+        set_leds(positions_list, locate_color, app.standbyColor, ip, testing)
 
 
 def position_optimization(positions, esp):
+    total = None
+    if esp:
+        layout = db.parse_row_layout(esp.get('row_layout'))
+        total = sum(layout) if layout else int(esp['rows']) * int(esp['cols'])
     segments = []
-    rows = esp['rows']
-    columns = esp['cols']
-    start_y = esp['start_top'].lower()
-    start_x = esp['start_left'].lower()
-    serpentine_direction = esp['serpentine_direction'].lower()
-
-    if start_x == "1":
-        start_x = "right"
-
-    if serpentine_direction == "1":
-        serpentine_direction = "vertical"
-
     for pos in positions:
-        i = pos - 1
-
-        if serpentine_direction == "horizontal":
-            # Handle horizontal serpentine direction
-            row = i // columns
-            column = i % columns if row % 2 == 0 else columns - 1 - (i % columns)
-        else:  # serpentine_direction == "vertical"
-            # Handle vertical serpentine direction
-            column = i // rows
-            row = i % rows if column % 2 == 0 else rows - 1 - (i % rows)
-
-        # Adjust for starting positions
-        if start_x == "right":
-            column = columns - 1 - column
-        if start_y == "bottom":
-            row = rows - 1 - row
-
-        # Calculate the LED number
-        if row % 2 == 0:
-            # Even rows - normal left to right
-            led_number = row * columns + column
-        else:
-            # Odd rows - right to left
-            led_number = row * columns + (columns - 1 - column)
-        # Append the last segment
-        segments.append(led_number)
-
+        index = int(pos) - 1
+        if index < 0 or (total is not None and index >= total):
+            continue
+        segments.append(index)
     return segments
 
 
 @app.route('/test_lights', methods=['POST'])
 def test_lights():
-    set_global_settings()
-    lights_list = request.get_json()
+    lights_list = request.get_json(silent=True)
+    if not isinstance(lights_list, dict) or not lights_list:
+        return {'error': 'Expected {"<esp ip>": [led numbers]}'}, 400
+    jobs = []
     for ip, positions in lights_list.items():
         # Validate positions list
-        if not positions or not all(isinstance(pos, int) for pos in positions):
+        if not positions or not isinstance(positions, list) or len(positions) > 10000 \
+                or not all(isinstance(pos, int) and not isinstance(pos, bool) for pos in positions):
             return {'error': 'Invalid positions list'}, 400
-        positions_json = json.dumps(positions)
+        # Only configured WLED controllers may be contacted
         esp = db.get_esp_settings_by_ip(ip)
-        light(positions_json, ip, esp, 1, True)
+        if esp is None:
+            return {'error': f'Unknown ESP {ip!r}'}, 404
+        jobs.append((json.dumps(positions), esp['esp_ip'], esp))
+    for positions_json, ip, esp in jobs:
+        if not submit_locate(light, positions_json, ip, esp, 1, True):
+            return {'error': LOCATE_BUSY}, 429
     return {'status': 'Lights controlled'}
 
 
@@ -422,71 +736,70 @@ def hex_to_rgb(hex_color):
         return [0, 255, 0]
 
 
-@app.route('/led/on', methods=['GET'])
+@app.route('/led/on', methods=['POST'])
 def turn_led_on():
     set_global_settings()
     app.previous_positions = []  # Reset previous positions
-    if request.method == 'GET':
-        ips = get_unique_ips_from_database()
-        for ip in ips:
-            total_leds = get_total_leds(ip)
-            on_data = {
-                "on": True,
-                "bri": app.brightness,
-                "transition": 5,
-                "mainseg": 0,
-                "seg": [
-                    {
-                        "id": 0,
-                        "start": 0,
-                        "stop": total_leds,
-                        "grp": 1,
-                        "spc": 0,
-                        "of": 0,
-                        "on": True,
-                        "frz": False,
-                        "cct": 127,
-                        "set": 0,
-                        "col": [hex_to_rgb(app.standbyColor)],
-                        "fx": 0,
-                        "sx": 128,
-                        "ix": 128,
-                        "pal": 0,
-                        "c1": 128,
-                        "c2": 128,
-                        "c3": 16,
-                        "sel": True,
-                        "rev": False,
-                        "mi": False,
-                        "o1": False,
-                        "o2": False,
-                        "o3": False,
-                        "si": 0,
-                        "m12": 1
-                    },
-                    {"stop": 0},
-                    {"stop": 0},
-                    {"stop": 0},
-                    {"stop": 0},
-                    {"stop": 0},
-                    {"stop": 0},
-                    {"stop": 0},
-                    {"stop": 0},
-                    {"stop": 0},
-                    {"stop": 0},
-                    {"stop": 0},
-                    {"stop": 0},
-                    {"stop": 0},
-                    {"stop": 0},
-                    {"stop": 0}
-                ]
-            }
-            send_request(ip, on_data)
-        return jsonify({'success': True})
+    ips = get_unique_ips_from_database()
+    for ip in ips:
+        total_leds = get_total_leds(ip)
+        on_data = {
+            "on": True,
+            "bri": app.brightness,
+            "transition": 5,
+            "mainseg": 0,
+            "seg": [
+                {
+                    "id": 0,
+                    "start": 0,
+                    "stop": total_leds,
+                    "grp": 1,
+                    "spc": 0,
+                    "of": 0,
+                    "on": True,
+                    "frz": False,
+                    "cct": 127,
+                    "set": 0,
+                    "col": [hex_to_rgb(app.standbyColor)],
+                    "fx": 0,
+                    "sx": 128,
+                    "ix": 128,
+                    "pal": 0,
+                    "c1": 128,
+                    "c2": 128,
+                    "c3": 16,
+                    "sel": True,
+                    "rev": False,
+                    "mi": False,
+                    "o1": False,
+                    "o2": False,
+                    "o3": False,
+                    "si": 0,
+                    "m12": 1
+                },
+                {"stop": 0},
+                {"stop": 0},
+                {"stop": 0},
+                {"stop": 0},
+                {"stop": 0},
+                {"stop": 0},
+                {"stop": 0},
+                {"stop": 0},
+                {"stop": 0},
+                {"stop": 0},
+                {"stop": 0},
+                {"stop": 0},
+                {"stop": 0},
+                {"stop": 0},
+                {"stop": 0}
+            ]
+        }
+        send_request(ip, on_data)
+    return jsonify({'success': True})
 
 
 # Route to turn the LED off
-@app.route('/led/off', methods=['GET'])
+@app.route('/led/off', methods=['POST'])
 def turn_led_off():
     ips = get_unique_ips_from_database()
     app.previous_positions = []  # Reset previous positions
@@ -523,34 +836,33 @@ def turn_led_off():
 
 
 # Route to turn the LED to Party
-@app.route('/led/party', methods=['GET'])
+@app.route('/led/party', methods=['POST'])
 def turn_led_party():
     app.previous_positions = []  # Reset previous positions
     set_global_settings()
-    if request.method == 'GET':
-        ips = get_unique_ips_from_database()
-        for ip in ips:
-            party_data = {"on": True, "bri": round(255 * app.brightness), "transition": 5, "mainseg": 0, "seg": [
-                {"id": 0, "grp": 1, "spc": 0, "of": 0, "on": True, "frz": False, "bri": 255, "cct": 127, "set": 0,
-                 "col": [[255, 255, 255], [0, 0, 0], [0, 0, 0]], "fx": 9, "sx": 128, "ix": 128, "pal": 0, "c1": 128,
-                 "c2": 128, "c3": 16},
-                {"stop": 0},
-                {"stop": 0},
-                {"stop": 0},
-                {"stop": 0},
-                {"stop": 0},
-                {"stop": 0},
-                {"stop": 0},
-                {"stop": 0},
-                {"stop": 0},
-                {"stop": 0},
-                {"stop": 0},
-                {"stop": 0},
-                {"stop": 0},
-                {"stop": 0},
-                {"stop": 0}]}
-            send_request(ip, party_data)
-        return jsonify()
+    ips = get_unique_ips_from_database()
+    for ip in ips:
+        party_data = {"on": True, "bri": round(255 * app.brightness), "transition": 5, "mainseg": 0, "seg": [
+            {"id": 0, "grp": 1, "spc": 0, "of": 0, "on": True, "frz": False, "bri": 255, "cct": 127, "set": 0,
+             "col": [[255, 255, 255], [0, 0, 0], [0, 0, 0]], "fx": 9, "sx": 128, "ix": 128, "pal": 0, "c1": 128,
+             "c2": 128, "c3": 16},
+            {"stop": 0},
+            {"stop": 0},
+            {"stop": 0},
+            {"stop": 0},
+            {"stop": 0},
+            {"stop": 0},
+            {"stop": 0},
+            {"stop": 0},
+            {"stop": 0},
+            {"stop": 0},
+            {"stop": 0},
+            {"stop": 0},
+            {"stop": 0},
+            {"stop": 0},
+            {"stop": 0}]}
+        send_request(ip, party_data)
+    return jsonify()
 
 
 @app.route('/api/translations', methods=['GET'])

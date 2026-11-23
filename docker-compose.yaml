@@ -2,6 +2,11 @@ services:
   spotlight-storage:
     environment:
       - TRANSLATIONS_DIR=/app/static/translations
+      # Optional: require this token for all API calls (browser asks once,
+      # Home Assistant sends "Authorization: Bearer <token>").
+      # - SPOTLIGHT_API_TOKEN=change-me
+      # Optional: only answer on these host names/IPs (DNS-rebinding protection).
+      # - SPOTLIGHT_ALLOWED_HOSTS=192.168.1.20,spotlight.local
     image: mellowlabs/spotlight_storage:dev
     ports:
       - "5000:5000"

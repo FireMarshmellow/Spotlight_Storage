@@ -44,6 +44,23 @@ function drawGrid(mode, rows, columns, startX, startY, serpentineDirection) {
     columns = parseInt(columns);
     rows = parseInt(rows);
 
+    const customLayout = mode === "esp"
+        ? parseRowLayout(document.getElementById('esp_row_layout').value)
+        : getSelectedEspLayout();
+    if (customLayout) {
+        canvasContainer.style.overflowX = '';
+        drawLayoutGrid(mode, customLayout, startX, startY, serpentineDirection);
+        if (mode === "item" && !isEventListened) {
+            canvas = responsiveCanvas;
+            canvas.addEventListener('click', function (event) {
+                handleCellClick(event, mode);
+            });
+            isEventListened = true;
+        }
+        return;
+    }
+    layoutCells = null;
+
     //console.log("startX: " + startX + ", " + "startY: " + startY + ", " + "serpentineDirection: " + serpentineDirection)
     canvas = document.getElementById(mode + '-responsive-canvas');
     let ctx = canvas.getContext('2d');
@@ -273,6 +290,18 @@ function handleCellClick(event, mode) {
 
     const canvas = document.getElementById(mode + '-responsive-canvas');
     const canvasContainer = document.getElementById(mode + '-canvas-container');
+
+    if (getSelectedEspLayout() && layoutCells) {
+        const r = canvas.getBoundingClientRect();
+        const px = (event.clientX - r.left) * (canvas.width / r.width);
+        const py = (event.clientY - r.top) * (canvas.height / r.height);
+        const hit = layoutCells.find(c => px >= c.x && px < c.x + c.w && py >= c.y && py < c.y + c.h);
+        if (!hit) return;
+        const idx = clickedCells.indexOf(hit.number);
+        if (idx === -1) clickedCells.push(hit.number); else clickedCells.splice(idx, 1);
+        redrawGrid(rows, columns, "item", startX, startY, serpentineDirection);
+        return;
+    }
     let lineWidth = 2;
     let boxSize = (canvas.width - lineWidth) / columns;
     if (boxSize <= 60) {
@@ -334,6 +363,13 @@ function calculateLedNumber(row, column, startX, startY, serpentineDirection, ro
 }
 
 function redrawGrid(rows, columns, mode, startX, startY, serpentineDirection) {
+    if (mode === "item") {
+        const customLayout = getSelectedEspLayout();
+        if (customLayout) {
+            drawLayoutGrid(mode, customLayout, startX, startY, serpentineDirection);
+            return;
+        }
+    }
      canvas = document.getElementById(mode + '-responsive-canvas');
 
     let ctx = canvas.getContext('2d');
@@ -471,3 +507,139 @@ function convertLedNumber(ledNumber, startX, startY, serpentineDirection, rows, 
 }
 
 
+
+
+// ---------------------------------------------------------------------------
+// Uneven drawer layouts, e.g. a box with 5 rows of 6 drawers and 2 rows of 3.
+// A layout is a list of drawer counts per "lane": rows (top to bottom) for
+// horizontal serpentine, columns (left to right) for vertical serpentine.
+// Each lane is split into equal-width cells, so wider drawers get wider cells.
+// Numbers follow the physical strip order, so the backend maps LED n -> n-1.
+// ---------------------------------------------------------------------------
+let layoutCells = null;
+
+function parseRowLayout(value) {
+    if (value === null || value === undefined) return null;
+    const text = String(value).trim();
+    if (text === "") return null;
+    const parts = text.split(/[,;]/).map(p => p.trim()).filter(p => p !== "");
+    if (parts.length === 0) return null;
+    const counts = parts.map(Number);
+    if (counts.some(n => !Number.isInteger(n) || n <= 0)) return null;
+    return counts;
+}
+
+function getSelectedEspLayout() {
+    const select = document.getElementById('item_esp_select');
+    if (!select || select.selectedIndex < 0) return null;
+    const option = select.options[select.selectedIndex];
+    return option ? parseRowLayout(option.dataset.espLayout) : null;
+}
+
+// Returns [{lane, slot, number}] where lane/slot are visual indices
+// (lane: row top->bottom or column left->right; slot: position within the lane).
+function computeLayoutNumbers(layout, startX, startY, serpentineDirection) {
+    const horizontal = serpentineDirection !== "vertical";
+    // The first lane visited and the direction of the first lane
+    const laneFromEnd = horizontal ? startY === "bottom" : startX === "right";
+    const slotFromEnd = horizontal ? startX === "right" : startY === "bottom";
+    const laneOrder = layout.map((_, i) => i);
+    if (laneFromEnd) laneOrder.reverse();
+
+    const cells = [];
+    let number = 1;
+    laneOrder.forEach((lane, visit) => {
+        const count = layout[lane];
+        const reversed = (visit % 2 === 0) ? slotFromEnd : !slotFromEnd;
+        for (let k = 0; k < count; k++) {
+            const slot = reversed ? count - 1 - k : k;
+            cells.push({ lane, slot, number: number++ });
+        }
+    });
+    return cells;
+}
+
+function drawLayoutGrid(mode, layout, startX, startY, serpentineDirection) {
+    startX = (startX == 1 || startX === "right") ? "right" : String(startX || "left").toLowerCase();
+    startY = String(startY || "top").toLowerCase();
+    serpentineDirection = (serpentineDirection == 1 || serpentineDirection === "vertical") ? "vertical" : "horizontal";
+
+    const container = document.getElementById(mode + '-canvas-container');
+    const cvs = document.getElementById(mode + '-responsive-canvas');
+    const ctx = cvs.getContext('2d');
+    const theme = localStorage.getItem('theme');
+    const lineWidth = 2;
+    const horizontal = serpentineDirection === "horizontal";
+    const maxCount = Math.max(...layout);
+    const lanes = layout.length;
+
+    const style = window.getComputedStyle(container);
+    const width = Math.max(container.clientWidth - parseFloat(style.paddingLeft) - parseFloat(style.paddingRight), 120);
+    // Size so that the smallest cell is at least 40px
+    let unit = (width - lineWidth) / (horizontal ? maxCount : lanes);
+    unit = Math.max(unit, 40);
+    const totalW = unit * (horizontal ? maxCount : lanes);
+    const totalH = unit * (horizontal ? lanes : maxCount);
+    cvs.width = totalW + lineWidth;
+    cvs.height = totalH + lineWidth;
+    container.style.overflowX = cvs.width > container.clientWidth ? 'scroll' : '';
+
+    const numbered = computeLayoutNumbers(layout, startX, startY, serpentineDirection);
+    const half = lineWidth / 2;
+    layoutCells = numbered.map(c => {
+        const count = layout[c.lane];
+        let x, y, w, h;
+        if (horizontal) {
+            w = totalW / count; h = unit;
+            x = c.slot * w; y = c.lane * unit;
+        } else {
+            w = unit; h = totalH / count;
+            x = c.lane * unit; y = c.slot * h;
+        }
+        return { ...c, x: x + half, y: y + half, w, h };
+    });
+
+    ctx.clearRect(0, 0, cvs.width, cvs.height);
+    ctx.setLineDash([]);
+    ctx.lineWidth = lineWidth;
+
+    // Cell borders
+    ctx.strokeStyle = "#6c757d";
+    layoutCells.forEach(c => ctx.strokeRect(c.x, c.y, c.w, c.h));
+
+    // Wiring path in strip order
+    const ordered = [...layoutCells].sort((a, b) => a.number - b.number);
+    ctx.strokeStyle = "#0d6efd";
+    ctx.beginPath();
+    ordered.forEach((c, i) => {
+        const cx = c.x + c.w / 2, cy = c.y + c.h / 2;
+        if (i === 0) ctx.moveTo(cx, cy); else ctx.lineTo(cx, cy);
+    });
+    ctx.stroke();
+
+    const minSide = Math.min(...layoutCells.map(c => Math.min(c.w, c.h)));
+    const dot = minSide / 15;
+    const marker = minSide / 8;
+    const total = layoutCells.length;
+    ctx.font = `${minSide / 5}px Arial`;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    layoutCells.forEach(c => {
+        const cx = c.x + c.w / 2, cy = c.y + c.h / 2;
+        const isClicked = mode === "item" && clickedCells.includes(c.number);
+        ctx.beginPath();
+        if (c.number === 1 && !isClicked) {
+            ctx.arc(cx, cy, marker, 0, Math.PI * 2);
+            ctx.fillStyle = '#198754';
+        } else if (c.number === total && !isClicked) {
+            ctx.arc(cx, cy, marker, 0, Math.PI * 2);
+            ctx.fillStyle = '#dc3545';
+        } else {
+            ctx.arc(cx, cy, isClicked ? marker : dot, 0, Math.PI * 2);
+            ctx.fillStyle = isClicked ? '#003ef8' : '#ffc107';
+        }
+        ctx.fill();
+        ctx.fillStyle = theme === 'dark' ? 'white' : 'black';
+        ctx.fillText(String(c.number), cx + minSide / 5, cy - minSide / 5);
+    });
+}

@@ -88,10 +88,10 @@ window.addEventListener('DOMContentLoaded', () => {
         })
 })
 
-// Function to send a GET request based on the button pressed
+// Function to send a POST request based on the button pressed
 function sendLedRequest(state) {
-    const url = `/led/${state}`; // Replace with the actual endpoint
-    fetch(url)
+    const url = `/led/${state}`;
+    fetch(url, { method: 'POST' })
         .then((response) => {
         })
         .catch((error) => {
@@ -190,8 +190,8 @@ document.getElementById("inventur").addEventListener("click", function () {
     confirmationModal.show();
     function displayItem(index) {
         const currentItem = itemsData[index];
-        text.innerHTML = currentItem.name;
-        amount.innerHTML = currentItem.quantity;
+        text.textContent = currentItem.name;
+        amount.textContent = currentItem.quantity;
         img.src = currentItem.image;
         fetch(`/api/items/${currentItem.id}`, {
             method: "POST",
@@ -205,13 +205,13 @@ document.getElementById("inventur").addEventListener("click", function () {
     minus_btn.onclick = function() {
         const currentItem = itemsData[currentnventurItemIndex];
         handleQuantityChange(currentItem, -1);
-        amount.innerHTML = currentItem.quantity - 1;
+        amount.textContent = currentItem.quantity - 1;
     };
 
     plus_btn.onclick = function() {
         const currentItem = itemsData[currentnventurItemIndex];
         handleQuantityChange(currentItem, + 1);
-        amount.innerHTML = currentItem.quantity + 1 ;
+        amount.textContent = currentItem.quantity + 1 ;
     };
 
 
@@ -271,4 +271,36 @@ document.getElementById("inventur").addEventListener("click", function () {
 document.addEventListener('DOMContentLoaded', function() {
     loadSettings();
     populateEspTable();
+});
+
+// Backup import: upload a JSON file exported via /api/export
+document.getElementById('import-button').addEventListener('click', function () {
+    document.getElementById('import-file').click();
+});
+
+document.getElementById('import-file').addEventListener('change', function () {
+    const file = this.files[0];
+    if (!file) return;
+    const replace = document.getElementById('import-replace').checked;
+    if (replace && !confirm("Replace mode deletes your current WLED nodes and items before importing. Continue?")) {
+        this.value = "";
+        return;
+    }
+    const formData = new FormData();
+    formData.append('file', file);
+    const query = replace ? 'mode=replace&confirm=replace' : 'mode=merge';
+    fetch(`/api/import?${query}`, { method: 'POST', body: formData })
+        .then(response => response.json().then(data => ({ ok: response.ok, data })))
+        .then(({ ok, data }) => {
+            if (!ok) {
+                alert(`Import failed: ${data.error}`);
+                return;
+            }
+            alert(`Import complete.\nWLED nodes: ${data.esps_added} added, ${data.esps_updated} updated\n` +
+                  `Items: ${data.items_added} added, ${data.items_updated} updated`);
+            // Reload so settings, nodes and items all reflect the imported data
+            window.location.reload();
+        })
+        .catch(error => alert(`Import failed: ${error}`))
+        .finally(() => { this.value = ""; });
 });

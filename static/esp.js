@@ -45,6 +45,8 @@ function populateEspTable() {
                 editButton.dataset.bsEspStartY = esp.start_top;
                 editButton.dataset.bsEspStartX = esp.start_left;
                 editButton.dataset.bsEspSerpentinedirection = esp.serpentine_direction;
+                editButton.dataset.bsEspLayout = esp.row_layout || "";
+                editButton.dataset.bsEspColors = esp.locate_colors || "";
                 editButton.dataset.bsToggle = "modal";
                 editButton.innerHTML = '<i data-lucide="file-edit" class="text-primary"></i>';
 
@@ -87,8 +89,11 @@ document.getElementById("save-esp-button").addEventListener('click', () => {
     let espId = saveButton.getAttribute('data-bs-esp-id');
     const name = document.getElementById("esp_name").value;
     const esp_ip = document.getElementById("esp_ip").value;
-    const rows = document.getElementById("esp_rows").value;
-    const cols = document.getElementById("esp_columns").value;
+    let rows = document.getElementById("esp_rows").value;
+    let cols = document.getElementById("esp_columns").value;
+    const rowLayoutInput = document.getElementById("esp_row_layout").value.trim();
+    const rowLayout = parseRowLayout(rowLayoutInput);
+    const locateColors = getLocateColors();
 
     const startTop = document.querySelector("#esp_starty option:checked").getAttribute("data-starty");
     const startLeft = document.querySelector("#esp_startx option:checked").getAttribute("data-startx");
@@ -107,6 +112,20 @@ document.getElementById("save-esp-button").addEventListener('click', () => {
         showAlert( 'esp-error-alert', "IP Address is not valid.", 'esp');
         return;
     }
+    if (rowLayoutInput !== "" && !rowLayout) {
+        showAlert('esp-error-alert', "Drawers per row must be a comma-separated list of positive numbers, e.g. 6,6,6,3,3.", 'esp');
+        return;
+    }
+    if (rowLayout) {
+        // Keep rows/cols consistent with the custom layout (bounding grid)
+        if (serpentineDirection.toLowerCase() === "vertical") {
+            cols = rowLayout.length;
+            rows = Math.max(...rowLayout);
+        } else {
+            rows = rowLayout.length;
+            cols = Math.max(...rowLayout);
+        }
+    }
 
     const espItem = {
         name,
@@ -115,7 +134,9 @@ document.getElementById("save-esp-button").addEventListener('click', () => {
         cols,
         startTop,
         startLeft,
-        serpentineDirection
+        serpentineDirection,
+        rowLayout: rowLayout ? rowLayout.join(",") : "",
+        locateColors
     };
 
     const processESPItem = () => {
@@ -176,8 +197,8 @@ document.getElementById('esp-delete-modal').addEventListener('show.bs.modal', fu
     const espName = button.getAttribute('data-bs-esp-name');
     const ipAddress = button.getAttribute('data-bs-esp-ip');
     // Set device name and IP address in the modal
-    document.getElementById('deviceNameSpan').innerHTML = `<b>${espName}</b>`;
-    document.getElementById('ipAddressSpan').innerHTML = `<b>${ipAddress}</b>`;
+    setBoldText(document.getElementById('deviceNameSpan'), espName);
+    setBoldText(document.getElementById('ipAddressSpan'), ipAddress);
     document.getElementById('confirmDelete').dataset.bsEspId = button.getAttribute('data-bs-esp-id');
 
 });
@@ -204,9 +225,20 @@ document.getElementById('esp-modal').addEventListener('show.bs.modal', function 
         setSelectedIndexByValue('esp_starty', espStartTop, 'data-starty');
         setSelectedIndexByValue('esp_startx', espStartLeft, 'data-startx');
         setSelectedIndexByValue('esp_serpentine', espSerpentineDirection, 'data-serpentine');
+        document.getElementById('esp_row_layout').value = button.getAttribute('data-bs-esp-layout') || "";
+        let colors = [];
+        try { colors = JSON.parse(button.getAttribute('data-bs-esp-colors') || "[]"); } catch (e) { colors = []; }
+        renderLocateColors(Array.isArray(colors) ? colors : []);
+        updateRowColumnInputs();
         document.getElementById('save-esp-button').dataset.bsEspId = button.getAttribute('data-bs-esp-id');
     }
 });
+
+function setBoldText(element, text) {
+    const bold = document.createElement('b');
+    bold.textContent = text ?? '';
+    element.replaceChildren(bold);
+}
 
 // Function to set selectedIndex based on the attribute value
 function setSelectedIndexByValue(selectId, value, attributeName) {
@@ -258,6 +290,49 @@ document.getElementById('esp_starty').addEventListener('change', function () {
 document.getElementById('esp_serpentine').addEventListener('change', function () {
     drawGrid("esp");
 });
+document.getElementById('esp_row_layout').addEventListener('input', function () {
+    updateRowColumnInputs();
+    drawGrid("esp");
+});
+document.getElementById('esp_add_color').addEventListener('click', function () {
+    const colors = getLocateColors();
+    colors.push(colors.length ? "#ff0000" : "#00ff00");
+    renderLocateColors(colors);
+});
+
+// Rows/columns are derived from the custom layout when one is given
+function updateRowColumnInputs() {
+    const hasLayout = parseRowLayout(document.getElementById('esp_row_layout').value) !== null;
+    document.getElementById('esp_rows').disabled = hasLayout;
+    document.getElementById('esp_columns').disabled = hasLayout;
+}
+
+function renderLocateColors(colors) {
+    const list = document.getElementById('esp_locate_colors_list');
+    list.innerHTML = "";
+    colors.forEach((color) => {
+        const wrapper = document.createElement('span');
+        wrapper.className = "d-inline-flex align-items-center border rounded px-1";
+        const input = document.createElement('input');
+        input.type = "color";
+        input.value = color;
+        input.className = "esp-locate-color";
+        input.style.cssText = "width: 2rem; height: 1.2rem; border: none; padding: 0; background: none;";
+        const remove = document.createElement('button');
+        remove.type = "button";
+        remove.className = "btn btn-sm btn-link p-0 ms-1 text-danger";
+        remove.textContent = "\u00d7";
+        remove.title = "Remove";
+        remove.addEventListener('click', () => wrapper.remove());
+        wrapper.appendChild(input);
+        wrapper.appendChild(remove);
+        list.appendChild(wrapper);
+    });
+}
+
+function getLocateColors() {
+    return Array.from(document.querySelectorAll('#esp_locate_colors_list .esp-locate-color')).map(i => i.value);
+}
 document.getElementById('esp-modal').addEventListener('hidden.bs.modal', function () {
 
     document.getElementById('esp-modal-label').innerHTML = "Add WLED"; // Set the modal label back to its initial state
@@ -272,6 +347,9 @@ document.getElementById('esp-modal').addEventListener('hidden.bs.modal', functio
     document.getElementById('esp_starty').selectedIndex = 1;
     document.getElementById('esp_startx').selectedIndex = 1;
     document.getElementById('esp_serpentine').selectedIndex = 1;
+    document.getElementById('esp_row_layout').value = "";
+    renderLocateColors([]);
+    updateRowColumnInputs();
 
     // Clear any existing data attributes
     document.getElementById('save-esp-button').removeAttribute('data-bs-esp-id');
@@ -323,7 +401,11 @@ function createESPTab(name, onClickHandler, ip) {
         anchor.innerHTML = 'All Boxes';
         anchor.classList.add('active');
     } else {
-        anchor.innerHTML = `${name} <span class="esp_ip" style="color: #888;"></span>`;
+        anchor.textContent = `${name} `;
+        const ipSpan = document.createElement('span');
+        ipSpan.className = 'esp_ip';
+        ipSpan.style.color = '#888';
+        anchor.appendChild(ipSpan);
     }
 
     anchor.onclick = onClickHandler;

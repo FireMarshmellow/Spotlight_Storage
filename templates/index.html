@@ -6,7 +6,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
-    <link href="https://cdn.jsdelivr.net/npm/@yaireo/tagify/dist/tagify.css" rel="stylesheet" type="text/css"/>
+    <link href="https://cdn.jsdelivr.net/npm/@yaireo/tagify@4.39.0/dist/tagify.css" rel="stylesheet" type="text/css" integrity="sha384-WFLqESDcLYQRlWIJnQc7vNZt6kigZgDqJ/sXg9DXtHJk3/lPW5nD0Br5VN8TvOAm" crossorigin="anonymous"/>
     <link rel="stylesheet" type="text/css" href="../static/overrides.css" media="screen"/>
     <link rel="stylesheet" type="text/css" href="../static/bootstrap-negative-margins.css" media="screen"/>
 </head>
@@ -46,7 +46,7 @@
                 <div class="col-12">
                     <div class="input-group mb-2 mb-md-0">
                         <div class="d-flex align-items-center position-relative w-100 me-0 me-md-2">
-                            <input type="text" class="form-control flex-grow-1" placeholder="Search items..." id="search">
+                            <input type="text" class="form-control flex-grow-1" placeholder="Search items..." id="search" style="padding-right: 2.25rem; text-overflow: ellipsis;">
                             <i data-lucide="search" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%);"></i>
                         </div>
                     </div>
@@ -59,11 +59,11 @@
                     <i data-lucide="arrow-down-up"></i>
                 </button>
                 <ul class="dropdown-menu dropdown-menu-end" id="sort_method">
-                    <li><a id="sortBybox" class="dropdown-item" href="#" onclick="sortItems('ip')"><i data-lucide="arrow-down-0-1" class="me-2"></i>Box</a></li>
-                    <li><a id="sortByid" class="dropdown-item" href="#" onclick="sortItems('id')"><i data-lucide="arrow-down-0-1" class="me-2"></i>ID</a></li>
-                    <li><a id="sortByname" class="dropdown-item" href="#" onclick="sortItems('name')"><i data-lucide="arrow-down-a-z" class="me-2"></i>Name</a></li>
-                    <li><a id="sortByquantity" class="dropdown-item" href="#" onclick="sortItems('quantity')"><i data-lucide="arrow-down-0-1" class="me-2"></i>Quantity</a>
-                    <li><a id="sortBylocation" class="dropdown-item" href="#" onclick="sortItems('position')"><i data-lucide="arrow-down-0-1" class="me-2"></i>Location</a>
+                    <li><a id="sortBybox" class="dropdown-item" href="#" data-sort="ip"><i data-lucide="arrow-down-0-1" class="me-2"></i>Box</a></li>
+                    <li><a id="sortByid" class="dropdown-item" href="#" data-sort="id"><i data-lucide="arrow-down-0-1" class="me-2"></i>ID</a></li>
+                    <li><a id="sortByname" class="dropdown-item" href="#" data-sort="name"><i data-lucide="arrow-down-a-z" class="me-2"></i>Name</a></li>
+                    <li><a id="sortByquantity" class="dropdown-item" href="#" data-sort="quantity"><i data-lucide="arrow-down-0-1" class="me-2"></i>Quantity</a>
+                    <li><a id="sortBylocation" class="dropdown-item" href="#" data-sort="position"><i data-lucide="arrow-down-0-1" class="me-2"></i>Location</a>
                     </li>
                 </ul>
             </div>
@@ -199,6 +199,26 @@
                 </div>
             </div>
             <hr>
+            <div class="row">
+                <h6 data-i18n="backup_title">Backup</h6>
+                <div class="d-flex flex-wrap gap-2 mb-2">
+                    <a href="/api/export" class="btn btn-outline-primary pe-3" id="export-button">
+                        <span class="icon-n4px"><i data-lucide="download" class="me-2"></i></span>
+                        <span data-i18n="export_btn_label">Export</span>
+                    </a>
+                    <button type="button" class="btn btn-outline-secondary pe-3" id="import-button">
+                        <span class="icon-n4px"><i data-lucide="upload" class="me-2"></i></span>
+                        <span data-i18n="import_btn_label">Import</span>
+                    </button>
+                    <input type="file" id="import-file" accept=".json,application/json" class="d-none">
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" id="import-replace">
+                    <label class="form-check-label" for="import-replace" data-i18n="import_replace_label">Replace existing data on import (otherwise merge)</label>
+                </div>
+                <div class="form-text" data-i18n="backup_help">Exports settings, WLED nodes and items as a JSON file. Uploaded images are not included.</div>
+            </div>
+            <hr>
             <div class="col-4">
                 <div class="form-floating mb-3">
                     <select class="form-select" id="language-selector">
@@ -237,7 +257,7 @@
             <div class="modal-content">
                 <div class="modal-header">
                     <h1 class="modal-title fs-5" id="item-modal-label">Add Item</h1>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" onclick="resetModal()"> </button>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" data-reset-item-modal> </button>
                 </div>
                 <div class="modal-body">
                     <div class="alert alert-danger d-none" id="item-error-alert">Please enter values in the follow empty fields:<br><span id="item-error-list"></span>
@@ -253,6 +273,20 @@
                     <div class="form-floating mb-3">
                         <input type="number" class="form-control" id="item_quantity" placeholder="1" required>
                         <label id="item_quantity_label" for="item_quantity">Item quantity</label>
+                    </div>
+                    <div class="row">
+                        <div class="col-6 pe-2">
+                            <div class="form-floating mb-3">
+                                <input type="text" class="form-control" id="item_article_number" placeholder="Article number" autocomplete="off">
+                                <label data-i18n="item_article_number_label" for="item_article_number">Article number / barcode</label>
+                            </div>
+                        </div>
+                        <div class="col-6 ps-2">
+                            <div class="form-floating mb-3">
+                                <input type="text" class="form-control" id="item_storage_location" placeholder="A02.014" autocomplete="off">
+                                <label data-i18n="item_storage_location_label" for="item_storage_location">Storage location</label>
+                            </div>
+                        </div>
                     </div>
 
                     <div class="row">
@@ -304,7 +338,7 @@
 
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary pe-3" id="cancel-item-button" data-bs-dismiss="modal"  onclick="resetModal()">
+                    <button type="button" class="btn btn-secondary pe-3" id="cancel-item-button" data-bs-dismiss="modal" data-reset-item-modal>
                         <span class="icon-n4px">
                             <i data-lucide="x" class="me-2"></i>
                         </span>
@@ -504,6 +538,23 @@
                             </div>
                         </div>
                     </div>
+                    <div class="form-floating mb-1">
+                        <input type="text" class="form-control" id="esp_row_layout" placeholder="6,6,6,6,6,3,3" autocomplete="off">
+                        <label data-i18n="esp_row_layout_label" for="esp_row_layout">Drawers per row (optional)</label>
+                    </div>
+                    <div class="form-text mb-3" data-i18n="esp_row_layout_help">
+                        For boxes with uneven rows: one number per row, top to bottom (per column, left to right, for vertical serpentine), e.g. 6,6,6,6,6,3,3. Leave empty for a regular grid.
+                    </div>
+                    <div class="mb-3">
+                        <div class="d-flex align-items-center flex-wrap gap-2" id="esp_locate_colors">
+                            <span data-i18n="esp_locate_colors_label">Mark colours (optional):</span>
+                            <span id="esp_locate_colors_list" class="d-flex flex-wrap gap-2"></span>
+                            <button type="button" class="btn btn-sm btn-outline-secondary" id="esp_add_color" data-i18n="esp_add_color_label">+ Colour</button>
+                        </div>
+                        <div class="form-text" data-i18n="esp_locate_colors_help">
+                            Overrides the global locate colour for this box. With several colours, an item's LEDs cycle through them in order (e.g. front of drawer green, back red). Click a colour's × to remove it.
+                        </div>
+                    </div>
                     <div id="esp-canvas-container" class="col-10 mx-auto">
                         <canvas id="esp-responsive-canvas"></canvas>
                     </div>
@@ -527,15 +578,15 @@
     </div>
 </div>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
-<script src="https://cdn.jsdelivr.net/npm/@yaireo/tagify"></script>
-<script src="https://cdn.jsdelivr.net/npm/@yaireo/tagify/dist/tagify.polyfills.min.js"></script>
-<script src="https://unpkg.com/lucide@latest"></script>
-<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
-<script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
-<link  href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.css" rel="stylesheet">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/masonry/4.2.2/masonry.pkgd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@yaireo/tagify@4.39.0/dist/tagify.js" integrity="sha384-l3Fn0B60NCHpAg1Z2EH4w/F7+T4eTOnKFeu3RjlbNLbZsivRi3VnbcN2YCvoQqoS" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/lucide@1.70.0/dist/umd/lucide.min.js" integrity="sha384-64z4N640tVzhAicQVGzxE/48VNN9yS53U5kv9UH8ca7xGU4KSJ9zz8nD4C2BEerP" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js" integrity="sha384-IQsoLXl5PILFhosVNubq5LC7Qb9DXgDA9i+tQ8Zj3iwWAwPtgFTxbJ8NT4GN1R8p" crossorigin="anonymous"></script>
+<script src="https://code.jquery.com/jquery-3.6.4.min.js" integrity="sha384-UG8ao2jwOWB7/oDdObZc6ItJmwUkR/PfMyt9Qs5AwX7PsnYn1CRKCTWyncPTWvaS" crossorigin="anonymous"></script>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.css" rel="stylesheet" integrity="sha384-1arqhTHsGLPVJdhZo8SAycbI+y5k+G7khi5bTZ4BxHJIpCfvWoeSDgXEXXRxB/9G" crossorigin="anonymous">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.js" integrity="sha384-P65gU1u4/dZpqRQ0AVqW+DHPwXmNAR84Qk31dC95hjk0WatF1GsVF1zRm/0uB+o0" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/masonry/4.2.2/masonry.pkgd.min.js" integrity="sha384-GNFwBvfVxBkLMJpYMOABq3c+d3KnQxudP/mGPkzpZSTYykLBNsZEnG2D9G/X/+7D" crossorigin="anonymous"></script>
 
+<script src="../static/api.js"></script>
 <script src="../static/images.js"></script>
 <script src="../static/script.js"></script>
 <script src="../static/esp.js"></script>
@@ -544,10 +595,7 @@
 <script src="../static/gen_grid.js"></script>
 <script src="../static/color-modes.js"></script>
 <script src="../static/translation.js"></script>
-
-<script>
-    lucide.createIcons();
-</script>
+<script src="../static/init.js"></script>
 </body>
 
 </html>

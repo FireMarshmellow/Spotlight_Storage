@@ -13,4 +13,8 @@ docker-compose.*
 **/*.test.ts*
 renovate.json
 Dockerfile*
-*.bat
+*.battests
+pytest.ini
+requirements-dev.txt
+.pytest_cache
+**/__pycache__
