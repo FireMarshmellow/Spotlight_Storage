@@ -1,1 +1,2 @@
-pytest>=8
+-r requirements.txt
+pytest==9.2.0

@@ -197,8 +197,8 @@ document.getElementById('esp-delete-modal').addEventListener('show.bs.modal', fu
     const espName = button.getAttribute('data-bs-esp-name');
     const ipAddress = button.getAttribute('data-bs-esp-ip');
     // Set device name and IP address in the modal
-    document.getElementById('deviceNameSpan').innerHTML = `<b>${espName}</b>`;
-    document.getElementById('ipAddressSpan').innerHTML = `<b>${ipAddress}</b>`;
+    setBoldText(document.getElementById('deviceNameSpan'), espName);
+    setBoldText(document.getElementById('ipAddressSpan'), ipAddress);
     document.getElementById('confirmDelete').dataset.bsEspId = button.getAttribute('data-bs-esp-id');
 
 });
@@ -233,6 +233,12 @@ document.getElementById('esp-modal').addEventListener('show.bs.modal', function 
         document.getElementById('save-esp-button').dataset.bsEspId = button.getAttribute('data-bs-esp-id');
     }
 });
+
+function setBoldText(element, text) {
+    const bold = document.createElement('b');
+    bold.textContent = text ?? '';
+    element.replaceChildren(bold);
+}
 
 // Function to set selectedIndex based on the attribute value
 function setSelectedIndexByValue(selectId, value, attributeName) {
@@ -395,7 +401,11 @@ function createESPTab(name, onClickHandler, ip) {
         anchor.innerHTML = 'All Boxes';
         anchor.classList.add('active');
     } else {
-        anchor.innerHTML = `${name} <span class="esp_ip" style="color: #888;"></span>`;
+        anchor.textContent = `${name} `;
+        const ipSpan = document.createElement('span');
+        ipSpan.className = 'esp_ip';
+        ipSpan.style.color = '#888';
+        anchor.appendChild(ipSpan);
     }
 
     anchor.onclick = onClickHandler;

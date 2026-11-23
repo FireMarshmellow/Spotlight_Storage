@@ -2,6 +2,8 @@ import json
 import os
 import shutil
 import sqlite3
+
+import security
 from collections import Counter
 
 # Define the path for the combined database
@@ -576,6 +578,10 @@ def import_data(data, mode='merge'):
             if mode == 'replace':
                 cur.execute('DELETE FROM esp')
             for esp in data['esps']:
+                host = security.normalize_device_host(esp['esp_ip'])
+                if host is None:
+                    raise BackupError(f"Invalid WLED address in backup: {esp['esp_ip']!r}")
+                esp['esp_ip'] = host
                 values = [
                     esp['name'], esp['esp_ip'], int(esp.get('rows') or 1), int(esp.get('cols') or 1),
                     esp.get('start_top') or 'Top', esp.get('start_left') or 'Left',
@@ -606,8 +612,13 @@ def import_data(data, mode='merge'):
                 tags = item.get('tags')
                 if tags is not None and not isinstance(tags, str):
                     tags = json.dumps(tags)
+                # Never import script-capable links (javascript:, data:, ...)
+                link = item.get('link') or ''
+                image = item.get('image') or ''
+                link = link if security.is_safe_link(link) else ''
+                image = image if security.is_safe_image_ref(image) else ''
                 values = [
-                    item['name'], item.get('link') or '', item.get('image') or '', position,
+                    item['name'], link, image, position,
                     int(item.get('quantity') or 0), item.get('ip') or '', tags or '[]',
                     item.get('article_number') or '', item.get('storage_location') or '',
                 ]

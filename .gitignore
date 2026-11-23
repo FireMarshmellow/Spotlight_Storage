@@ -200,3 +200,5 @@ $RECYCLE.BIN/
 *.sqlite
 *.jpg
 *.webp
+# Generated per machine by setup.py
+.env

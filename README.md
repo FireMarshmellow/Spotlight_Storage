@@ -82,6 +82,17 @@ docker compose up -d
 ```
 
 
+## Security
+
+Spotlight Storage is meant for your home network. Out of the box it blocks requests that other websites try to make through your browser, only fetches images from public addresses, and only talks to the WLED controllers you configured.
+
+If the app is reachable by people you don't trust (shared network, port forwarding, ...), set these in `docker-compose.yaml`:
+
+- `SPOTLIGHT_API_TOKEN=<long random string>`: every API call must send the token. The web page asks for it once and remembers it in that browser. Home Assistant and scripts send it as `Authorization: Bearer <token>` (or `X-API-Key: <token>`).
+- `SPOTLIGHT_ALLOWED_HOSTS=192.168.1.20,spotlight.local`: only answer on these addresses (protects against DNS rebinding).
+
+The container runs as an unprivileged user with the waitress production server. Running without Docker needs Python 3.10 or newer (`pip install -r requirements.txt`, then `waitress-serve --listen=0.0.0.0:5000 app:app`). Run the tests with `pip install -r requirements-dev.txt` and `pytest`.
+
 ## dependencies:
 
 - python 3.6

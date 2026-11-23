@@ -199,6 +199,7 @@ function createItem(item) {
     const col = document.createElement('div');
     col.classList.add('col-8', 'col-sm-5', 'col-md-4', 'col-lg-2', 'mb-1');
     // Set dataset attributes to store item information
+    item.id = parseInt(item.id, 10);
     col.dataset.id = item.id;
     col.dataset.name = item.name;
     col.dataset.quantity = parseInt(item.quantity, 10);  // Store as numbers
@@ -214,6 +215,9 @@ function createItem(item) {
     const metaParts = [];
     if (item.article_number) metaParts.push(`<span title="Article number"># ${escapeHtml(item.article_number)}</span>`);
     if (item.storage_location) metaParts.push(`<span title="Storage location">&#128205; ${escapeHtml(item.storage_location)}</span>`);
+    const safeName = escapeHtml(item.name);
+    const safeImage = escapeHtml(safeUrl(item.image));
+    const safeLink = escapeHtml(safeUrl(item.link));
     const metaHtml = metaParts.length ? `<div class="small text-muted mb-2 d-flex flex-wrap gap-2 item-meta">${metaParts.join('')}</div>` : '';
 
     // Set inner HTML for the created column
@@ -221,14 +225,14 @@ function createItem(item) {
     <div class="card overflow-hidden position-relative">
         <!-- Image container with tooltip -->
         <div class="overflow-hidden d-flex justify-content-center">
-            <img src="${item.image}" class="card-img-top dynamic-img" alt="${item.name}">
+            <img src="${safeImage}" class="card-img-top dynamic-img" alt="${safeName}">
         </div>
 
         <!-- Card body with item details and buttons -->
         <div class="card-body p-2">
             <!-- Link to the item -->
-            <a href="${item.link}" target="_blank" class="card-title-link">
-                <h5 id="link-btn-${item.id}" class="card-title" data-bs-toggle="tooltip" title="Shop for more">${item.name}</h5>
+            <a href="${safeLink}" target="_blank" rel="noopener noreferrer" class="card-title-link">
+                <h5 id="link-btn-${item.id}" class="card-title" data-bs-toggle="tooltip" title="Shop for more">${safeName}</h5>
             </a>
             ${metaHtml}
 
@@ -259,7 +263,7 @@ function createItem(item) {
                 <button class="btn btn-outline-danger me-auto minus-btn" id="minus-btn-${item.id}" data-bs-toggle="tooltip" title="-1 from stock" data-item-id="${item.id}">
                     <span class="icon-n4px"><i data-lucide="minus"></i></span>
                 </button>
-                <span id="quantity-${item.id}">${item.quantity}</span>
+                <span id="quantity-${item.id}">${escapeHtml(item.quantity)}</span>
                 <button class="btn btn-outline-success ms-auto plus-btn" id="plus-btn-${item.id}" data-bs-toggle="tooltip" title="+1 to stock" data-item-id="${item.id}">
                     <span class="icon-n4px"><i data-lucide="plus"></i></span>
                 </button>
@@ -297,7 +301,7 @@ function createItem(item) {
     });
 
     col.querySelector('.delete-btn').addEventListener('click', () => {
-        const response = confirm(`Are you sure you want to delete ${item.name}?`);
+        const response = confirm(`Are you sure you want to delete ${String(item.name)}?`);
         const id = item.id;
         const itemsContainer = document.getElementById('items-container-grid');
         if (response) {

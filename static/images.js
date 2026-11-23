@@ -15,8 +15,13 @@ async function uploadImage() {
     }
     try {
         const response = await fetch('/upload', { body: formData, method: 'POST' });
+        if (!response.ok) {
+            const error = await response.json().catch(() => ({}));
+            alert(`Upload failed: ${error.error || response.status}`);
+            return null;
+        }
         const imageURL = await response.text();
-        return new URL(window.location.href + imageURL);
+        return new URL(imageURL, window.location.href);
     } catch (error) {
         console.error('Error uploading file:', error);
         return null;
@@ -31,6 +36,11 @@ async function processCroppedImage(croppedImageFile, item) {
 
     try {
         const response = await fetch('/upload', { body: formData, method: 'POST' });
+        if (!response.ok) {
+            const error = await response.json().catch(() => ({}));
+            alert(`Upload failed: ${error.error || response.status}`);
+            return;
+        }
         const imageURL = await response.text();
         const fullImageUrl = new URL(imageURL, window.location.href).href;
         // Update the database with the new image URL

@@ -6,7 +6,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
-    <link href="https://cdn.jsdelivr.net/npm/@yaireo/tagify/dist/tagify.css" rel="stylesheet" type="text/css"/>
+    <link href="https://cdn.jsdelivr.net/npm/@yaireo/tagify@4.39.0/dist/tagify.css" rel="stylesheet" type="text/css" integrity="sha384-WFLqESDcLYQRlWIJnQc7vNZt6kigZgDqJ/sXg9DXtHJk3/lPW5nD0Br5VN8TvOAm" crossorigin="anonymous"/>
     <link rel="stylesheet" type="text/css" href="../static/overrides.css" media="screen"/>
     <link rel="stylesheet" type="text/css" href="../static/bootstrap-negative-margins.css" media="screen"/>
 </head>
@@ -59,11 +59,11 @@
                     <i data-lucide="arrow-down-up"></i>
                 </button>
                 <ul class="dropdown-menu dropdown-menu-end" id="sort_method">
-                    <li><a id="sortBybox" class="dropdown-item" href="#" onclick="sortItems('ip')"><i data-lucide="arrow-down-0-1" class="me-2"></i>Box</a></li>
-                    <li><a id="sortByid" class="dropdown-item" href="#" onclick="sortItems('id')"><i data-lucide="arrow-down-0-1" class="me-2"></i>ID</a></li>
-                    <li><a id="sortByname" class="dropdown-item" href="#" onclick="sortItems('name')"><i data-lucide="arrow-down-a-z" class="me-2"></i>Name</a></li>
-                    <li><a id="sortByquantity" class="dropdown-item" href="#" onclick="sortItems('quantity')"><i data-lucide="arrow-down-0-1" class="me-2"></i>Quantity</a>
-                    <li><a id="sortBylocation" class="dropdown-item" href="#" onclick="sortItems('position')"><i data-lucide="arrow-down-0-1" class="me-2"></i>Location</a>
+                    <li><a id="sortBybox" class="dropdown-item" href="#" data-sort="ip"><i data-lucide="arrow-down-0-1" class="me-2"></i>Box</a></li>
+                    <li><a id="sortByid" class="dropdown-item" href="#" data-sort="id"><i data-lucide="arrow-down-0-1" class="me-2"></i>ID</a></li>
+                    <li><a id="sortByname" class="dropdown-item" href="#" data-sort="name"><i data-lucide="arrow-down-a-z" class="me-2"></i>Name</a></li>
+                    <li><a id="sortByquantity" class="dropdown-item" href="#" data-sort="quantity"><i data-lucide="arrow-down-0-1" class="me-2"></i>Quantity</a>
+                    <li><a id="sortBylocation" class="dropdown-item" href="#" data-sort="position"><i data-lucide="arrow-down-0-1" class="me-2"></i>Location</a>
                     </li>
                 </ul>
             </div>
@@ -202,7 +202,7 @@
             <div class="row">
                 <h6 data-i18n="backup_title">Backup</h6>
                 <div class="d-flex flex-wrap gap-2 mb-2">
-                    <a href="/api/export" class="btn btn-outline-primary pe-3" id="export-button" download>
+                    <a href="/api/export" class="btn btn-outline-primary pe-3" id="export-button">
                         <span class="icon-n4px"><i data-lucide="download" class="me-2"></i></span>
                         <span data-i18n="export_btn_label">Export</span>
                     </a>
@@ -257,7 +257,7 @@
             <div class="modal-content">
                 <div class="modal-header">
                     <h1 class="modal-title fs-5" id="item-modal-label">Add Item</h1>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" onclick="resetModal()"> </button>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" data-reset-item-modal> </button>
                 </div>
                 <div class="modal-body">
                     <div class="alert alert-danger d-none" id="item-error-alert">Please enter values in the follow empty fields:<br><span id="item-error-list"></span>
@@ -338,7 +338,7 @@
 
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary pe-3" id="cancel-item-button" data-bs-dismiss="modal"  onclick="resetModal()">
+                    <button type="button" class="btn btn-secondary pe-3" id="cancel-item-button" data-bs-dismiss="modal" data-reset-item-modal>
                         <span class="icon-n4px">
                             <i data-lucide="x" class="me-2"></i>
                         </span>
@@ -578,15 +578,15 @@
     </div>
 </div>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
-<script src="https://cdn.jsdelivr.net/npm/@yaireo/tagify"></script>
-<script src="https://cdn.jsdelivr.net/npm/@yaireo/tagify/dist/tagify.polyfills.min.js"></script>
-<script src="https://unpkg.com/lucide@latest"></script>
-<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
-<script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
-<link  href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.css" rel="stylesheet">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/masonry/4.2.2/masonry.pkgd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@yaireo/tagify@4.39.0/dist/tagify.js" integrity="sha384-l3Fn0B60NCHpAg1Z2EH4w/F7+T4eTOnKFeu3RjlbNLbZsivRi3VnbcN2YCvoQqoS" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/lucide@1.70.0/dist/umd/lucide.min.js" integrity="sha384-64z4N640tVzhAicQVGzxE/48VNN9yS53U5kv9UH8ca7xGU4KSJ9zz8nD4C2BEerP" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js" integrity="sha384-IQsoLXl5PILFhosVNubq5LC7Qb9DXgDA9i+tQ8Zj3iwWAwPtgFTxbJ8NT4GN1R8p" crossorigin="anonymous"></script>
+<script src="https://code.jquery.com/jquery-3.6.4.min.js" integrity="sha384-UG8ao2jwOWB7/oDdObZc6ItJmwUkR/PfMyt9Qs5AwX7PsnYn1CRKCTWyncPTWvaS" crossorigin="anonymous"></script>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.css" rel="stylesheet" integrity="sha384-1arqhTHsGLPVJdhZo8SAycbI+y5k+G7khi5bTZ4BxHJIpCfvWoeSDgXEXXRxB/9G" crossorigin="anonymous">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.js" integrity="sha384-P65gU1u4/dZpqRQ0AVqW+DHPwXmNAR84Qk31dC95hjk0WatF1GsVF1zRm/0uB+o0" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/masonry/4.2.2/masonry.pkgd.min.js" integrity="sha384-GNFwBvfVxBkLMJpYMOABq3c+d3KnQxudP/mGPkzpZSTYykLBNsZEnG2D9G/X/+7D" crossorigin="anonymous"></script>
 
+<script src="../static/api.js"></script>
 <script src="../static/images.js"></script>
 <script src="../static/script.js"></script>
 <script src="../static/esp.js"></script>
@@ -595,10 +595,7 @@
 <script src="../static/gen_grid.js"></script>
 <script src="../static/color-modes.js"></script>
 <script src="../static/translation.js"></script>
-
-<script>
-    lucide.createIcons();
-</script>
+<script src="../static/init.js"></script>
 </body>
 
 </html>

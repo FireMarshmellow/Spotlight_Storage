@@ -24,6 +24,19 @@ def fresh_db(tmp_path, monkeypatch):
     db.create_combined_db().close()
     app_module.app.previous_positions = []
     app_module.app.delSegments = ""
+    # Run LED jobs inline instead of on the background worker, without waiting
+    # for the "stay lit" timeout, so tests are fast and deterministic.
+    jobs = []
+
+    def submit_inline(func, *args):
+        jobs.append((func, args))
+        func(*args)
+        return True
+
+    monkeypatch.setattr(app_module, 'submit_locate', submit_inline)
+    monkeypatch.setattr(app_module, 'wait_or_interrupt', lambda seconds: None)
+    monkeypatch.delenv('SPOTLIGHT_API_TOKEN', raising=False)
+    monkeypatch.delenv('SPOTLIGHT_ALLOWED_HOSTS', raising=False)
     yield
 
 
@@ -56,17 +69,6 @@ def wled(monkeypatch):
     monkeypatch.setattr(app_module, 'send_request', recorder.send)
     monkeypatch.setattr(app_module, 'get_total_leds', lambda ip: 10)
     monkeypatch.setattr(app_module.time, 'sleep', lambda s: None)
-
-    class SyncThread:
-        """Run 'background' locate threads inline so tests are deterministic."""
-
-        def __init__(self, target, args=(), kwargs=None, daemon=None):
-            self.target, self.args, self.kwargs = target, args, kwargs or {}
-
-        def start(self):
-            self.target(*self.args, **self.kwargs)
-
-    monkeypatch.setattr(app_module.threading, 'Thread', SyncThread)
     return recorder
 
 

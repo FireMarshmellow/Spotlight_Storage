@@ -1,0 +1,3 @@
+# Force LF so the shell scripts run inside the Linux container
+*.sh text eol=lf
+Dockerfile text eol=lf

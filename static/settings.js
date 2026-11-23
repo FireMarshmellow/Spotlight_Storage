@@ -88,10 +88,10 @@ window.addEventListener('DOMContentLoaded', () => {
         })
 })
 
-// Function to send a GET request based on the button pressed
+// Function to send a POST request based on the button pressed
 function sendLedRequest(state) {
-    const url = `/led/${state}`; // Replace with the actual endpoint
-    fetch(url)
+    const url = `/led/${state}`;
+    fetch(url, { method: 'POST' })
         .then((response) => {
         })
         .catch((error) => {
@@ -190,8 +190,8 @@ document.getElementById("inventur").addEventListener("click", function () {
     confirmationModal.show();
     function displayItem(index) {
         const currentItem = itemsData[index];
-        text.innerHTML = currentItem.name;
-        amount.innerHTML = currentItem.quantity;
+        text.textContent = currentItem.name;
+        amount.textContent = currentItem.quantity;
         img.src = currentItem.image;
         fetch(`/api/items/${currentItem.id}`, {
             method: "POST",
@@ -205,13 +205,13 @@ document.getElementById("inventur").addEventListener("click", function () {
     minus_btn.onclick = function() {
         const currentItem = itemsData[currentnventurItemIndex];
         handleQuantityChange(currentItem, -1);
-        amount.innerHTML = currentItem.quantity - 1;
+        amount.textContent = currentItem.quantity - 1;
     };
 
     plus_btn.onclick = function() {
         const currentItem = itemsData[currentnventurItemIndex];
         handleQuantityChange(currentItem, + 1);
-        amount.innerHTML = currentItem.quantity + 1 ;
+        amount.textContent = currentItem.quantity + 1 ;
     };
 
 
@@ -288,7 +288,8 @@ document.getElementById('import-file').addEventListener('change', function () {
     }
     const formData = new FormData();
     formData.append('file', file);
-    fetch(`/api/import?mode=${replace ? 'replace' : 'merge'}`, { method: 'POST', body: formData })
+    const query = replace ? 'mode=replace&confirm=replace' : 'mode=merge';
+    fetch(`/api/import?${query}`, { method: 'POST', body: formData })
         .then(response => response.json().then(data => ({ ok: response.ok, data })))
         .then(({ ok, data }) => {
             if (!ok) {

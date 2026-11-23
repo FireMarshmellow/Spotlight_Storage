@@ -40,7 +40,7 @@ def test_round_trip_into_empty_database(client, tmp_path, monkeypatch):
     backup = json.loads(client.get('/api/export').data)
 
     monkeypatch.setattr(db, 'COMBINED_DATABASE', str(tmp_path / 'other' / 'combined_data.db'))
-    resp = client.post('/api/import?mode=replace', json=backup)
+    resp = client.post('/api/import?mode=replace&confirm=replace', json=backup)
     assert resp.status_code == 200
     assert resp.get_json()['esps_added'] == 1 and resp.get_json()['items_added'] == 1
 
@@ -73,7 +73,7 @@ def test_replace_removes_existing_data(client):
     make_item(name='To be removed')
     backup = {'format': 'spotlight-storage-backup', 'version': 1,
               'items': [{'name': 'Only item', 'position': '[1]', 'quantity': 1, 'ip': '10.0.0.5'}]}
-    client.post('/api/import?mode=replace', json=backup)
+    client.post('/api/import?mode=replace&confirm=replace', json=backup)
     assert [i['name'] for i in db.read_items()] == ['Only item']
     assert len(db.read_esp()) == 1  # esps section absent -> untouched
 
@@ -98,7 +98,7 @@ def test_invalid_imports_are_rejected_and_change_nothing(client):
          'items': [{'name': 'ok', 'quantity': 1}, {'name': 'bad', 'quantity': 'many'}]},
     ]
     for bad in bad_inputs:
-        assert client.post('/api/import?mode=replace', json=bad).status_code == 400, bad
+        assert client.post('/api/import?mode=replace&confirm=replace', json=bad).status_code == 400, bad
     assert [i['name'] for i in db.read_items()] == ['Resistor']
     assert client.post('/api/import?mode=wipe', json={'format': 'spotlight-storage-backup', 'version': 1}).status_code == 400
     resp = client.post('/api/import', data={'file': (io.BytesIO(b'not json'), 'x.json')},
